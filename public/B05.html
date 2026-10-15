@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>총기(실탄) 출고확인서 (B05)</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 40px; background: #f0f0f0; display: flex; justify-content: center; margin: 0; }
+        .paper { width: 210mm; min-height: 297mm; background: white; padding: 5mm; box-shadow: 0 0 10px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; color: #000; }
+        
+        h1 { text-align: center; font-size: 28px; margin-bottom: 40px; letter-spacing: 5px; font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: -1px; table-layout: fixed; border: 2px solid #000; }
+        th, td { border: 1px solid #000; padding: 0.01px; font-size: 14px; height: 30px; text-align: center; }
+        th { background: #f2f2f2; font-weight: bold; }
+        
+        .input-full { width: 100%; border: none; outline: none; font-size: 14px; font-family: inherit; background: transparent; text-align: center; }
+        
+        .footer-container { margin-top: 60px; position: relative; }
+        .confirm-text { text-align: center; font-size: 18px; margin-bottom: 50px; line-height: 1.6; }
+        .confirm-text b { font-size: 22px; border-bottom: 2px solid #000; padding: 0 10px; }
+
+        .signature-line { display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px; }
+        .current-date-area { font-size: 18px; margin-bottom: 20px; font-weight: bold; }
+        
+        .sign-row { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .verifier-area { font-size: 18px; flex: 1; text-align: center; padding-left: 100px; }
+        .organization-area { font-size: 22px; font-weight: bold; text-align: right; }
+        
+        .recipient-container { margin-top: 60px; border-bottom: 3px solid #000; padding-bottom: 10px; }
+        .recipient-area { font-size: 24px; font-weight: bold; text-align: left; letter-spacing: 2px; }
+
+        .contact-info { margin-top: 20px; font-size: 13px; line-height: 1.5; color: #444; }
+
+        .seal-area { 
+            position: absolute; top: 80px; right: -10px; 
+            width: 120px; height: 120px; border: 3px double red; border-radius: 50%; 
+            color: red; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            font-weight: bold; transform: rotate(-5deg); opacity: 0.7; font-size: 14px;
+        }
+        .seal-date { font-size: 12px; margin: 3px 0; }
+
+        .no-print { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 10px; z-index: 1000; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .btn-print { background: #2c3e50; }
+
+        /* 제목 영역 */
+        .title-area { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 40px; }
+        .title-area h1 { margin: 0; font-size: 28px; letter-spacing: 5px; font-weight: bold; text-align: center; flex: 1; }
+        .btn-group-register { position: absolute; right: 0; display: flex; gap: 6px; }
+        .btn-group-reg { padding: 7px 13px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; background: #8e44ad; box-shadow: 0 2px 4px rgba(0,0,0,0.2); white-space: nowrap; }
+        .btn-group-reg:hover { background: #6c3483; }
+
+        /* 단체등록 모달 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: white; border-radius: 14px; padding: 28px 24px; width: 95vw; max-width: 1100px; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .modal-header h2 { margin: 0; font-size: 20px; color: #2c3e50; }
+        .modal-close { background: #e74c3c; color: white; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .modal-close:hover { background: #c0392b; }
+        .modal-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .modal-table th { background: #2c3e50; color: white; padding: 7px 4px; text-align: center; border: 1px solid #aaa; }
+        .modal-table td { border: 1px solid #ccc; padding: 3px 4px; text-align: center; }
+        .modal-table td input { width: 100%; border: none; outline: none; font-size: 13px; font-family: inherit; text-align: center; background: transparent; }
+        .modal-table td input:focus { background: #eaf4ff; border-radius: 3px; }
+        .modal-table tr:nth-child(even) td { background: #f9f9f9; }
+        .modal-table tr:nth-child(even) td input:focus { background: #eaf4ff; }
+        .modal-table .num-cell { color: #888; font-weight: bold; font-size: 12px; width: 28px; }
+        .modal-footer { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .modal-footer-left { font-size: 13px; color: #666; }
+        .modal-btn { padding: 9px 22px; border: none; border-radius: 7px; color: white; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .modal-btn-clear { background: #95a5a6; }
+        .modal-btn-clear:hover { background: #7f8c8d; }
+        .modal-btn-apply { background: #27ae60; }
+        .modal-btn-apply:hover { background: #1e8449; }
+
+        /* 동명이인 / 등록총기 선택 팝업 (B02 스타일) */
+        .player-select-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center;
+        }
+        .player-select-overlay.open { display: flex; }
+        .player-select-box {
+            background: white; border-radius: 14px; padding: 25px 22px 18px;
+            width: 90%; max-width: 520px; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            max-height: 85vh; display: flex; flex-direction: column;
+        }
+        .player-select-list {
+            overflow-y: auto; max-height: 60vh; margin-top: 10px; margin-bottom: 10px;
+        }
+        .player-select-item {
+            display: flex; flex-direction: column; padding: 12px 16px;
+            border: 2px solid #e0e0e0; border-radius: 9px; margin-bottom: 9px;
+            cursor: pointer; transition: 0.18s; background: #fafafa;
+        }
+        .player-select-item:hover { background: #e6f7ff; border-color: #1890ff; }
+        .player-select-item .ps-name { font-size: 1.1em; font-weight: bold; color: #222; }
+        .player-select-item .ps-affil { font-size: 0.95em; color: #1890ff; font-weight: bold; }
+        .player-select-cancel { margin-top: 5px; text-align: right; }
+        .player-select-cancel button {
+            padding: 9px 22px; border: none; border-radius: 7px;
+            background: #e0e0e0; color: #333; font-weight: bold; cursor: pointer;
+        }
+        .player-select-cancel button:hover { background: #d0d0d0; }
+
+        @media print {
+            .modal-overlay { display: none !important; }
+            .player-select-overlay { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            .btn-group-register { display: none !important; }
+            .paper { box-shadow: none !important; width: 100% !important; margin: 0 !important; }
+            @page { size: A4; margin: 15mm; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="paper">
+    <div class="title-area">
+        <h1>총기(실탄) 출고확인서</h1>
+        <div class="btn-group-register">
+            <button class="btn-group-reg" onclick="openGroupModal()">단체등록<br>(최대20명)</button>
+        </div>
+    </div>
+
+    <!-- 표 1: 출고 사항 -->
+    <table>
+        <tr>
+            <th rowspan="4" style="width: 10%;">출고<br>사항</th>
+            <th style="width: 15%;">출고 사유</th>
+            <td colspan="4"><input type="text" class="input-full" id="outReason" value="대회 종료 후 복귀를 위한 출고"></td>
+        </tr>
+        <tr>
+            <th>목적지</th>
+            <td colspan="4"><input type="text" class="input-full" id="destination" value="나주국제사격장"></td>
+        </tr>
+        <tr>
+            <th rowspan="2">운반<br>책임자</th>
+            <th style="width: 10%;">성명</th>
+            <td style="width: 20%;"><input type="text" class="input-full" id="managerName"></td>
+            <th style="width: 15%;">생년월일</th>
+            <td><input type="text" class="input-full" id="managerBirth" placeholder="00.00.00"></td>
+        </tr>
+        <tr>
+            <th>전화번호</th>
+            <td><input type="text" class="input-full" id="managerPhone" placeholder="010-0000-0000"></td>
+            <th>차량번호</th>
+            <td><input type="text" class="input-full" id="carInfo" placeholder="12가3456"></td>
+        </tr>
+    </table>
+
+    <!-- 표 2: 총기 및 실탄 정보 -->
+    <table style="margin-top: 15px;">
+        <tbody id="infoBody">
+            <tr>
+                <th rowspan="2" id="infoMainHeader" style="width: 10%;">총 기<br>(실 탄)<br>정 보</th>
+                <th style="width: 18%;">성명</th>
+                <th style="width: 15%;">생년월일</th>
+                <th style="width: 10%;">구경</th>
+                <th style="width: 17%;">총기명칭</th>
+                <th style="width: 18%;">총기번호</th>
+                <th style="width: 12%;">실탄수</th>
+            </tr>
+            <tr class="info-row">
+                <!-- 첫 번째 행은 rowspan 때문에 td가 하나 적음 -->
+                <td><input type="text" class="input-full name-input" placeholder="성명/바코드" onkeydown="handleSearchInput(event, this)"></td>
+                <td><input type="text" class="input-full" readonly></td>
+                <td><input type="text" class="input-full" readonly></td>
+                <td><input type="text" class="input-full" readonly></td>
+                <td><input type="text" class="input-full" readonly></td>
+                <td><input type="text" class="input-full ammo-val" value="0" onkeydown="handleLastInput(event, this)" oninput="updateTotals()"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer-container">
+        <div class="confirm-text">
+            위와 같이 총기 <b id="totalGun">0</b> 정 (실탄 <b id="totalAmmo">0</b> 발)이 출고되었음을 확인합니다.
+        </div>
+
+        <div class="signature-line">
+            <div class="current-date-area" id="currentDate"></div>
+            <div class="sign-row">
+                <div class="verifier-area">확 인 자 : </div>
+                <div class="organization-area">전남국제사격장 (인)</div>
+            </div>
+        </div>
+
+        <div class="recipient-container">
+            <div class="recipient-area">나 주 경 찰 서 장 &nbsp;&nbsp; 귀하</div>
+        </div>
+        
+        <div class="contact-info">
+           나주국제사격장 ☎ 061-336-5857 / 팩스 061-336-6857<br>
+           나주경찰서 총포담당 ☎ 061-339-0345 / 팩스 061-339-0107
+        </div>
+
+        <div class="seal-area">
+            <div>출고확인</div>
+            <div class="seal-date" id="sealDate"></div>
+            <div>전남국제사격장</div>
+        </div>
+    </div>
+</div>
+
+<div class="no-print">
+    <button class="btn btn-print" onclick="window.print()">인쇄하기</button>
+</div>
+
+<!-- 단체등록 모달 -->
+<div class="modal-overlay" id="groupModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>🏅 단체등록 (최대 20명)</h2>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button type="button" class="modal-btn modal-btn-clear" style="padding:6px 14px; font-size:13px;" onclick="clearGroupModal()">초기화</button>
+                <button type="button" class="modal-btn modal-btn-apply" style="padding:6px 14px; font-size:13px;" onclick="applyGroupData()">일괄등록</button>
+                <button type="button" class="modal-close" onclick="closeGroupModal()">✕ 닫기</button>
+            </div>
+        </div>
+        <!-- 소속/바코드 검색 가운데 정렬 -->
+        <div style="display: flex; justify-content: center; align-items: center; gap: 8px; border-bottom: 2px solid #262626; padding-bottom: 12px; margin-bottom: 14px;">
+            <input type="text" id="groupAffilSearch" placeholder="소속 / 바코드 검색 (B01)" 
+                style="padding: 7px 12px; border: 2px solid #1890ff; border-radius: 6px; font-size: 13px; width: 280px; outline: none;"
+                onkeypress="if(event.key==='Enter') searchAffilForGroup()">
+            <button type="button" onclick="searchAffilForGroup()"
+                style="padding: 7px 14px; border-radius: 6px; border: none; background: #1890ff; color: white; font-weight: bold; cursor: pointer; font-size: 13px; white-space: nowrap;">🔍 검색</button>
+        </div>
+        <p style="margin:0 0 10px; font-size:13px; color:#555;">성명 또는 바코드 입력 후 Enter → 자동 검색. 미등록 선수는 직접 입력하세요.</p>
+        <table class="modal-table" id="groupTable">
+            <thead>
+                <tr>
+                    <th style="width:28px;">No</th>
+                    <th style="width:13%; cursor:pointer;" onclick="sortGroupTableByName()" title="클릭 시 같은 이름순 정렬">성명/바코드 ↕</th>
+                    <th style="width:11%;">생년월일</th>
+                    <th style="width:8%;">구경</th>
+                    <th style="width:14%;">총기명칭</th>
+                    <th style="width:15%;">총기번호</th>
+                    <th style="width:9%;">실탄수</th>
+                </tr>
+            </thead>
+            <tbody id="groupBody">
+            </tbody>
+        </table>
+        <div class="modal-footer">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button type="button" class="modal-btn" style="background:#52c41a; padding:9px 18px; font-size:14px;" onclick="addGroupRow()">추가하기</button>
+                <div class="modal-footer-left" id="groupCount">입력: 0 / 20 명</div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button type="button" class="modal-btn modal-btn-clear" onclick="clearGroupModal()">초기화</button>
+                <button type="button" class="modal-btn modal-btn-apply" onclick="applyGroupData()">일괄등록</button>
+                <button type="button" class="modal-close" style="padding:9px 18px; font-size:14px;" onclick="closeGroupModal()">✕ 닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 동명이인 / 등록총기 선택 팝업 (B02 스타일) -->
+<div id="playerSelectOverlay" class="player-select-overlay">
+    <div class="player-select-box" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; margin-bottom:10px; color:#333; font-size:1.3em;">👥 동명이인 / 등록총기 선택</h3>
+        <p style="font-size:12px; color:#666; margin:0 0 8px;">해당 선수의 등록된 총기를 선택하세요.</p>
+        <div id="playerSelectList" class="player-select-list"></div>
+        <div class="player-select-cancel">
+            <button type="button" onclick="closePlayerSelectModal()">취소</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const PLAYER_KEY = "PLAYER_MASTER";
+    const LOG_KEY = "AMMO_LOGS_B03";
+
+    // 생년월일 자동 서식 (00.00.00)
+    function formatBirth(val) {
+        if (!val) return '';
+        const digits = val.replace(/[^0-9]/g, '').slice(0, 6);
+        if (digits.length <= 2) return digits;
+        if (digits.length <= 4) return digits.slice(0, 2) + '.' + digits.slice(2);
+        return digits.slice(0, 2) + '.' + digits.slice(2, 4) + '.' + digits.slice(4);
+    }
+
+    // 전화번호 자동 서식 (010-0000-0000 / 02-000-0000 등)
+    function formatPhone(val) {
+        if (!val) return '';
+        const digits = val.replace(/[^0-9]/g, '').slice(0, 11);
+        if (digits.startsWith('02')) {
+            if (digits.length <= 2) return digits;
+            if (digits.length <= 5) return digits.slice(0, 2) + '-' + digits.slice(2);
+            if (digits.length <= 9) return digits.slice(0, 2) + '-' + digits.slice(2, 5) + '-' + digits.slice(5);
+            return digits.slice(0, 2) + '-' + digits.slice(2, 6) + '-' + digits.slice(6);
+        } else {
+            if (digits.length <= 3) return digits;
+            if (digits.length <= 7) return digits.slice(0, 3) + '-' + digits.slice(3);
+            if (digits.length <= 10) return digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6);
+            return digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+        document.getElementById('sealDate').innerText = dateStr;
+        document.getElementById('currentDate').innerText = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+        updateTotals();
+
+        // 표 1 생년월일 자동 '.' 서식 적용
+        const birthInput = document.getElementById('managerBirth');
+        if (birthInput) {
+            birthInput.addEventListener('input', function() {
+                this.value = formatBirth(this.value);
+            });
+        }
+
+        // 표 1 전화번호 자동 '-' 서식 적용
+        const phoneInput = document.getElementById('managerPhone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                this.value = formatPhone(this.value);
+            });
+        }
+
+        // 운반책임자 성명 입력 시 B01 선수 정보 자동 완성 (엔터/블러)
+        const nameInput = document.getElementById('managerName');
+        if (nameInput) {
+            const autoFillManager = () => {
+                const q = nameInput.value.trim();
+                if (!q) return;
+                const players = JSON.parse(localStorage.getItem(PLAYER_KEY) || '[]');
+                const found = players.find(p => p.userName === q || p.barcode === q);
+                if (found) {
+                    if (found.userName) nameInput.value = found.userName;
+                    if (found.userBirth && birthInput) birthInput.value = formatBirth(found.userBirth);
+                    if (found.contact && phoneInput) phoneInput.value = formatPhone(found.contact);
+                }
+            };
+            nameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    autoFillManager();
+                    if (birthInput) birthInput.focus();
+                }
+            });
+            nameInput.addEventListener('blur', autoFillManager);
+        }
+    });
+
+    // 구경 유추 헬퍼
+    function getCaliberFromGunType(gunType) {
+        if (!gunType) return '';
+        if (gunType.includes('엽총')) return '12Ga';
+        if (gunType.includes('화약권총(32)') || gunType.includes('32')) return '3.2';
+        if (gunType.includes('화약권총') || gunType.includes('화약소총') || gunType.includes('22')) return '2.2';
+        if (gunType.includes('공기권총') || gunType.includes('공기소총') || gunType.includes('4.5')) return '4.5';
+        return '';
+    }
+
+    // 총기종류/구경으로부터 표준 탄종 분류 ('22탄', '32탄', '엽탄', '공기총')
+    function normalizeAmmoType(gunType, gunCaliber) {
+        const gType = (gunType || '').trim();
+        const gCal = (gunCaliber || '').trim();
+
+        if (gType.includes('공기권총') || gType.includes('공기소총') || gCal === '4.5') {
+            return '공기총'; // 공기총은 실탄수 0
+        }
+        if (gType.includes('엽총') || gCal === '12Ga' || gCal === '12G') {
+            return '엽탄';
+        }
+        if (gType.includes('화약권총(32)') || gType.includes('32') || gCal === '3.2') {
+            return '32탄';
+        }
+        if (gType.includes('화약권총') || gType.includes('화약소총') || gType.includes('22') || gCal === '2.2') {
+            return '22탄';
+        }
+        return '';
+    }
+
+    // B03 로그 탄종 매칭 헬퍼
+    function matchAmmoTypeWithLog(logType, targetType) {
+        if (!logType || !targetType) return false;
+        const cleanLog = logType.replace(/[\.\s]/g, '');
+        const cleanTarget = targetType.replace(/[\.\s]/g, '');
+        return cleanLog.includes(cleanTarget) || cleanTarget.includes(cleanLog);
+    }
+
+    // B03 실탄 잔고 조회 헬퍼 (해당 선수의 해당 탄종 잔고)
+    function getAmmoBalance(player, ammoType) {
+        if (!ammoType || ammoType === '공기총') return 0;
+
+        const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+        const pLogs = logs.filter(l => {
+            const isBarcode = player.barcode && l.barcode && l.barcode === player.barcode;
+            const isName = (l.name === player.userName || l.userName === player.userName);
+            const isBirth = !player.userBirth || !l.userBirth || (l.userBirth === player.userBirth);
+            const isAffil = !player.affiliation || !l.affiliation || (l.affiliation === player.affiliation);
+            const isPerson = isBarcode || (isName && isBirth && isAffil);
+
+            if (!isPerson) return false;
+            return matchAmmoTypeWithLog(l.type, ammoType);
+        });
+
+        return pLogs.length > 0 ? (pLogs[pLogs.length - 1].curr || 0) : 0;
+    }
+
+    // 표 2에서 동일인(성명+생년월일)의 동일 탄종이 이미 존재하는지 검사
+    function isAmmoTypeAlreadyInTable(currentRow, userName, userBirth, ammoType) {
+        if (!ammoType || ammoType === '공기총') return false;
+        const rows = document.querySelectorAll('.info-row');
+        for (const r of rows) {
+            if (r === currentRow) continue;
+            const rName = (r.querySelector('.name-input')?.value || '').trim();
+            if (!rName) continue;
+            const inputs = r.querySelectorAll('input');
+            const rBirth = (inputs[1]?.value || '').trim();
+            const rCaliber = (inputs[2]?.value || '').trim();
+            const rGunName = (inputs[3]?.value || '').trim();
+            const rAmmoType = normalizeAmmoType(rGunName, rCaliber);
+
+            // 동일인 및 동일 탄종 여부
+            if (rName === userName && (!userBirth || !rBirth || rBirth === userBirth) && rAmmoType === ammoType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 단체등록 팝업창에서 동일인(성명+생년월일)의 동일 탄종이 이미 존재하는지 검사
+    function isAmmoTypeAlreadyInGroup(currentRow, userName, userBirth, ammoType) {
+        if (!ammoType || ammoType === '공기총') return false;
+        const rows = document.querySelectorAll('#groupBody tr');
+        for (const r of rows) {
+            if (r === currentRow) continue;
+            const rName = (r.querySelector('[data-col="name"]')?.value || '').trim();
+            if (!rName) continue;
+            const rBirth = (r.querySelector('[data-col="birth"]')?.value || '').trim();
+            const rCaliber = (r.querySelector('[data-col="caliber"]')?.value || '').trim();
+            const rGunName = (r.querySelector('[data-col="gunname"]')?.value || '').trim();
+            const rAmmoType = normalizeAmmoType(rGunName, rCaliber);
+
+            if (rName === userName && (!userBirth || !rBirth || rBirth === userBirth) && rAmmoType === ammoType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ===== 동명이인 선택 팝업 (B02 스타일) =====
+    let _b05SelectCallback = null;
+
+    function showPlayerSelectModal(players, callback) {
+        _b05SelectCallback = callback;
+        const list = document.getElementById('playerSelectList');
+        list.innerHTML = '';
+
+        players.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'player-select-item';
+            const birthStr = p.userBirth ? ` (${p.userBirth})` : '';
+            const gunNo = p.gunNumber || '-';
+            const gunName = p.gunName || '-';
+            const gunType = p.gunType || '미지정';
+            const caliber = p.gunCaliber || getCaliberFromGunType(p.gunType) || '-';
+            const isRedGun = gunType.includes('화약권총') || gunType.includes('화약소총') || gunType.includes('엽총');
+            const gunTypeHtml = isRedGun ? `<b style="color:#e74c3c;">${gunType}</b>` : `<b>${gunType}</b>`;
+
+            div.innerHTML = `
+                <div>
+                    <span class="ps-affil">[소속: ${p.affiliation || '미지정'}]</span>
+                    <span class="ps-name" style="margin-left:6px;">${p.userName}${birthStr}</span>
+                </div>
+                <div style="font-size:0.9em; color:#555; margin-top:5px; line-height:1.4;">
+                    총종: ${gunTypeHtml} | 명칭: <b>${gunName}</b> | 총번: <b>${gunNo}</b> | 구경: <b>${caliber}</b>
+                </div>
+            `;
+            div.onclick = () => {
+                closePlayerSelectModal();
+                if (typeof callback === 'function') callback(p);
+            };
+            list.appendChild(div);
+        });
+
+        document.getElementById('playerSelectOverlay').classList.add('open');
+    }
+
+    function closePlayerSelectModal() {
+        document.getElementById('playerSelectOverlay').classList.remove('open');
+        _b05SelectCallback = null;
+    }
+
+    // 오버레이 바깥 클릭 시 닫기
+    document.getElementById('playerSelectOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closePlayerSelectModal();
+    });
+
+    // ESC 키 누르면 팝업 닫기
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (document.getElementById('playerSelectOverlay').classList.contains('open')) {
+                closePlayerSelectModal();
+            }
+        }
+    });
+
+    // ===== 표 2 선수 정보 채우기 =====
+    function fillRowWithPlayer(row, found) {
+        const inputs = row.querySelectorAll('input');
+        if (inputs.length < 6) return;
+
+        const userName = found.userName || '';
+        const userBirth = found.userBirth || '';
+        const gunCaliber = found.gunCaliber || getCaliberFromGunType(found.gunType) || '';
+        const gunName = found.gunName || found.gunType || '';
+        const gunNumber = found.gunNumber || '';
+
+        inputs[0].value = userName;
+        inputs[1].value = userBirth;
+        inputs[2].value = gunCaliber;
+        inputs[3].value = gunName;
+        inputs[4].value = gunNumber;
+        
+        // 탄종 분류 판별
+        const ammoType = normalizeAmmoType(found.gunType, gunCaliber);
+
+        let finalAmmo = 0;
+        if (ammoType === '공기총') {
+            // 공기권총, 공기소총은 항상 0
+            finalAmmo = 0;
+        } else if (isAmmoTypeAlreadyInTable(row, userName, userBirth, ammoType)) {
+            // 이미 같은 소속/성명/생년월일에 같은 탄종이 표에 등록되어 있으면 0으로 표시 (중복 방지)
+            finalAmmo = 0;
+        } else {
+            // 최초 1회 등록 시 B03 실탄 잔고 불러오기
+            finalAmmo = getAmmoBalance(found, ammoType);
+        }
+
+        inputs[5].value = finalAmmo;
+
+        updateTotals();
+        inputs[5].focus();
+        inputs[5].select();
+    }
+
+    // 표2 성명/바코드 검색 핸들러
+    function handleSearchInput(event, input) {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            event.preventDefault();
+            const query = input.value.trim();
+            if (!query) return;
+
+            const players = JSON.parse(localStorage.getItem(PLAYER_KEY) || '[]');
+            const queryLower = query.toLowerCase();
+            const found = players.filter(p => {
+                const bMatch = p.barcode && p.barcode.toLowerCase() === queryLower;
+                const nMatch = p.userName && p.userName.toLowerCase().includes(queryLower);
+                return bMatch || nMatch;
+            });
+
+            const row = input.closest('tr');
+
+            if (found.length === 0) {
+                alert("등록된 선수 정보를 찾을 수 없습니다. 선수관리(B01)에서 먼저 등록하거나 직접 입력하세요.");
+                return;
+            }
+
+            // 고유 선수/총기 목록 추출
+            const uniqueFound = [];
+            const seenKeys = new Set();
+            found.forEach(p => {
+                const key = `${p.userName||''}_${p.userBirth||''}_${p.affiliation||''}_${p.gunType||''}_${p.gunNumber||''}_${p.gunCaliber||''}`;
+                if (!seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    uniqueFound.push(p);
+                }
+            });
+
+            if (uniqueFound.length === 1) {
+                fillRowWithPlayer(row, uniqueFound[0]);
+            } else {
+                showPlayerSelectModal(uniqueFound, (selected) => fillRowWithPlayer(row, selected));
+            }
+        }
+    }
+
+    // 엔터 시 다음 행 이동 또는 추가
+    function handleLastInput(event, input) {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            event.preventDefault();
+            const currentRow = input.closest('tr');
+            if (!currentRow.nextElementSibling) {
+                addNewRow();
+            } else {
+                const nextInput = currentRow.nextElementSibling.querySelector('.name-input');
+                if (nextInput) nextInput.focus();
+            }
+        }
+    }
+
+    // 행 추가 시 통합열(rowspan) 조절
+    function addNewRow() {
+        const tbody = document.getElementById('infoBody');
+        const headerCell = document.getElementById('infoMainHeader');
+        
+        const newRow = document.createElement('tr');
+        newRow.className = 'info-row';
+        newRow.innerHTML = `
+            <td><input type="text" class="input-full name-input" placeholder="성명/바코드" onkeydown="handleSearchInput(event, this)"></td>
+            <td><input type="text" class="input-full" readonly></td>
+            <td><input type="text" class="input-full" readonly></td>
+            <td><input type="text" class="input-full" readonly></td>
+            <td><input type="text" class="input-full" readonly></td>
+            <td><input type="text" class="input-full ammo-val" value="0" onkeydown="handleLastInput(event, this)" oninput="updateTotals()"></td>
+        `;
+        
+        tbody.appendChild(newRow);
+        
+        // 메인 헤더의 rowspan을 전체 행 수 + 1(제목행) 만큼 증가
+        const rowCount = tbody.querySelectorAll('tr').length;
+        headerCell.rowSpan = rowCount;
+        
+        const nameInp = newRow.querySelector('.name-input');
+        if (nameInp) nameInp.focus();
+    }
+
+    // 합계 계산
+    function updateTotals() {
+        const rows = document.querySelectorAll('.info-row');
+        let guns = 0;
+        let ammo = 0;
+
+        rows.forEach(row => {
+            const nameEl = row.querySelector('.name-input');
+            const name = nameEl ? nameEl.value.trim() : '';
+            const ammoEl = row.querySelector('.ammo-val');
+            const ammoVal = ammoEl ? (parseInt(ammoEl.value.replace(/,/g, '')) || 0) : 0;
+            if (name !== "") {
+                guns++;
+                ammo += ammoVal;
+            }
+        });
+
+        document.getElementById('totalGun').innerText = guns;
+        document.getElementById('totalAmmo').innerText = ammo.toLocaleString();
+    }
+
+    // ===== 단체등록 모달 =====
+    const MAX_GROUP = 20;
+
+    function openGroupModal() {
+        const tbody = document.getElementById('groupBody');
+        if (tbody.children.length === 0) buildGroupRows();
+        const searchInput = document.getElementById('groupAffilSearch');
+        if (searchInput) searchInput.value = '';
+        document.getElementById('groupModal').classList.add('active');
+        if (searchInput) searchInput.focus();
+    }
+
+    function closeGroupModal() {
+        document.getElementById('groupModal').classList.remove('active');
+    }
+
+    // 단체등록 팝업창의 데이터를 같은 이름순(가나다 순)으로 정렬하는 함수
+    function sortGroupTableByName() {
+        const rows = Array.from(document.querySelectorAll('#groupBody tr'));
+        const filledData = [];
+        rows.forEach(r => {
+            const name = (r.querySelector('[data-col="name"]').value || '').trim();
+            if (name) {
+                filledData.push({
+                    name: name,
+                    birth: r.querySelector('[data-col="birth"]').value || '',
+                    caliber: r.querySelector('[data-col="caliber"]').value || '',
+                    gunname: r.querySelector('[data-col="gunname"]').value || '',
+                    gunnum: r.querySelector('[data-col="gunnum"]').value || '',
+                    ammo: r.querySelector('[data-col="ammo"]').value || '0'
+                });
+            }
+        });
+
+        // 같은 이름순(가나다 순) 정렬, 이름이 같으면 총기명칭/총기번호 순
+        filledData.sort((a, b) => {
+            const cmp = a.name.localeCompare(b.name, 'ko');
+            if (cmp !== 0) return cmp;
+            const gunCmp = (a.gunname || '').localeCompare(b.gunname || '', 'ko');
+            if (gunCmp !== 0) return gunCmp;
+            return (a.gunnum || '').localeCompare(b.gunnum || '', 'ko');
+        });
+
+        // 행에 정렬된 데이터 재할당
+        rows.forEach((r, idx) => {
+            const d = filledData[idx];
+            r.querySelector('[data-col="name"]').value = d ? d.name : '';
+            r.querySelector('[data-col="birth"]').value = d ? d.birth : '';
+            r.querySelector('[data-col="caliber"]').value = d ? d.caliber : '';
+            r.querySelector('[data-col="gunname"]').value = d ? d.gunname : '';
+            r.querySelector('[data-col="gunnum"]').value = d ? d.gunnum : '';
+            r.querySelector('[data-col="ammo"]').value = d ? d.ammo : '0';
+        });
+
+        updateGroupCount();
+    }
+
+    // B01(PLAYER_MASTER)에서 소속/바코드 검색하여 단체등록 테이블에 추가 채우기 (같은 이름순 정렬 및 부족 시 자동 행 추가)
+    function searchAffilForGroup() {
+        const searchVal = document.getElementById('groupAffilSearch').value.trim();
+        if (!searchVal) { alert('소속명 또는 바코드를 입력해주세요.'); return; }
+
+        const players = JSON.parse(localStorage.getItem(PLAYER_KEY) || '[]');
+        const searchLower = searchVal.toLowerCase();
+        const matched = players.filter(p => {
+            const matchAffil = p.affiliation && p.affiliation.toLowerCase().includes(searchLower);
+            const matchBarcode = p.barcode && p.barcode.toLowerCase().includes(searchLower);
+            return matchAffil || matchBarcode;
+        });
+
+        if (matched.length === 0) {
+            alert(`"${searchVal}" 검색어에 해당하는 선수를 찾을 수 없습니다.`);
+            return;
+        }
+
+        // 검색된 선수들을 같은 이름순(가나다 순)으로 정렬
+        matched.sort((a, b) => {
+            const nameA = (a.userName || '').trim();
+            const nameB = (b.userName || '').trim();
+            const cmp = nameA.localeCompare(nameB, 'ko');
+            if (cmp !== 0) return cmp;
+            const gunA = (a.gunName || a.gunType || '').trim();
+            const gunB = (b.gunName || b.gunType || '').trim();
+            return gunA.localeCompare(gunB, 'ko');
+        });
+
+        let rows = Array.from(document.querySelectorAll('#groupBody tr'));
+        let emptyRows = rows.filter(r => {
+            const nameInput = r.querySelector('[data-col="name"]');
+            return !nameInput || !nameInput.value.trim();
+        });
+
+        // 빈 자리가 부족하면 자동으로 행 추가
+        while (emptyRows.length < matched.length) {
+            addGroupRow();
+            rows = Array.from(document.querySelectorAll('#groupBody tr'));
+            emptyRows = rows.filter(r => {
+                const nameInput = r.querySelector('[data-col="name"]');
+                return !nameInput || !nameInput.value.trim();
+            });
+        }
+
+        for (let k = 0; k < matched.length; k++) {
+            const p = matched[k];
+            const row = emptyRows[k];
+            fillGroupRowWithPlayer(row, p);
+        }
+
+        // 전체 테이블을 같은 이름순으로 재정렬
+        sortGroupTableByName();
+
+        document.getElementById('groupAffilSearch').value = '';
+        alert(`✅ "${searchVal}" 검색 결과 ${matched.length}명이 추가되었습니다.`);
+    }
+
+    function createGroupRow(i) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="num-cell">${i}</td>
+            <td><input type="text" placeholder="성명/바코드" data-col="name" onkeydown="groupSearchInput(event, this)" oninput="updateGroupCount()"></td>
+            <td><input type="text" data-col="birth"></td>
+            <td><input type="text" data-col="caliber"></td>
+            <td><input type="text" data-col="gunname"></td>
+            <td><input type="text" data-col="gunnum"></td>
+            <td><input type="number" data-col="ammo" value="0" min="0" oninput="updateGroupCount()"></td>
+        `;
+        return tr;
+    }
+
+    function buildGroupRows(rowCount = MAX_GROUP) {
+        const tbody = document.getElementById('groupBody');
+        tbody.innerHTML = '';
+        for (let i = 1; i <= rowCount; i++) {
+            tbody.appendChild(createGroupRow(i));
+        }
+        updateGroupCount();
+    }
+
+    // 단체등록 테이블에 번호 20(또는 마지막 번호) 밑으로 새 행 추가하기
+    function addGroupRow() {
+        const tbody = document.getElementById('groupBody');
+        const newIdx = tbody.children.length + 1;
+        const tr = createGroupRow(newIdx);
+        tbody.appendChild(tr);
+        updateGroupCount();
+        const nameInput = tr.querySelector('[data-col="name"]');
+        if (nameInput) nameInput.focus();
+    }
+
+    // 단체등록 모달 행에 선수 정보를 채우는 함수
+    function fillGroupRowWithPlayer(row, found) {
+        const userName = found.userName || '';
+        const userBirth = found.userBirth || '';
+        const gunCaliber = found.gunCaliber || getCaliberFromGunType(found.gunType) || '';
+        const gunName = found.gunName || found.gunType || '';
+        const gunNumber = found.gunNumber || '';
+
+        row.querySelector('[data-col="name"]').value = userName;
+        row.querySelector('[data-col="birth"]').value = userBirth;
+        row.querySelector('[data-col="caliber"]').value = gunCaliber;
+        row.querySelector('[data-col="gunname"]').value = gunName;
+        row.querySelector('[data-col="gunnum"]').value = gunNumber;
+        
+        // 탄종 분류 판별
+        const ammoType = normalizeAmmoType(found.gunType, gunCaliber);
+
+        let finalAmmo = 0;
+        if (ammoType === '공기총') {
+            finalAmmo = 0;
+        } else if (isAmmoTypeAlreadyInGroup(row, userName, userBirth, ammoType)) {
+            // 이미 같은 소속/성명/생년월일에 같은 탄종이 단체등록 목록에 등록되어 있으면 0으로 표시 (중복 방지)
+            finalAmmo = 0;
+        } else {
+            // 최초 1회 등록 시 B03 실탄 잔고 불러오기
+            finalAmmo = getAmmoBalance(found, ammoType);
+        }
+
+        row.querySelector('[data-col="ammo"]').value = finalAmmo;
+
+        updateGroupCount();
+        const ammoInput = row.querySelector('[data-col="ammo"]');
+        if (ammoInput) {
+            ammoInput.focus();
+            ammoInput.select();
+        }
+    }
+
+    function groupSearchInput(event, input) {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            event.preventDefault();
+            const query = input.value.trim();
+            if (!query) return;
+
+            const players = JSON.parse(localStorage.getItem(PLAYER_KEY) || '[]');
+            const queryLower = query.toLowerCase();
+            const found = players.filter(p => {
+                const bMatch = p.barcode && p.barcode.toLowerCase() === queryLower;
+                const nMatch = p.userName && p.userName.toLowerCase().includes(queryLower);
+                return bMatch || nMatch;
+            });
+
+            const row = input.closest('tr');
+
+            if (found.length === 0) {
+                // 미등록 선수: 이름만 넣고 다음 셀로 이동
+                const birthInput = row.querySelector('[data-col="birth"]');
+                if (birthInput) birthInput.focus();
+                return;
+            }
+
+            // 고유 선수/총기 목록 추출
+            const uniqueFound = [];
+            const seenKeys = new Set();
+            found.forEach(p => {
+                const key = `${p.userName||''}_${p.userBirth||''}_${p.affiliation||''}_${p.gunType||''}_${p.gunNumber||''}_${p.gunCaliber||''}`;
+                if (!seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    uniqueFound.push(p);
+                }
+            });
+
+            if (uniqueFound.length === 1) {
+                fillGroupRowWithPlayer(row, uniqueFound[0]);
+            } else {
+                showPlayerSelectModal(uniqueFound, (selected) => fillGroupRowWithPlayer(row, selected));
+            }
+        }
+    }
+
+    function updateGroupCount() {
+        const rows = document.querySelectorAll('#groupBody tr');
+        let count = 0;
+        rows.forEach(row => {
+            const nameEl = row.querySelector('[data-col="name"]');
+            const name = nameEl ? nameEl.value.trim() : '';
+            if (name) count++;
+        });
+        document.getElementById('groupCount').textContent = `입력: ${count} / ${rows.length} 명`;
+    }
+
+    function clearGroupModal() {
+        if (!confirm('입력 내용을 모두 초기화 하시겠습니까?')) return;
+        buildGroupRows();
+    }
+
+    function applyGroupData() {
+        const rows = document.querySelectorAll('#groupBody tr');
+        const data = [];
+        // 단체등록 일괄 등록 시에도 동일인 + 동일 탄종 중복 방지
+        const seenAmmoMap = new Set();
+
+        rows.forEach(row => {
+            const name = row.querySelector('[data-col="name"]').value.trim();
+            if (!name) return;
+            const birth = row.querySelector('[data-col="birth"]').value.trim();
+            const caliber = row.querySelector('[data-col="caliber"]').value.trim();
+            const gunname = row.querySelector('[data-col="gunname"]').value.trim();
+            const gunnum = row.querySelector('[data-col="gunnum"]').value.trim();
+            let rawAmmo = parseInt(row.querySelector('[data-col="ammo"]').value) || 0;
+
+            const ammoType = normalizeAmmoType(gunname, caliber);
+            if (ammoType === '공기총') {
+                rawAmmo = 0;
+            } else if (ammoType) {
+                const comboKey = `${name}_${birth}_${ammoType}`;
+                if (seenAmmoMap.has(comboKey)) {
+                    rawAmmo = 0; // 중복 총기는 0
+                } else {
+                    seenAmmoMap.add(comboKey);
+                }
+            }
+
+            data.push({
+                name,
+                birth,
+                caliber,
+                gunname,
+                gunnum,
+                ammo: rawAmmo
+            });
+        });
+
+        if (data.length === 0) { alert('등록할 데이터가 없습니다.'); return; }
+        if (!confirm(`총 ${data.length}명을 표2에 등록하시겠습니까?\n기존 표2 내용은 덮어씌워집니다.`)) return;
+
+        // 기존 표2 초기화
+        const tbody = document.getElementById('infoBody');
+        const headerCell = document.getElementById('infoMainHeader');
+        tbody.querySelectorAll('.info-row').forEach(r => r.remove());
+
+        // 데이터 행 추가
+        data.forEach((d) => {
+            const tr = document.createElement('tr');
+            tr.className = 'info-row';
+            tr.innerHTML = `
+                <td><input type="text" class="input-full name-input" value="${escHtml(d.name)}" placeholder="성명/바코드" onkeydown="handleSearchInput(event, this)"></td>
+                <td><input type="text" class="input-full" value="${escHtml(d.birth)}" readonly></td>
+                <td><input type="text" class="input-full" value="${escHtml(d.caliber)}" readonly></td>
+                <td><input type="text" class="input-full" value="${escHtml(d.gunname)}" readonly></td>
+                <td><input type="text" class="input-full" value="${escHtml(d.gunnum)}" readonly></td>
+                <td><input type="text" class="input-full ammo-val" value="${escHtml(d.ammo)}" onkeydown="handleLastInput(event, this)" oninput="updateTotals()"></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // rowspan 업데이트 (헤더행 1 + 데이터행 수)
+        const rowCount = tbody.querySelectorAll('tr').length;
+        headerCell.rowSpan = rowCount;
+
+        updateTotals();
+        closeGroupModal();
+        alert(`${data.length}명이 표2에 등록되었습니다.`);
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // 모달 바깥 클릭 시 닫기
+    document.getElementById('groupModal').addEventListener('click', function(e) {
+        if (e.target === this) closeGroupModal();
+    });
+</script>
+
+</body>
+</html>

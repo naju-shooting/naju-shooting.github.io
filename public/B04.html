@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문서관리대장 (B04)</title>
+<!-- PDF.js: 브라우저에서 PDF 텍스트 추출 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+
+body {
+    font-family: 'Malgun Gothic', sans-serif;
+    margin: 30px;
+    background: #f8f9fb;
+    color: #2f3542;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.control-panel {
+    background: white;
+    border: 1px solid #dfe4ea;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+input[type="text"],
+input[type="date"],
+select {
+    padding: 9px;
+    border: 1px solid #ced6e0;
+    border-radius: 5px;
+    outline: none;
+}
+
+input[type="text"] { width: 220px; }
+
+.btn-search, .btn-new, .btn-reg, .btn-can {
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-search {
+    background: #2f3542;
+    color: white;
+    padding: 9px 20px;
+}
+
+.btn-search:hover { background: #57606f; }
+
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #ced6e0;
+    background: white;
+    cursor: pointer;
+}
+
+.filter-btn.active {
+    background: #2f3542;
+    color: white;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th, td {
+    border: 1px solid #dfe4ea;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+th { background: #f1f2f6; }
+
+/* 목록(테이블) 행 마우스 올릴 때(Hover) 행 전체 #ff9560 바탕 표시 */
+#docTableBody tr {
+    transition: background-color 0.15s ease;
+}
+
+#docTableBody tr:hover {
+    background-color: #ff9560 !important;
+}
+
+.btn-sort-num {
+    background: #2f3542;
+    color: white;
+    border: 1px solid #1e2229;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.btn-sort-num:hover {
+    background: #57606f;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.title-cell { text-align: left; }
+
+.badge {
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.bg-입고문서 { background: #27ae60; }
+.bg-출고문서 { background: #e83e8c; }
+.bg-일시관리전환 { background: #8e44ad; }
+.bg-완료문서 { background: #c0392b; }
+
+.badge-btn {
+    cursor: pointer;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    transition: filter 0.15s;
+}
+.badge-btn:hover { filter: brightness(1.15); }
+
+/* 체크박스 그룹 */
+.check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+}
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.check-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #2f3542;
+    cursor: pointer;
+}
+
+.pdf-link {
+    color: #2980b9;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.pdf-link:hover { color: #c0392b; }
+
+.add-link {
+    color: #8e44ad;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline;
+    margin-top: 4px;
+}
+
+.add-link-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.btn-edit-add {
+    background: #f39c12;
+    color: white;
+    border: none;
+    padding: 2px 7px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-edit-add:hover { background: #e67e22; }
+
+.btn-edit {
+    background: #f1c40f;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-add {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 4px;
+}
+
+.btn-del {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 4px;
+}
+
+.footer-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-new {
+    background: #27ae60;
+    color: white;
+    padding: 12px 22px;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+}
+
+.page-btn {
+    padding: 6px 12px;
+    border: 1px solid #ced6e0;
+    background: white;
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background: #2f3542;
+    color: white;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal {
+    background: white;
+    width: 460px;
+    border-radius: 10px;
+    padding: 25px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-group { margin-bottom: 15px; }
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px;
+    border: 1px solid #ced6e0;
+    border-radius: 5px;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    height: 110px;
+    resize: vertical;
+}
+
+.file-box {
+    background: #f1f2f6;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-reg {
+    flex: 1;
+    background: #2f3542;
+    color: white;
+    padding: 12px;
+}
+
+.btn-can {
+    flex: 1;
+    background: #f1f2f6;
+    padding: 12px;
+}
+
+/* 파일 목록 스타일 */
+.file-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.file-list-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f2f6;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+.file-list-item span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.btn-file-open {
+    background: #2980b9;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.btn-file-open:hover { background: #1a6a99; }
+.btn-file-del {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.btn-file-del:hover { background: #c0392b; }
+
+.btn-ai {
+    flex: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ai:hover { filter: brightness(1.1); }
+.btn-ai:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.ai-status {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+    line-height: 1.5;
+}
+
+.ai-status.loading {
+    display: block;
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+
+.ai-status.success {
+    display: block;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.ai-status.error {
+    display: block;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.ai-result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 12px;
+}
+
+.ai-result-table th {
+    background: #4338ca;
+    color: white;
+    padding: 5px 6px;
+    border: 1px solid #6366f1;
+}
+
+.ai-key-group {
+    background: #f8f0ff;
+    border: 1px solid #d8b4fe;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+}
+
+.ai-key-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #6d28d9;
+    margin-bottom: 5px;
+}
+
+.ai-key-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    border: 1px solid #c4b5fd;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: monospace;
+    color: #1e1b4b;
+    background: white;
+}
+
+.ai-key-hint {
+    font-size: 11px;
+    color: #7c3aed;
+    margin-top: 4px;
+}
+
+.ai-key-save-btn {
+    margin-top: 6px;
+    padding: 4px 12px;
+    background: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.ai-key-save-btn:hover { background: #6d28d9; }
+
+</style>
+</head>
+<body>
+
+<h2>📦 문서관리대장 (B04)</h2>
+
+<div class="control-panel">
+    <div class="search-row">
+        <div class="input-group">
+            <label>조회기간</label>
+            <input type="date" id="startDate">
+            <span>~</span>
+            <input type="date" id="endDate">
+        </div>
+        <input type="text" id="searchInput" placeholder="제목 또는 성명 검색">
+        <button class="btn-search" id="searchBtn">조회 및 검색</button>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th width="80">
+                <button type="button" class="btn-sort-num" id="sortOrderBtn" title="클릭 시 최신순 / 마지막순 정렬">
+                    번호 <span id="sortOrderIcon">▼</span>
+                </button>
+            </th>
+            <th>제목</th>
+            <th width="120">일시</th>
+            <th width="90">성명</th>
+            <th width="110">관할서</th>
+            <th width="160">처리</th>
+        </tr>
+    </thead>
+    <tbody id="docTableBody"></tbody>
+</table>
+
+<div class="footer-actions">
+    <div class="pagination" id="pagination"></div>
+    <button class="btn-new" id="newBtn">+ 문서 등록하기</button>
+</div>
+
+<!-- 신규/수정 모달 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3 id="modalTitle">신규문서등록</h3>
+
+        <div class="form-group">
+            <label>제목</label>
+            <input type="text" id="newTitle">
+        </div>
+
+        <div class="form-group">
+            <label>성명</label>
+            <input type="text" id="newName">
+        </div>
+
+        <div class="form-group">
+            <label>관할서</label>
+            <input type="text" id="newOffice">
+        </div>
+
+        <div class="form-group">
+            <label>PDF 첨부</label>
+            <!-- 기존 PDF 목록 -->
+            <div class="file-list" id="fileList"></div>
+            <!-- 추가 파일 선택 -->
+            <input type="file" id="newFile" accept=".pdf" multiple style="margin-top:6px;">
+            <div class="file-box" id="fileName" style="margin-top:4px;">선택된 파일 없음</div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-reg" id="submitBtn">등록하기</button>
+            <button class="btn-can" id="cancelBtn">취소</button>
+        </div>
+    </div>
+</div>
+
+<!-- 추가문서 모달 -->
+<div class="modal-overlay" id="addModalOverlay">
+    <div class="modal">
+        <h3>추가문서 등록</h3>
+
+        <div class="form-group">
+            <label>추가구분 <span style="color:#888;font-size:12px;">(복수 선택 가능)</span></label>
+            <div class="check-group">
+                <label class="check-item"><input type="checkbox" id="chkAdd1" value="출고공문"> 출고공문</label>
+                <label class="check-item"><input type="checkbox" id="chkAdd2" value="출고요청서"> 출고요청서</label>
+                <label class="check-item"><input type="checkbox" id="chkAdd3" value="실탄수불대장"> 실탄수불대장</label>
+                <label class="check-item"><input type="checkbox" id="chkAdd4" value="사후공문"> 사후공문</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>추가내용 제목</label>
+            <input type="text" id="addTitle" placeholder="추가내용 제목을 입력하세요">
+        </div>
+
+        <div class="form-group">
+            <label>내용</label>
+            <textarea id="addContent" placeholder="내용을 입력하세요"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>PDF 첨부</label>
+            <input type="file" id="addFile" accept=".pdf">
+            <div class="file-box" id="addFileName">선택된 파일 없음</div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-reg" id="addSubmitBtn">추가등록</button>
+            <button class="btn-can" id="addCancelBtn">취소</button>
+        </div>
+    </div>
+</div>
+
+<!-- 추가문서 수정 모달 -->
+<div class="modal-overlay" id="editAddModalOverlay">
+    <div class="modal">
+        <h3>추가문서 수정</h3>
+
+        <div class="form-group">
+            <label>추가구분 <span style="color:#888;font-size:12px;">(복수 선택 가능)</span></label>
+            <div class="check-group">
+                <label class="check-item"><input type="checkbox" id="chkEditAdd1" value="출고공문"> 출고공문</label>
+                <label class="check-item"><input type="checkbox" id="chkEditAdd2" value="출고요청서"> 출고요청서</label>
+                <label class="check-item"><input type="checkbox" id="chkEditAdd3" value="실탄수불대장"> 실탄수불대장</label>
+                <label class="check-item"><input type="checkbox" id="chkEditAdd4" value="사후공문"> 사후공문</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>추가내용 제목</label>
+            <input type="text" id="editAddTitle" placeholder="추가내용 제목을 입력하세요">
+        </div>
+
+        <div class="form-group">
+            <label>내용</label>
+            <textarea id="editAddContent" placeholder="내용을 입력하세요"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>PDF 첨부 (기존 PDF 유지 시 비워두세요)</label>
+            <!-- 기존 PDF 목록 -->
+            <div class="file-list" id="editAddFileList"></div>
+            <!-- 추가 파일 선택 -->
+            <input type="file" id="editAddFile" accept=".pdf" multiple style="margin-top:6px;">
+            <div class="file-box" id="editAddFileName" style="margin-top:4px;">선택된 파일 없음</div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-reg" id="editAddSubmitBtn">수정완료</button>
+            <button class="btn-can" id="editAddCancelBtn">취소</button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+const App = {
+
+    dbName: 'b04DB',
+    storeName: 'documents',
+    db: null,
+    allData: [],
+    currentPage: 1,
+    rowsPerPage: 15,
+    currentCategory: '전체',
+    currentSortOrder: 'latest', // 'latest': 최신순, 'oldest': 마지막순
+    targetId: null,
+    tempFile: null,          // 메인 대표 PDF (fileData)
+    tempExtraFiles: [],      // 메인 추가 PDF 목록 [{name, data}]
+    addTargetId: null,
+    addTempFile: null,
+    editAddExtraFiles: [],   // 추가문서 수정 추가 PDF 목록 [{name, data}]
+
+    async init() {
+        await this.initDB();
+        await this.loadData();
+        this.bindEvents();
+        // 조회기간 기본값: 시작=당해연도 1월 1일, 끝=오늘
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const startOfYearStr = `${yyyy}-01-01`;
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('startDate').value = startOfYearStr;
+        document.getElementById('endDate').value   = todayStr;
+        this.renderTable(1);
+    },
+
+    toggleSortOrder() {
+        this.currentSortOrder = (this.currentSortOrder === 'latest') ? 'oldest' : 'latest';
+        const icon = document.getElementById('sortOrderIcon');
+        if (icon) {
+            icon.innerText = (this.currentSortOrder === 'latest') ? '▼' : '▲';
+        }
+        this.renderTable(this.currentPage);
+    },
+
+    bindEvents() {
+        const sortBtn = document.getElementById('sortOrderBtn');
+        if (sortBtn) {
+            sortBtn.addEventListener('click', () => this.toggleSortOrder());
+        }
+
+        document.getElementById('searchBtn')
+            .addEventListener('click', () => this.renderTable(1));
+
+        document.getElementById('searchInput')
+            .addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') this.renderTable(1);
+            });
+
+        document.getElementById('newBtn')
+            .addEventListener('click', () => this.openModal());
+
+        document.getElementById('cancelBtn')
+            .addEventListener('click', () => this.closeModal());
+
+        document.getElementById('submitBtn')
+            .addEventListener('click', async () => await this.saveDoc());
+
+        document.getElementById('newFile')
+            .addEventListener('change', (e) => this.handleFile(e));
+
+        document.getElementById('addFile')
+            .addEventListener('change', (e) => this.handleAddFile(e));
+
+        document.getElementById('addCancelBtn')
+            .addEventListener('click', () => {
+                document.getElementById('addModalOverlay').style.display = 'none';
+            });
+
+        document.getElementById('addSubmitBtn')
+            .addEventListener('click', async () => await this.saveAddition());
+
+        document.getElementById('editAddFile')
+            .addEventListener('change', (e) => this.handleEditAddFile(e));
+
+        document.getElementById('editAddCancelBtn')
+            .addEventListener('click', () => {
+                document.getElementById('editAddModalOverlay').style.display = 'none';
+            });
+
+        document.getElementById('editAddSubmitBtn')
+            .addEventListener('click', async () => await this.saveEditAddition());
+
+    },
+
+    async initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, 1);
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    db.createObjectStore(this.storeName, { keyPath: 'id' });
+                }
+            };
+            request.onsuccess = (e) => { this.db = e.target.result; resolve(); };
+            request.onerror = () => reject();
+        });
+    },
+
+    async loadData() {
+        return new Promise(resolve => {
+            const tx = this.db.transaction(this.storeName, 'readonly');
+            const store = tx.objectStore(this.storeName);
+            const request = store.getAll();
+            request.onsuccess = () => {
+                this.allData = (request.result || []).sort((a, b) => b.id - a.id);
+                resolve();
+            };
+        });
+    },
+
+    async saveToDB(data) {
+        return new Promise(resolve => {
+            const tx = this.db.transaction(this.storeName, 'readwrite');
+            tx.objectStore(this.storeName).put(data);
+            tx.oncomplete = () => resolve();
+        });
+    },
+
+    async deleteFromDB(id) {
+        return new Promise(resolve => {
+            const tx = this.db.transaction(this.storeName, 'readwrite');
+            tx.objectStore(this.storeName).delete(id);
+            tx.oncomplete = () => resolve();
+        });
+    },
+
+    renderTable(page) {
+        this.currentPage = page;
+        const tbody = document.getElementById('docTableBody');
+        tbody.innerHTML = '';
+
+        const keyword = document.getElementById('searchInput').value.toLowerCase();
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        const filtered = this.allData.filter(item => {
+            const matchCategory = this.currentCategory === '전체' || item.category === this.currentCategory;
+            const matchSearch = item.title.toLowerCase().includes(keyword) || item.name.toLowerCase().includes(keyword);
+            let matchDate = true;
+            if (startDate) matchDate = matchDate && item.date >= startDate;
+            if (endDate)   matchDate = matchDate && item.date <= endDate;
+            return matchCategory && matchSearch && matchDate;
+        });
+
+        // 정렬 적용 (내림차순: id 내림차순, 오름차순: id 오름차순)
+        filtered.sort((a, b) => {
+            if (this.currentSortOrder === 'latest' || this.currentSortOrder === 'desc') {
+                return (b.id || 0) - (a.id || 0);
+            } else {
+                return (a.id || 0) - (b.id || 0);
+            }
+        });
+
+        if (filtered.length === 0) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 6;
+            td.textContent = '조회 결과 없음';
+            td.style.padding = '30px';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            this.renderPagination(0);
+            return;
+        }
+
+        const start = (page - 1) * this.rowsPerPage;
+        const pageData = filtered.slice(start, start + this.rowsPerPage);
+
+        pageData.forEach((item, index) => {
+            const tr = document.createElement('tr');
+
+            // 번호 (내림차순: 전체개수 - 인덱스, 오름차순: 1부터 증가)
+            const td1 = document.createElement('td');
+            const rowNum = (this.currentSortOrder === 'latest' || this.currentSortOrder === 'desc')
+                ? (filtered.length - (start + index))
+                : (start + index + 1);
+            td1.textContent = rowNum;
+
+            // 제목 + 추가문서
+            const td3 = document.createElement('td');
+            td3.className = 'title-cell';
+
+            if (item.fileData) {
+                const link = document.createElement('span');
+                link.className = 'pdf-link';
+                link.textContent = item.title + ' 📎';
+                link.addEventListener('click', () => this.openPDF(item.fileData));
+                td3.appendChild(link);
+            } else {
+                td3.textContent = item.title;
+            }
+
+            if (item.additions && item.additions.length > 0) {
+                item.additions.forEach((add, idx) => {
+                    const addRow = document.createElement('div');
+                    addRow.className = 'add-link-row';
+
+                    const addLink = document.createElement('span');
+                    addLink.className = 'add-link';
+                    // 추가구분 태그 표시
+                    const typeTag = (add.addTypes && add.addTypes.length > 0)
+                        ? ` [${add.addTypes.join('/')}]` : '';
+                    if (add.fileData) {
+                        addLink.textContent = `└ 추가${idx + 1}${typeTag}: ${add.title} 📎`;
+                        addLink.addEventListener('click', () => this.openPDF(add.fileData));
+                    } else {
+                        addLink.textContent = `└ 추가${idx + 1}${typeTag}: ${add.title}`;
+                        addLink.style.cursor = 'default';
+                        addLink.style.color = '#555';
+                        if (add.content) {
+                            addLink.title = add.content;
+                        }
+                    }
+
+                    const editAddBtn = document.createElement('button');
+                    editAddBtn.className = 'btn-edit-add';
+                    editAddBtn.textContent = '수정';
+                    editAddBtn.addEventListener('click', () => this.openEditAddModal(item.id, idx));
+
+                    const delAddBtn = document.createElement('button');
+                    delAddBtn.className = 'btn-edit-add';
+                    delAddBtn.textContent = '삭제';
+                    delAddBtn.style.background = '#e74c3c';
+                    delAddBtn.addEventListener('click', async () => {
+                        if (confirm('이 추가문서를 삭제하시겠습니까?')) {
+                            item.additions.splice(idx, 1);
+                            await this.saveToDB(item);
+                            this.renderTable(this.currentPage);
+                        }
+                    });
+
+                    addRow.appendChild(addLink);
+                    addRow.appendChild(editAddBtn);
+                    addRow.appendChild(delAddBtn);
+                    td3.appendChild(addRow);
+                });
+            }
+
+            // 날짜
+            const td4 = document.createElement('td');
+            td4.textContent = item.date;
+
+            // 성명
+            const td5 = document.createElement('td');
+            td5.textContent = item.name;
+
+            // 관할서
+            const td6 = document.createElement('td');
+            td6.textContent = item.office;
+
+            // 처리 버튼
+            const td7 = document.createElement('td');
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-edit';
+            editBtn.textContent = '수정';
+            editBtn.addEventListener('click', () => this.editItem(item.id));
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'btn-add';
+            addBtn.textContent = '추가';
+            addBtn.addEventListener('click', () => this.openAddModal(item.id));
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn-del';
+            delBtn.textContent = '삭제';
+            delBtn.addEventListener('click', async () => {
+                if (confirm('삭제하시겠습니까?')) await this.deleteItem(item.id);
+            });
+
+            td7.appendChild(editBtn);
+            td7.appendChild(addBtn);
+            td7.appendChild(delBtn);
+
+            tr.append(td1, td3, td4, td5, td6, td7);
+            tbody.appendChild(tr);
+        });
+
+        this.renderPagination(filtered.length);
+    },
+
+    renderPagination(totalRows) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        const totalPage = Math.ceil(totalRows / this.rowsPerPage) || 1;
+        for (let i = 1; i <= totalPage; i++) {
+            const btn = document.createElement('button');
+            btn.className = `page-btn ${i === this.currentPage ? 'active' : ''}`;
+            btn.textContent = i;
+            btn.addEventListener('click', () => this.renderTable(i));
+            pagination.appendChild(btn);
+        }
+    },
+
+    async saveDoc() {
+        const title    = document.getElementById('newTitle').value.trim();
+        const name     = document.getElementById('newName').value.trim();
+        const office   = document.getElementById('newOffice').value.trim();
+
+        if (!title || !name || !office) {
+            alert('필수항목(제목, 성명, 관할서)을 모두 입력해주세요.');
+            return;
+        }
+
+        const today = new Date();
+        const date = today.getFullYear() + '-' +
+            String(today.getMonth() + 1).padStart(2, '0') + '-' +
+            String(today.getDate()).padStart(2, '0');
+
+        if (this.targetId) {
+            const index = this.allData.findIndex(x => x.id === this.targetId);
+            this.allData[index].title    = title;
+            this.allData[index].name     = name;
+            this.allData[index].office   = office;
+            if (this.tempFile !== null) this.allData[index].fileData = this.tempFile;
+            // 새로 선택한 추가 파일 합침
+            if (!this.allData[index].extraFiles) this.allData[index].extraFiles = [];
+            this.allData[index].extraFiles.push(...this.tempExtraFiles);
+            await this.saveToDB(this.allData[index]);
+            alert('수정 완료');
+        } else {
+            const newDoc = {
+                id: Date.now(),
+                category: '일반',
+                title, name, office, date,
+                fileData: this.tempFile,
+                extraFiles: [...this.tempExtraFiles],
+                additions: []
+            };
+            this.allData.unshift(newDoc);
+            await this.saveToDB(newDoc);
+            alert('등록 완료');
+        }
+
+        this.closeModal();
+        this.renderTable(1);
+    },
+
+    async saveAddition() {
+        const title   = document.getElementById('addTitle').value.trim();
+        const content = document.getElementById('addContent').value.trim();
+
+        if (!title) { alert('추가내용 제목을 입력해주세요.'); return; }
+
+        const item = this.allData.find(x => x.id === this.addTargetId);
+        if (!item) return;
+
+        if (!item.additions) item.additions = [];
+
+        // 추가구분 체크된 값 수집
+        const addTypes = [];
+        ['chkAdd1','chkAdd2','chkAdd3','chkAdd4'].forEach(chkId => {
+            const el = document.getElementById(chkId);
+            if (el && el.checked) addTypes.push(el.value);
+        });
+
+        item.additions.push({
+            title,
+            content,
+            addTypes,
+            fileData: this.addTempFile || null,
+            createdAt: new Date().toLocaleString()
+        });
+
+        await this.saveToDB(item);
+
+        document.getElementById('addModalOverlay').style.display = 'none';
+        this.renderTable(this.currentPage);
+        alert('추가문서가 등록되었습니다.');
+    },
+
+    async deleteAddition() {
+        if (!confirm('이 추가문서를 삭제하시겠습니까?')) return;
+        const item = this.allData.find(x => x.id === this.editAddTargetId);
+        if (!item || !item.additions) return;
+        item.additions.splice(this.editAddTargetIdx, 1);
+        await this.saveToDB(item);
+        document.getElementById('editAddModalOverlay').style.display = 'none';
+        this.renderTable(this.currentPage);
+        alert('추가문서가 삭제되었습니다.');
+    },
+
+    async deleteItem(id) {
+        this.allData = this.allData.filter(x => x.id !== id);
+        await this.deleteFromDB(id);
+        this.renderTable(1);
+    },
+
+    handleFile(e) {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        let loaded = 0;
+        files.forEach((file, i) => {
+            const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            if (!isPDF) { alert(`"${file.name}"은 PDF 파일이 아닙니다.`); return; }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (i === 0 && !this.tempFile) {
+                    // 첫 번째 파일은 대표 fileData로
+                    this.tempFile = ev.target.result;
+                } else {
+                    this.tempExtraFiles.push({ name: file.name, data: ev.target.result });
+                }
+                loaded++;
+                if (loaded === files.length) {
+                    document.getElementById('fileName').textContent =
+                        files.length === 1 ? files[0].name : `${files.length}개 파일 선택됨`;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    },
+
+    handleAddFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        if (!isPDF) { alert('PDF 파일만 첨부 가능합니다.'); return; }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            this.addTempFile = ev.target.result;
+            document.getElementById('addFileName').textContent = file.name;
+        };
+        reader.readAsDataURL(file);
+    },
+
+    openPDF(fileData) {
+        const win = window.open();
+        win.document.write(`<iframe src="${fileData}" style="width:100%;height:100%;border:none;"></iframe>`);
+    },
+
+    openModal() {
+        this.targetId = null;
+        this.tempFile = null;
+        this.tempExtraFiles = [];
+        document.getElementById('modalTitle').textContent = '신규문서등록';
+        document.getElementById('submitBtn').textContent = '등록하기';
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newName').value = '';
+        document.getElementById('newOffice').value = '';
+        document.getElementById('newFile').value = '';
+        document.getElementById('fileName').textContent = '선택된 파일 없음';
+        const listEl = document.getElementById('fileList');
+        if (listEl) listEl.innerHTML = '';
+        document.getElementById('modalOverlay').style.display = 'flex';
+    },
+
+    closeModal() {
+        document.getElementById('modalOverlay').style.display = 'none';
+    },
+
+    openAddModal(id) {
+        this.addTargetId = id;
+        this.addTempFile = null;
+        // 추가구분 체크박스 초기화
+        ['chkAdd1','chkAdd2','chkAdd3','chkAdd4'].forEach(chkId => {
+            const el = document.getElementById(chkId);
+            if (el) el.checked = false;
+        });
+        document.getElementById('addTitle').value = '';
+        document.getElementById('addContent').value = '';
+        document.getElementById('addFile').value = '';
+        document.getElementById('addFileName').textContent = '선택된 파일 없음';
+        document.getElementById('addModalOverlay').style.display = 'flex';
+    },
+
+    editAddTargetId: null,
+    editAddTargetIdx: null,
+    editAddTempFile: null,
+
+    openEditAddModal(id, idx) {
+        const item = this.allData.find(x => x.id === id);
+        if (!item || !item.additions || !item.additions[idx]) return;
+        const add = item.additions[idx];
+        this.editAddTargetId  = id;
+        this.editAddTargetIdx = idx;
+        this.editAddTempFile  = null;
+        this.editAddExtraFiles = []; // 추가파일 초기화
+        // 추가구분 체크박스 복원
+        const savedTypes = add.addTypes || [];
+        ['chkEditAdd1','chkEditAdd2','chkEditAdd3','chkEditAdd4'].forEach(chkId => {
+            const el = document.getElementById(chkId);
+            el.checked = savedTypes.includes(el.value);
+        });
+        document.getElementById('editAddTitle').value   = add.title   || '';
+        document.getElementById('editAddContent').value = add.content || '';
+        document.getElementById('editAddFile').value    = '';
+        document.getElementById('editAddFileName').textContent = '추가 파일 선택 시 목록에 추가됩니다';
+        // 기존 파일 목록 렌더
+        this._renderEditAddFileList();
+        document.getElementById('editAddModalOverlay').style.display = 'flex';
+    },
+
+    handleEditAddFile(e) {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        let loaded = 0;
+        files.forEach((file, i) => {
+            const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            if (!isPDF) { alert(`"${file.name}"은 PDF 파일이 아닙니다.`); return; }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                this.editAddExtraFiles.push({ name: file.name, data: ev.target.result });
+                loaded++;
+                if (loaded === files.length) {
+                    document.getElementById('editAddFileName').textContent =
+                        files.length === 1 ? files[0].name : `${files.length}개 파일 선택됨`;
+                    // 파일 목록 UI 갱신
+                    this._renderEditAddFileList();
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    },
+
+    // 파일 목록 UI 렌더링 헬퍼: 메인 편집 모달
+    _renderMainFileList(item) {
+        const listEl = document.getElementById('fileList');
+        listEl.innerHTML = '';
+        // 대표 fileData
+        if (item && item.fileData) {
+            const row = this._makeFileRow('대표 PDF', item.fileData, () => {
+                if (confirm('대표 PDF를 삭제하시겠습니까?')) {
+                    this.tempFile = null;
+                    item.fileData = null;
+                    this._renderMainFileList(item);
+                }
+            });
+            listEl.appendChild(row);
+        }
+        // 추가 extraFiles
+        const extras = (item && item.extraFiles) ? [...item.extraFiles] : [];
+        extras.forEach((f, i) => {
+            const row = this._makeFileRow(f.name || `첨부${i + 2}`, f.data, () => {
+                if (confirm(`"${f.name || '첨부파일'}"를 삭제하시겠습니까?`)) {
+                    item.extraFiles.splice(i, 1);
+                    this._renderMainFileList(item);
+                }
+            });
+            listEl.appendChild(row);
+        });
+        // 새로 선택된 파일
+        this.tempExtraFiles.forEach((f, i) => {
+            const row = this._makeFileRow(`신규: ${f.name}`, f.data, () => {
+                this.tempExtraFiles.splice(i, 1);
+                this._renderMainFileList(item);
+            });
+            listEl.appendChild(row);
+        });
+    },
+
+    // 파일 목록 UI 렌더링 헬퍼: 추가문서 수정 모달
+    _renderEditAddFileList() {
+        const listEl = document.getElementById('editAddFileList');
+        listEl.innerHTML = '';
+        const item = this.allData.find(x => x.id === this.editAddTargetId);
+        const add  = item && item.additions ? item.additions[this.editAddTargetIdx] : null;
+        // 대표 fileData
+        if (add && add.fileData) {
+            const row = this._makeFileRow('대표 PDF', add.fileData, () => {
+                if (confirm('대표 PDF를 삭제하시겠습니까?')) {
+                    add.fileData = null;
+                    this._renderEditAddFileList();
+                }
+            });
+            listEl.appendChild(row);
+        }
+        // 추가 extraFiles
+        const extras = (add && add.extraFiles) ? [...add.extraFiles] : [];
+        extras.forEach((f, i) => {
+            const row = this._makeFileRow(f.name || `첨부${i + 2}`, f.data, () => {
+                if (confirm(`"${f.name || '첨부파일'}"를 삭제하시겠습니까?`)) {
+                    add.extraFiles.splice(i, 1);
+                    this._renderEditAddFileList();
+                }
+            });
+            listEl.appendChild(row);
+        });
+        // 새로 선택된 파일
+        this.editAddExtraFiles.forEach((f, i) => {
+            const row = this._makeFileRow(`신규: ${f.name}`, f.data, () => {
+                this.editAddExtraFiles.splice(i, 1);
+                this._renderEditAddFileList();
+            });
+            listEl.appendChild(row);
+        });
+    },
+
+    // 파일 항목 한 줄 요소 생성
+    _makeFileRow(label, data, onDel) {
+        const row = document.createElement('div');
+        row.className = 'file-list-item';
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = label;
+        const openBtn = document.createElement('button');
+        openBtn.className = 'btn-file-open';
+        openBtn.textContent = '열기';
+        openBtn.addEventListener('click', () => this.openPDF(data));
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-file-del';
+        delBtn.textContent = '삭제';
+        delBtn.addEventListener('click', onDel);
+        row.append(nameSpan, openBtn, delBtn);
+        return row;
+    },
+
+    async saveEditAddition() {
+        const title   = document.getElementById('editAddTitle').value.trim();
+        const content = document.getElementById('editAddContent').value.trim();
+        if (!title) { alert('제목을 입력해주세요.'); return; }
+
+        const item = this.allData.find(x => x.id === this.editAddTargetId);
+        if (!item || !item.additions) return;
+
+        const add = item.additions[this.editAddTargetIdx];
+        // 추가구분 체크된 값 수집
+        const addTypes = [];
+        ['chkEditAdd1','chkEditAdd2','chkEditAdd3','chkEditAdd4'].forEach(chkId => {
+            const el = document.getElementById(chkId);
+            if (el.checked) addTypes.push(el.value);
+        });
+        add.addTypes = addTypes;
+        add.title   = title;
+        add.content = content;
+        // 새로 선택한 추가 파일 합슰
+        if (!add.extraFiles) add.extraFiles = [];
+        add.extraFiles.push(...this.editAddExtraFiles);
+
+        await this.saveToDB(item);
+        document.getElementById('editAddModalOverlay').style.display = 'none';
+        this.renderTable(this.currentPage);
+        alert('추가문서가 수정되었습니다.');
+    },
+
+    editItem(id) {
+        const item = this.allData.find(x => x.id === id);
+        if (!item) return;
+        this.targetId = id;
+        this.tempFile = item.fileData || null;
+        this.tempExtraFiles = []; // 추가파일 초기화
+        document.getElementById('newTitle').value    = item.title;
+        document.getElementById('newName').value     = item.name;
+        document.getElementById('newOffice').value   = item.office;
+        document.getElementById('newFile').value = '';
+        document.getElementById('fileName').textContent = '추가파일 선택 시 목록에 추가됩니다';
+        // 기존 파일 목록 렌더
+        this._renderMainFileList(item);
+        document.getElementById('modalTitle').textContent = '문서 수정';
+        document.getElementById('submitBtn').textContent  = '수정하기';
+        document.getElementById('modalOverlay').style.display = 'flex';
+    },
+
+    // ===== AI 등록 =====
+    GEMINI_API_KEY: '',
+    GEMINI_MODEL: 'gemini-2.0-flash',
+
+    saveApiKey() {
+        const engine = document.getElementById('aiEngine').value;
+        localStorage.setItem('AI_ENGINE', engine);
+
+        if (engine === 'gemini') {
+            const key = document.getElementById('geminiApiKey').value.trim();
+            if (!key) { alert('API 키를 입력해 주세요.'); return; }
+            const model = document.getElementById('geminiModel').value;
+            localStorage.setItem('GEMINI_API_KEY', key);
+            localStorage.setItem('GEMINI_MODEL', model);
+            this.GEMINI_API_KEY = key;
+        } else {
+            const url = document.getElementById('ollamaUrl').value.trim();
+            const textModel = document.getElementById('ollamaTextModel').value.trim();
+            const visionModel = document.getElementById('ollamaVisionModel').value.trim();
+            if (!url) { alert('Ollama 주소를 입력해 주세요.'); return; }
+            localStorage.setItem('OLLAMA_URL', url);
+            localStorage.setItem('OLLAMA_TEXT_MODEL', textModel);
+            localStorage.setItem('OLLAMA_VISION_MODEL', visionModel);
+        }
+        alert('✅ AI 설정이 저장되었습니다. AI등록 버튼을 클릭하세요.');
+    },
+
+    setAiStatus(type, html) {
+        const el = document.getElementById('aiStatus');
+        el.className = 'ai-status ' + type;
+        el.innerHTML = html;
+    },
+
+    async runAiRegister() {
+        // 1. PDF 파일 확인
+        const fileInput = document.getElementById('newFile');
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert('먼저 PDF 파일을 첨부해 주세요.');
+            return;
+        }
+        const file = fileInput.files[0];
+
+        // 2. AI 엔진 확인
+        const engine = document.getElementById('aiEngine').value;
+        let apiKey = '';
+        if (engine === 'gemini') {
+            apiKey = document.getElementById('geminiApiKey').value.trim()
+                     || localStorage.getItem('GEMINI_API_KEY') || '';
+            if (!apiKey) {
+                alert('⚠️ Gemini API 키를 입력해 주세요.\n(PDF 첨부 아래 API 키 입력란에 넣고 [설정 저장] 단추를 누르세요)');
+                document.getElementById('geminiApiKey').focus();
+                return;
+            }
+            localStorage.setItem('GEMINI_API_KEY', apiKey);
+            this.GEMINI_API_KEY = apiKey;
+        }
+
+        document.getElementById('aiBtn').disabled = true;
+        this.setAiStatus('loading', '⏳ PDF 분석 중...');
+
+        try {
+            // 3. PDF.js 초기화
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const totalPages = pdfDoc.numPages;
+
+            // 텍스트 추출 시도
+            let extractedText = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const page = await pdfDoc.getPage(i);
+                const tc = await page.getTextContent();
+                extractedText += tc.items.map(it => it.str).join(' ') + '\n';
+            }
+
+            const cleanedText = extractedText.replace(/\s/g, '');
+            const isImagePdf = cleanedText.length < 10;
+
+            // 출력 JSON 스키마 (반드시 이 키명만 사용)
+            const jsonSchema = `[
+  {
+    "소속": "(소속 기관명)",
+    "성명": "(사람 이름)",
+    "생년월일": "(YYMMDD 6자리, 예: 891112)",
+    "총종": "(엽총/화약권총/화약권총(32)/화약소총/공기권총/공기소총 중 하나)",
+    "명칭": "(총기 명칭/모델명)",
+    "총번": "(총기 일련번호)",
+    "구경": "(구경, 예: 0.22)",
+    "실탄수량": 0
+  }
+]`;
+            const rules = [
+                '규칙:',
+                '- 반드시 위 JSON 배열 형식으로만 출력. 설명/주석 없이 순수 JSON만.',
+                '- 키 이름: 소속/성명/생년월일/총종/명칭/총번/구경/실탄수량 (정확히 이 한글 키명 사용)',
+                '- 성명: 반드시 사람 이름. 비어있으면 그 행 제외.',
+                '- 생년월일: YY.MM.DD 또는 YYMMDD 등 다양한 형식 → YYMMDD 6자리 숫자로 변환 (예: 89.11.12 → 891112)',
+                '- 총종: 엽총/화약권총/화약권총(32)/화약소총/공기권총/공기소총 중 가장 유사한 값 선택',
+                '- 실탄수량: 숫자만 (없으면 0, 쉼표 제거 후 정수)',
+                '- 한 사람이 총기 여러 자루면 각각 별도 행으로 출력',
+                '- 제조국/제조사/형식/허가번호 등 스키마에 없는 컬럼은 무시',
+            ].join('\n');
+
+            let requestBody;
+            let imageParts = [];
+            if (!isImagePdf) {
+                // 텍스트 PDF
+                this.setAiStatus('loading', '⏳ 텍스트 PDF — AI 분석 중...');
+                requestBody = {
+                    contents: [{ parts: [{ text: `아래는 한국 총기실탄 세부 목록 문서의 텍스트입니다. 각 행에서 연번/소속/성명/생년월일/총종/명칭/총번/구경/실탄수량을 추출하여 JSON 배열로만 반환하세요.\n\n=== 문서 텍스트 ===\n${extractedText}\n=================\n\n출력 형식(반드시 이 키명만 사용):\n${jsonSchema}\n\n${rules}` }] }],
+                    generationConfig: { temperature: 0 }
+                };
+            } else {
+                // 이미지 PDF: 각 페이지를 canvas로 렌더링 후 JPEG로 전송
+                const MAX_PAGES = 5;
+                const pagesToProcess = Math.min(totalPages, MAX_PAGES);
+                imageParts = [];
+                for (let i = 1; i <= pagesToProcess; i++) {
+                    this.setAiStatus('loading', `⏳ 이미지 PDF — 페이지 ${i}/${pagesToProcess} 렌더링 중...`);
+                    const pg = await pdfDoc.getPage(i);
+                    const vp = pg.getViewport({ scale: 1.8 });
+                    const cv = document.createElement('canvas');
+                    cv.width = vp.width; cv.height = vp.height;
+                    await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+                    imageParts.push({ inline_data: { mime_type: 'image/jpeg', data: cv.toDataURL('image/jpeg', 0.88).split(',')[1] } });
+                }
+                this.setAiStatus('loading', '⏳ 이미지 PDF — AI 분석 중 (OCR)...');
+                requestBody = {
+                    contents: [{ parts: [{ text: `이 이미지들은 한국 총기실탄 세부 목록 문서입니다. 각 행에서 연번/소속/성명/생년월일/총종/명칭/총번/구경/실탄수량을 추출하여 JSON 배열로만 반환하세요.\n\n출력 형식(반드시 이 키명만 사용):\n${jsonSchema}\n\n${rules}` }, ...imageParts] }],
+                    generationConfig: { temperature: 0 }
+                };
+            }
+
+            let rawText = '';
+            
+            if (engine === 'gemini') {
+                const model = document.getElementById('geminiModel').value || 'gemini-2.0-flash';
+                const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!resp.ok) {
+                    const errJson = await resp.json().catch(() => null);
+                    if (resp.status === 429) {
+                        const retry = errJson?.error?.details?.find(d => d.retryDelay)?.retryDelay || '';
+                        throw new Error(`할당량 초과(429). ${retry ? retry + ' 후 재시도' : '잠시 후 다시 시도하세요.'}<br>다른 모델을 선택하거나 잠시 기다려 주세요.`);
+                    }
+                    throw new Error(`API 오류 (${resp.status}): ${errJson?.error?.message || ''}`);
+                }
+
+                const result = await resp.json();
+                rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            } else {
+                // Ollama 로컬 요청 처리
+                const ollamaUrl = document.getElementById('ollamaUrl').value.trim() || 'http://localhost:11434';
+                const textModel = document.getElementById('ollamaTextModel').value.trim() || 'llama3.2';
+                const visionModel = document.getElementById('ollamaVisionModel').value.trim() || 'llava';
+                
+                let ollamaBody;
+                if (!isImagePdf) {
+                    const promptText = `다음 총기실탄 세부 목록 텍스트에서 정보를 추출하여 JSON 배열 형식으로만 반환하세요. 다른 말은 절대 하지 마세요.\n\n스키마:\n${jsonSchema}\n\n${rules}\n\n텍스트:\n${extractedText}`;
+                    ollamaBody = {
+                        model: textModel,
+                        prompt: promptText,
+                        stream: false,
+                        options: { temperature: 0 },
+                        format: "json"
+                    };
+                } else {
+                    const promptText = `이 이미지들은 한국 총기실탄 세부 목록 문서입니다. 이미지에서 정보를 추출하여 JSON 배열 형식으로만 반환하세요. 다른 말은 절대 하지 마세요.\n\n스키마:\n${jsonSchema}\n\n${rules}`;
+                    // base64 데이터만 추출
+                    const imagesBase64 = imageParts.map(p => p.inline_data.data);
+                    ollamaBody = {
+                        model: visionModel,
+                        prompt: promptText,
+                        images: imagesBase64,
+                        stream: false,
+                        options: { temperature: 0 },
+                        format: "json"
+                    };
+                }
+
+                this.setAiStatus('loading', `⏳ 로컬 Ollama (${ollamaBody.model}) 분석 요청 중...<br><small>Ollama가 실행 중이어야 합니다.</small>`);
+
+                try {
+                    const resp = await fetch(`${ollamaUrl}/api/generate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(ollamaBody)
+                    });
+                    
+                    if (!resp.ok) {
+                        throw new Error(`Ollama 서버 응답 에러 (${resp.status})`);
+                    }
+                    const result = await resp.json();
+                    rawText = result?.response || '';
+                } catch (e) {
+                    throw new Error(`Ollama 서버 연결 실패: 로컬 Ollama가 정상 실행 중인지 확인하세요.<br>
+                    <b>주의:</b> CORS 허용을 위해 CMD/터미널에서 <code>set OLLAMA_ORIGINS=*</code> 설정 후 <code>ollama serve</code>로 백그라운드 구동하셔야 웹브라우저에서 연결됩니다.`);
+                }
+            }
+
+            rawText = rawText.trim().replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
+
+            let parsed;
+            try {
+                const jsonObj = JSON.parse(rawText);
+                if (Array.isArray(jsonObj)) {
+                    parsed = jsonObj;
+                } else if (jsonObj && typeof jsonObj === 'object') {
+                    const arrVal = Object.values(jsonObj).find(v => Array.isArray(v));
+                    parsed = arrVal ? arrVal : [jsonObj];
+                } else {
+                    parsed = [];
+                }
+            } catch(e) {
+                throw new Error('AI 응답을 JSON으로 파싱하지 못했습니다.<br>'
+                    + '<b>AI 원본 응답:</b><br><pre style="white-space:pre-wrap;font-size:11px;">' + rawText.substring(0, 500) + '</pre>'
+                    + (isImagePdf ? '' : '<br><b>PDF 추출 텍스트(앞부분):</b><br><pre style="white-space:pre-wrap;font-size:11px;">' + extractedText.substring(0, 300) + '</pre>'));
+            }
+
+            // ── 키 이름 정규화 (AI가 다른 키명으로 반환할 경우 표준 키로 매핑) ──
+            const KEY_MAP = {
+                '성명': ['성명','name','이름','사수','선수'],
+                '소속': ['소속','affiliation','단체','기관','소속기관','소속단체'],
+                '생년월일': ['생년월일','birth','birthdate','생년','생일'],
+                '총종': ['총종','guntype','총기종류','종류','총기구분'],
+                '명칭': ['명칭','gunname','총기명칭','모델','모델명','총기명'],
+                '총번': ['총번','serial','gunnumber','일련번호','시리얼','총기번호'],
+                '구경': ['구경','caliber','calibre'],
+                '실탄수량': ['실탄수량','ammo','실탄','탄수','수량','실탄수']
+            };
+            parsed = parsed.map(row => {
+                const norm = {};
+                const rowLower = {};
+                Object.keys(row).forEach(k => { rowLower[k.toLowerCase().replace(/\s/g,'')] = row[k]; });
+                Object.entries(KEY_MAP).forEach(([stdKey, aliases]) => {
+                    for (const alias of aliases) {
+                        const al = alias.toLowerCase().replace(/\s/g,'');
+                        if (row[alias] !== undefined) { norm[stdKey] = row[alias]; break; }
+                        if (rowLower[al] !== undefined) { norm[stdKey] = rowLower[al]; break; }
+                    }
+                    if (norm[stdKey] === undefined) norm[stdKey] = row[stdKey] !== undefined ? row[stdKey] : '';
+                });
+                return norm;
+            });
+
+            // 생년월일 YY.MM.DD → YYMMDD 변환
+            parsed = parsed.map(row => {
+                let b = String(row['생년월일'] || '').trim();
+                b = b.replace(/[.\-\/]/g, '');   // 89.11.12 → 891112
+                if (b.length === 8) b = b.substring(2); // YYYYMMDD → YYMMDD
+                row['생년월일'] = b;
+                // 실탄수량 숫자 정리
+                let amt = String(row['실탄수량'] || '0').replace(/,/g, '');
+                row['실탄수량'] = parseInt(amt) || 0;
+                return row;
+            });
+
+            // 성명이 있는 행만 유효
+            parsed = parsed.filter(row => row && (row['성명'] || '').trim());
+
+            if (parsed.length === 0) {
+                const hint = isImagePdf
+                    ? '이미지(스캔) PDF로 처리했으나 데이터를 찾지 못했습니다.<br>'
+                      + '① 이미지 해상도가 너무 낮거나 ② 표 형식이 다를 수 있습니다.<br>'
+                      + '③ Vision 모델(llava 등)이 설치·실행 중인지 확인하세요.'
+                    : '텍스트 추출 및 AI 분석은 성공했으나 성명 항목을 찾지 못했습니다.<br>'
+                      + 'PDF가 총기실탄 세부목록 양식인지 확인해 주세요.<br>'
+                      + '<b>AI 원본 응답:</b><br><pre style="white-space:pre-wrap;font-size:11px;">' + rawText.substring(0, 600) + '</pre>';
+                throw new Error(hint);
+            }
+
+            // 5. B01(PLAYER_MASTER) + B03(AMMO_LOGS_B03) 등록
+            const PLAYER_KEY = 'PLAYER_MASTER';
+            const LOG_KEY = 'AMMO_LOGS_B03';
+            let players = JSON.parse(localStorage.getItem(PLAYER_KEY) || '[]');
+            const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const today = `${yyyy}-${mm}-${dd}`;
+            const timeStr = now.toLocaleString();
+            const added = [], updated = [];
+
+            const gunTypeMap = {
+                '엽총':'엽총', '화약권총':'화약권총', '화약권총(32)':'화약권총(32)',
+                '화약소총':'화약소총', '공기권총':'공기권총', '공기소총':'공기소총'
+            };
+
+            parsed.forEach((row, i) => {
+                const name = (row['성명'] || '').trim();
+                if (!name) return;
+
+                const affiliation = (row['소속'] || '').trim();
+                const userBirth   = (row['생년월일'] || '').trim();
+                const gunType     = (row['총종'] || '').trim();
+                const gunName     = (row['명칭'] || '').trim();
+                const gunNumber   = (row['총번'] || '').trim();
+                const gunCaliber  = (row['구경'] || '').trim();
+                const ammo        = parseInt(row['실탄수량']) || 0;
+                const mappedGunType = gunTypeMap[gunType] || gunType || '화약권총';
+
+                const existIdx = players.findIndex(p =>
+                    p.userName === name && (!userBirth || p.userBirth === userBirth)
+                );
+                const playerData = {
+                    id: existIdx >= 0 ? players[existIdx].id : (Date.now() + i),
+                    barcode:    existIdx >= 0 ? (players[existIdx].barcode || '') : '',
+                    affiliation, userName: name, userBirth,
+                    gunType: mappedGunType, gunName, gunNumber, gunCaliber,
+                    contact: existIdx >= 0 ? (players[existIdx].contact || '') : '',
+                    status:  existIdx >= 0 ? (players[existIdx].status  || '출고') : '출고'
+                };
+                if (existIdx >= 0) { players[existIdx] = playerData; updated.push(name); }
+                else               { players.unshift(playerData);     added.push(name); }
+
+                // B03 탄종 매칭
+                let ammoType = '엽탄';
+                if (mappedGunType.includes('화약권총(32)')) ammoType = '32탄';
+                else if (mappedGunType.includes('화약권총') || mappedGunType.includes('화약소총')) ammoType = '22탄';
+
+                if (ammo > 0) {
+                    const bc = playerData.barcode;
+                    const uLogs = logs.filter(l => (bc && l.barcode===bc) || l.name===name);
+                    const lastCurr = uLogs.length > 0 ? (uLogs[uLogs.length-1].curr || 0) : 0;
+                    logs.push({
+                        id: Date.now() + i + 1000, date: today, time: timeStr,
+                        barcode: bc, name, type: ammoType,
+                        base: lastCurr, out: 0, in: ammo, curr: lastCurr + ammo
+                    });
+                }
+            });
+
+            localStorage.setItem(PLAYER_KEY, JSON.stringify(players));
+            localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+
+            // 6. 결과 표시
+            let tbl = `<table class="ai-result-table"><thead><tr>
+                <th>소속</th><th>성명</th><th>생년월일</th><th>총종</th>
+                <th>명칭</th><th>총번</th><th>구경</th><th>실탄수량</th><th>상태</th>
+            </tr></thead><tbody>`;
+            parsed.forEach(row => {
+                const n = (row['성명']||'').trim(); if(!n) return;
+                const isUpd = updated.includes(n);
+                tbl += `<tr>
+                    <td>${row['소속']||''}</td><td><b>${n}</b></td>
+                    <td>${row['생년월일']||''}</td><td>${row['총종']||''}</td>
+                    <td>${row['명칭']||''}</td><td>${row['총번']||''}</td>
+                    <td>${row['구경']||''}</td><td>${row['실탄수량']||0}</td>
+                    <td style="color:${isUpd?'#d97706':'#166534'}">${isUpd?'수정':'신규'}</td>
+                </tr>`;
+            });
+            tbl += '</tbody></table>';
+
+            this.setAiStatus('success',
+                `✅ AI 등록 완료! 신규 <b>${added.length}명</b> / 수정 <b>${updated.length}명</b><br>
+                <small>B01(선수정보) 및 B03(실탄로그)에 저장되었습니다.</small>${tbl}`);
+
+        } catch (err) {
+            console.error(err);
+            this.setAiStatus('error', `❌ 오류 발생: ${err.message}`);
+        } finally {
+            document.getElementById('aiBtn').disabled = false;
+        }
+    }
+
+};
+
+window.addEventListener('DOMContentLoaded', async () => {
+    await App.init();
+});
+
+</script>
+</body>
+</html>

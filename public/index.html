@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사격장 통합 관리 시스템 - 보안 인증</title>
+    <!-- 구글 폰트 및 Pretendard 웹폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --bg-card: rgba(18, 24, 38, 0.85);
+            --border-card: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            /* Blue Accent */
+            --cyan-start: #38bdf8;
+            --blue-end: #2563eb;
+            --blue-glow: rgba(56, 189, 248, 0.3);
+            --blue-border: rgba(56, 189, 248, 0.4);
+
+            /* Error Accent */
+            --error-color: #f43f5e;
+            --error-glow: rgba(244, 63, 94, 0.3);
+
+            /* Success Accent */
+            --success-color: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Noto Sans KR', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(37, 99, 235, 0.18), transparent 45%),
+                radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.15), transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.85), transparent 100%);
+        }
+
+        /* 미세 배경 그리드 */
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 상단 헤더 바 */
+        .top-header {
+            width: 100%;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .system-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        .logo-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+
+        .logo-title {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #f1f5f9;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            padding: 5px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .clock-display {
+            font-family: 'Plus Jakarta Sans', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* 메인 로그인 박스 영역 */
+        .auth-container {
+            position: relative;
+            z-index: 10;
+            max-width: 460px;
+            width: 90%;
+            margin: auto 0;
+            padding: 10px 0;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            border: 1px solid var(--border-card);
+            padding: 44px 38px;
+            box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .auth-card.shake {
+            animation: shake 0.45s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+
+        .lock-badge {
+            width: 76px;
+            height: 76px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(37, 99, 235, 0.25));
+            border: 1px solid var(--blue-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px -5px var(--blue-glow);
+            transition: all 0.3s ease;
+        }
+
+        .lock-badge svg {
+            width: 38px;
+            height: 38px;
+            fill: #38bdf8;
+            transition: transform 0.3s ease;
+        }
+
+        .auth-card:hover .lock-badge {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px -5px rgba(56, 189, 248, 0.45);
+        }
+
+        .auth-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        /* 입력 폼 */
+        .auth-form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-group {
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            width: 20px;
+            height: 20px;
+            fill: #64748b;
+            pointer-events: none;
+            transition: fill 0.2s ease;
+        }
+
+        .password-input {
+            width: 100%;
+            height: 56px;
+            padding: 0 50px 0 50px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 16px;
+            font-family: inherit;
+            letter-spacing: 2px;
+            outline: none;
+            transition: all 0.25s ease;
+            user-select: text;
+        }
+
+        .password-input::placeholder {
+            color: #64748b;
+            font-size: 14px;
+            letter-spacing: normal;
+        }
+
+        .password-input:focus {
+            border-color: #38bdf8;
+            background: rgba(15, 23, 42, 0.95);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+        }
+
+        .password-input:focus + .input-icon,
+        .input-group:focus-within .input-icon {
+            fill: #38bdf8;
+        }
+
+        .password-input.error {
+            border-color: var(--error-color);
+            box-shadow: 0 0 0 4px var(--error-glow);
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            color: #cbd5e1;
+        }
+
+        .toggle-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* 메시지 및 캡스락 경고 */
+        .msg-box {
+            min-height: 22px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .msg-box.error {
+            color: #fb7185;
+        }
+
+        .msg-box.success {
+            color: #34d399;
+        }
+
+        .caps-warning {
+            display: none;
+            font-size: 12px;
+            color: #f59e0b;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        /* 제출 버튼 */
+        .btn-submit {
+            width: 100%;
+            height: 54px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.5);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 6px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -4px rgba(56, 189, 248, 0.6);
+            background: linear-gradient(135deg, #0ea5e9, #1d4ed8);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            transition: transform 0.25s ease;
+        }
+
+        .btn-submit:hover svg {
+            transform: translateX(4px);
+        }
+
+        /* 하단 푸터 */
+        .bottom-footer {
+            width: 100%;
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            z-index: 10;
+        }
+
+        @media (max-width: 600px) {
+            .top-header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .auth-card {
+                padding: 32px 24px;
+            }
+
+            .auth-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <!-- 상단 헤더 -->
+    <header class="top-header">
+        <div class="system-logo">
+            <div class="logo-icon">
+                <!-- 사격/과녁 아이콘 -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                </svg>
+            </div>
+            <div class="logo-title">사격장 통합 운영 시스템</div>
+        </div>
+
+        <div class="header-info">
+            <div class="status-badge">
+                <span>🔒 관리자 인증 필요</span>
+            </div>
+            <div class="clock-display" id="liveClock">0000.00.00 00:00:00</div>
+        </div>
+    </header>
+
+    <!-- 중앙 로그인 카드 -->
+    <main class="auth-container">
+        <div class="auth-card" id="authCard">
+            <div class="lock-badge" id="lockBadge">
+                <svg viewBox="0 0 24 24" id="lockIcon">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+            </div>
+
+            <h1 class="auth-title">관리자 보안 인증</h1>
+            <p class="auth-subtitle">통합 시스템에 접속하려면 관리자 암호를 입력하세요.</p>
+
+            <form class="auth-form" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    </svg>
+                    <input 
+                        type="password" 
+                        id="passwordInput" 
+                        class="password-input" 
+                        placeholder="암호 입력" 
+                        autocomplete="current-password"
+                        autofocus
+                        required
+                        oninput="clearError()"
+                        onkeyup="checkCapsLock(event)"
+                    >
+                    <button type="button" class="toggle-btn" onclick="togglePasswordVisibility()" title="암호 보기/숨기기">
+                        <svg viewBox="0 0 24 24" id="eyeIcon">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="caps-warning" id="capsWarning">
+                    ⚠️ Caps Lock이 켜져 있습니다
+                </div>
+
+                <div class="msg-box" id="msgBox"></div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span>시스템 접속하기</span>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- 하단 푸터 -->
+    <footer class="bottom-footer">
+        © 2026 사격장 통합 관리 시스템 | Security Portal Gateway
+    </footer>
+
+    <script>
+        // 정답 암호
+        const CORRECT_PASSWORD = "skwn" + "5857"; // skwn5857
+        const TARGET_URL = "AAABBB.html";
+
+        // 시계 업데이트
+        function updateClock() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const clockEl = document.getElementById('liveClock');
+            if (clockEl) {
+                clockEl.textContent = `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 암호 표시 / 숨기기 토글
+        function togglePasswordVisibility() {
+            const input = document.getElementById('passwordInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeIcon.innerHTML = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+            } else {
+                input.type = 'password';
+                eyeIcon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+            }
+        }
+
+        // CapsLock 감지
+        function checkCapsLock(e) {
+            const capsWarning = document.getElementById('capsWarning');
+            if (e.getModifierState && e.getModifierState('CapsLock')) {
+                capsWarning.style.display = 'flex';
+            } else {
+                capsWarning.style.display = 'none';
+            }
+        }
+
+        // 오류 상태 초기화
+        function clearError() {
+            const input = document.getElementById('passwordInput');
+            const msgBox = document.getElementById('msgBox');
+            input.classList.remove('error');
+            msgBox.className = 'msg-box';
+            msgBox.textContent = '';
+        }
+
+        // 로그인 처리
+        function handleLogin(event) {
+            event.preventDefault();
+            const input = document.getElementById('passwordInput');
+            const authCard = document.getElementById('authCard');
+            const msgBox = document.getElementById('msgBox');
+            const submitBtn = document.getElementById('submitBtn');
+            const entered = input.value.trim();
+
+            if (entered === CORRECT_PASSWORD) {
+                // 인증 성공
+                msgBox.className = 'msg-box success';
+                msgBox.innerHTML = '✓ 인증 성공! 시스템으로 이동합니다...';
+                input.disabled = true;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>접속 중...</span>';
+
+                setTimeout(() => {
+                    window.location.href = TARGET_URL;
+                }, 350);
+            } else {
+                // 인증 실패
+                input.classList.add('error');
+                msgBox.className = 'msg-box error';
+                msgBox.innerHTML = '⚠️ 암호가 올바르지 않습니다. 다시 입력해주세요.';
+
+                // 진동 애니메이션
+                authCard.classList.remove('shake');
+                void authCard.offsetWidth; // 리플로우 강제 트리거
+                authCard.classList.add('shake');
+
+                input.select();
+                input.focus();
+            }
+        }
+    </script>
+</body>
+</html>

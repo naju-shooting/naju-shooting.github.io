@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관내사격장 통합 관리(AAA)</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Pretendard', system-ui, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 헤더 */
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            margin: 0;
+            font-size: 1.3em;
+            letter-spacing: -1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .clock {
+            font-family: monospace;
+            font-size: 1.1em;
+            color: #94a3b8;
+            font-weight: bold;
+        }
+
+        .btn-util {
+            padding: 8px 15px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* 메인 그리드 (2행 6열 구조) */
+        .main-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: 80px 1fr;
+            gap: 15px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* 1행: 버튼 스타일 */
+        .nav-btn {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-weight: 800;
+            color: var(--primary);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .nav-btn:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* 2행: 카드 섹션 스타일 */
+        .grid-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        /* 인원 현황표 스타일 */
+        .status-table {
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+        }
+
+        .status-table th,
+        .status-table td {
+            border: 1px solid var(--border);
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .status-table th {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 800;
+        }
+
+        .col-title {
+            background: #f8fafc !important;
+            font-size: 11px !important;
+            color: #64748b;
+        }
+
+        .total-row {
+            background: #eff6ff;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .current-val {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* 자동 저장 메모판 */
+        .memo-area {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 15px;
+            resize: none;
+            outline: none;
+            font-size: 14px;
+            color: #475569;
+            box-sizing: border-box;
+            background: #ffffff;
+            line-height: 1.6;
+        }
+
+        .memo-area:focus {
+            background: #fdfdfd;
+        }
+
+        .footer {
+            padding: 10px 30px;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            border-top: 1px solid var(--border);
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <h1>관내사격장 통합 관리</h1>
+        </div>
+        <div class="header-right">
+            <div class="clock" id="liveClock">0000-00-00 00:00:00</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-util" style="background:var(--success)" onclick="exportData()">💾 전체데이터 USB
+                    백업</button>
+                <button class="btn-util" style="background:var(--warning)"
+                    onclick="document.getElementById('fileInput').click()">📂 데이터 복원</button>
+                <input type="file" id="fileInput" hidden accept=".json" onchange="importData(event)">
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- 1행: 메뉴 이동 버튼 -->
+        <button class="nav-btn" onclick="window.open('A01.html','_blank')">선수등록관리</button>
+        <button class="nav-btn" onclick="window.open('A02.html','_blank')">일일사용총기관리</button>
+        <button class="nav-btn" onclick="window.open('A03.html','_blank')">일시관리전환총기</button>
+        <button class="nav-btn" onclick="window.open('A04.html','_blank')">탄약수불관리</button>
+        <button class="nav-btn" onclick="window.open('A05.html','_blank')">탄약고 문서관리대장</button>
+        <button class="nav-btn" onclick="window.open('A06.html','_blank')">총탄관리일지</button>
+
+        <!-- 2행: 현황 및 입력 메모판 -->
+        <div class="grid-item">
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width:35%">총 종</th>
+                        <th colspan="2">인원 현황</th>
+                    </tr>
+                    <tr>
+                        <th class="col-title">전체</th>
+                        <th class="col-title">현재</th>
+                    </tr>
+                </thead>
+                <tbody id="stat-body">
+                    <!-- 스크립트에서 자동 생성 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2행 2열~6열 : 메모장 -->
+        <div class="grid-item"><textarea class="memo-area" id="memo-8" placeholder="입력하세요..."
+                oninput="saveMemo(8, this.value)"></textarea></div>
+        <div class="grid-item"><textarea class="memo-area" id="memo-9" placeholder="입력하세요..."
+                oninput="saveMemo(9, this.value)"></textarea></div>
+        <div class="grid-item"><textarea class="memo-area" id="memo-10" placeholder="입력하세요..."
+                oninput="saveMemo(10, this.value)"></textarea></div>
+        <div class="grid-item"><textarea class="memo-area" id="memo-11" placeholder="입력하세요..."
+                oninput="saveMemo(11, this.value)"></textarea></div>
+        <div class="grid-item"><textarea class="memo-area" id="memo-12" placeholder="입력하세요..."
+                oninput="saveMemo(12, this.value)"></textarea></div>
+    </div>
+
+    <div class="footer">
+        현재 인원 = 전체 등록 인원(A01) - 일시사용(출고상태) 등록 인원(A03)
+    </div>
+
+    <script>
+        // 키 명칭을 다른 페이지(A01~A06)와 통일합니다.
+        const KEYS = {
+            MASTER: 'PRO_PLAYER_MASTER_V2', // A01: 마스터 데이터
+            LOGS: 'DATA_A02_LOGS',          // A02: 출입 기록 (필요시 사용)
+            TEMP: 'PRO_TEMP_GUNS',          // A03: 일시전환 데이터
+            MEMO_PREFIX: 'SAVE_MEMO_'
+        };
+
+        window.onload = () => {
+            // 저장된 메모 로드
+            [8, 9, 10, 11, 12].forEach(i => {
+                const saved = localStorage.getItem(KEYS.MEMO_PREFIX + i);
+                const el = document.getElementById('memo-' + i);
+                if (saved && el) el.value = saved;
+            });
+
+            updateStatistics();
+            updateClock();
+            setInterval(updateClock, 1000);
+            setInterval(updateStatistics, 3000); // 3초마다 현황판 자동 갱신
+        };
+
+        // 메모 저장 함수 (입력란에 oninput="saveMemo(8, this.value)" 형태로 사용)
+        function saveMemo(idx, val) {
+            localStorage.setItem(KEYS.MEMO_PREFIX + idx, val);
+        }
+
+        function updateStatistics() {
+            // 데이터 로드 (A01 마스터, A03 일시전환)
+            const masterList = JSON.parse(localStorage.getItem('PRO_PLAYER_MASTER_V2') || '[]');
+            const tempList = JSON.parse(localStorage.getItem('PRO_TEMP_GUNS') || '[]');
+
+            // 1. 카테고리 정의 (A03의 gunType과 100% 일치해야 함)
+            const categories = ['엽총', '화약권총', '화약권총(32)', '화약소총', '공기권총', '공기소총'];
+            const stats = {};
+            categories.forEach(cat => stats[cat] = { total: 0, current: 0 });
+
+            // 2. 전체 인원(A01 마스터) 계산
+            masterList.forEach(p => {
+                let type = (p.gunType || p.type || "").trim();
+                if (type === '화약권총32' || type === '화약권총(32)' || p.gunCaliber === '3.2' || (p.gunCaliber && String(p.gunCaliber).includes('3.2'))) {
+                    const hasGunInfo = String(p.gunType || '').trim() !== '' && String(p.gunNumber || '').trim() !== '';
+                    if (hasGunInfo) {
+                        type = '화약권총(32)';
+                    } else {
+                        type = '';
+                    }
+                }
+                if (stats[type]) {
+                    stats[type].total++;
+                }
+            });
+
+            // 3. 현재 사격장 내 인원 초기화 (전체 인원에서 시작)
+            categories.forEach(cat => stats[cat].current = stats[cat].total);
+
+            // 4. A03(일시전환) 목록 기반 실시간 차감
+            tempList.forEach(p => {
+                let type = (p.gunType || p.type || "").trim();
+                if (type === '화약권총32') type = '화약권총(32)';
+
+                // [출고 판정 조건]
+                // 1. 상태가 '출고'이거나 '대기'인 경우
+                // 2. 입고시간(inTime)이 기록되지 않았거나 "-" 인 경우
+                const isCurrentlyOut = (p.status === '출고' || p.status === '대기') &&
+                    (!p.inTime || p.inTime === "-" || p.inTime === "");
+
+                // 완료(입고완료)되지 않은 데이터만 차감 대상으로 선정
+                if (isCurrentlyOut && !p.isDone) {
+                    if (stats[type]) {
+                        stats[type].current--; // 출고 상태이므로 사격장 내 인원에서 1명 제외
+                    }
+                }
+            });
+
+            // 5. 테이블 업데이트
+            const tbody = document.getElementById('stat-body');
+            if (!tbody) return;
+
+            let html = '';
+            let totalAll = 0;
+            let totalCurr = 0;
+
+            categories.forEach(cat => {
+                const safeCurrent = Math.max(0, stats[cat].current);
+
+                // 디자인: 인원이 있으면 파란색, 없으면 흐리게
+                const colorStyle = safeCurrent > 0 ? 'color: #3b82f6; font-weight: bold;' : 'color: #cbd5e1;';
+
+                html += `<tr>
+            <td style="font-weight: 600; color: #1e293b;">${cat}</td>
+            <td style="font-weight: 500;">${stats[cat].total}</td>
+            <td class="current-val" style="${colorStyle}">${safeCurrent}</td>
+        </tr>`;
+
+                totalAll += stats[cat].total;
+                totalCurr += safeCurrent;
+            });
+
+            // 합계 표시
+            html += `<tr class="total-row" style="background: #f8fafc; border-top: 2px solid #e2e8f0;">
+        <td style="font-weight: 800; color: #1e293b;">합계</td>
+        <td style="font-weight: 800;">${totalAll}</td>
+        <td class="current-val" style="font-weight: 800; color: #3b82f6;">${totalCurr}</td>
+    </tr>`;
+
+            tbody.innerHTML = html;
+        }
+
+
+
+
+        function updateClock() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const time = now.toLocaleTimeString('ko-KR', { hour12: false });
+            const clockEl = document.getElementById('liveClock');
+            if (clockEl) clockEl.textContent = `${year}-${month}-${day} ${time}`;
+        }
+
+        // [전체 데이터 백업] 관내용관리 전체 데이터 백업 (바탕화면 > 공유폴더(사격장) > 관내용관리 > USB백업파일)
+        async function exportData() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mi = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            const dateTag = `${yyyy}${mm}${dd}`;
+            const timeTag = `${hh}${mi}${ss}`;
+            const fileName = `AAA_TOTAL_ARCHIVE_${dateTag}_${timeTag}.json`;
+
+            const backup = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                backup[key] = localStorage.getItem(key);
+            }
+            const dataStr = JSON.stringify(backup, null, 2);
+
+            // Chrome/Edge File System Access API (id 및 startIn으로 폴더 위치 지정/기억)
+            if (window.showSaveFilePicker) {
+                try {
+                    const fileHandle = await window.showSaveFilePicker({
+                        suggestedName: fileName,
+                        id: 'AAA_USB_BACKUP_FOLDER',
+                        startIn: 'desktop',
+                        types: [{
+                            description: 'JSON 백업 파일',
+                            accept: { 'application/json': ['.json'] }
+                        }]
+                    });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(dataStr);
+                    await writable.close();
+                    alert(`관내용관리 백업 완료!\n\n• 파일명: ${fileName}\n• 저장 위치:\n바탕화면 > 공유폴더(사격장) > 관내용관리 > USB백업파일`);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        alert('저장 오류: ' + err.message);
+                    }
+                }
+            } else {
+                // 다운로드 폴더 fallback
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+                alert(`백업 파일이 생성되었습니다.\n\n• 파일명: ${fileName}\n\n※ 백업 파일 저장 경로:\n바탕화면 > 공유폴더(사격장) > 관내용관리 > USB백업파일\n(C:\\Users\\BS2308\\Desktop\\공유폴더(사격장)\\관내용관리\\USB백업파일)`);
+            }
+        }
+
+        // [전체 데이터 복원]
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm("⚠️ 데이터를 복원하시겠습니까?\n기존에 입력된 모든 데이터가 삭제되고 백업 시점으로 대체됩니다.")) {
+                        localStorage.clear();
+                        Object.keys(data).forEach(key => localStorage.setItem(key, data[key]));
+                        alert("데이터 복원이 완료되었습니다.");
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert("파일 형식이 잘못되었습니다.");
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+
+</html>

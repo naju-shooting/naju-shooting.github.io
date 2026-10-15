@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문서관리대장(A05)</title>
+
+<style>
+
+body{
+    font-family:'Malgun Gothic',sans-serif;
+    margin:30px;
+    background:#f8f9fb;
+    color:#2f3542;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.control-panel{
+    background:white;
+    border:1px solid #dfe4ea;
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.search-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.input-group{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+input[type="text"],
+input[type="date"],
+select{
+    padding:9px;
+    border:1px solid #ced6e0;
+    border-radius:5px;
+    outline:none;
+}
+
+input[type="text"]{
+    width:240px;
+}
+
+.btn-search,
+.btn-new,
+.btn-reg,
+.btn-can{
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.btn-search{
+    background:#2f3542;
+    color:white;
+    padding:9px 20px;
+}
+
+.btn-search:hover{
+    background:#57606f;
+}
+
+.filter-buttons{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.filter-btn{
+    padding:8px 16px;
+    border-radius:20px;
+    border:1px solid #ced6e0;
+    background:white;
+    cursor:pointer;
+}
+
+.filter-btn.active{
+    background:#2f3542;
+    color:white;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+th, td{
+    border:1px solid #dfe4ea;
+    padding:12px;
+    text-align:center;
+    font-size:14px;
+    vertical-align:top;
+}
+
+th{
+    background:#f1f2f6;
+}
+
+.title-cell{
+    text-align:left;
+}
+
+.badge{
+    color:white;
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.bg-일시관리{background:#3498db;}
+.bg-영구관리{background:#27ae60;}
+.bg-양도양수{background:#e67e22;}
+.bg-소지허가갱신{background:#9b59b6;}
+
+.pdf-link{
+    color:#2980b9;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.pdf-link:hover{
+    color:#c0392b;
+}
+
+.add-link{
+    color:#8e44ad;
+    font-size:12px;
+    cursor:pointer;
+    display:block;
+    margin-top:4px;
+}
+
+.btn-edit{
+    background:#f1c40f;
+    border:none;
+    padding:5px 10px;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+.btn-add{
+    background:#3498db;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    border-radius:4px;
+    cursor:pointer;
+    margin-left:4px;
+}
+
+.btn-del{
+    background:#e74c3c;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    border-radius:4px;
+    cursor:pointer;
+    margin-left:4px;
+}
+
+.footer-actions{
+    margin-top:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.btn-new{
+    background:#27ae60;
+    color:white;
+    padding:12px 22px;
+}
+
+.pagination{
+    display:flex;
+    gap:5px;
+}
+
+.page-btn{
+    padding:6px 12px;
+    border:1px solid #ced6e0;
+    background:white;
+    cursor:pointer;
+}
+
+.page-btn.active{
+    background:#2f3542;
+    color:white;
+}
+
+.modal-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.modal{
+    background:white;
+    width:430px;
+    border-radius:10px;
+    padding:25px;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    box-sizing:border-box;
+}
+
+.file-box{
+    background:#f1f2f6;
+    padding:10px;
+    border-radius:5px;
+    margin-top:8px;
+    font-size:12px;
+}
+
+.btn-group{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+.btn-reg{
+    flex:1;
+    background:#2f3542;
+    color:white;
+    padding:12px;
+}
+
+.btn-can{
+    flex:1;
+    background:#f1f2f6;
+    padding:12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>📦 문서관리대장</h2>
+
+<div class="control-panel">
+
+    <div class="search-row">
+
+        <div class="input-group">
+            <label>조회기간</label>
+            <input type="date" id="startDate">
+            <span>~</span>
+            <input type="date" id="endDate">
+        </div>
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="제목 또는 성명 검색"
+        >
+
+        <button class="btn-search" id="searchBtn">
+            조회 및 검색
+        </button>
+
+    </div>
+
+    <div class="filter-buttons">
+
+        <button class="filter-btn active" data-cat="전체">전체보기</button>
+        <button class="filter-btn" data-cat="일시관리">일시관리</button>
+        <button class="filter-btn" data-cat="영구관리">영구관리</button>
+        <button class="filter-btn" data-cat="양도양수">양도양수</button>
+        <button class="filter-btn" data-cat="소지허가갱신">소지허가갱신</button>
+
+    </div>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+    <th width="60">번호</th>
+    <th width="130">문서구분</th>
+    <th>제목</th>
+    <th width="120">일시</th>
+    <th width="100">성명</th>
+    <th width="120">관할서</th>
+    <th width="180">처리</th>
+</tr>
+</thead>
+
+<tbody id="docTableBody"></tbody>
+
+</table>
+
+<div class="footer-actions">
+
+    <div class="pagination" id="pagination"></div>
+
+    <button class="btn-new" id="newBtn">
+        + 문서 등록하기
+    </button>
+
+</div>
+
+<!-- 메인 모달 -->
+<div class="modal-overlay" id="modalOverlay">
+
+    <div class="modal">
+
+        <h3 id="modalTitle">신규문서등록</h3>
+
+        <div class="form-group">
+            <label>문서구분</label>
+
+            <select id="newCategory">
+                <option value="">선택</option>
+                <option value="일시관리">일시관리</option>
+                <option value="영구관리">영구관리</option>
+                <option value="양도양수">양도양수</option>
+                <option value="소지허가갱신">소지허가갱신</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>제목</label>
+            <input type="text" id="newTitle">
+        </div>
+
+        <div class="form-group">
+            <label>성명</label>
+            <input type="text" id="newName">
+        </div>
+
+        <div class="form-group">
+            <label>관할서</label>
+            <input type="text" id="newOffice">
+        </div>
+
+        <div class="form-group">
+
+            <label>PDF 첨부</label>
+
+            <input type="file" id="newFile" accept=".pdf">
+
+            <div class="file-box" id="fileName">
+                선택된 파일 없음
+            </div>
+
+        </div>
+
+        <div class="btn-group">
+
+            <button class="btn-reg" id="submitBtn">
+                등록하기
+            </button>
+
+            <button class="btn-can" id="cancelBtn">
+                취소
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 추가문서 모달 -->
+<div class="modal-overlay" id="addModalOverlay">
+
+    <div class="modal">
+
+        <h3>추가문서 등록</h3>
+
+        <div class="form-group">
+            <label>추가내용 제목</label>
+            <input type="text" id="addTitle">
+        </div>
+
+        <div class="form-group">
+
+            <label>PDF 첨부</label>
+
+            <input type="file" id="addFile" accept=".pdf">
+
+            <div class="file-box" id="addFileName">
+                선택된 파일 없음
+            </div>
+
+        </div>
+
+        <div class="btn-group">
+
+            <button class="btn-reg" id="addSubmitBtn">
+                추가등록
+            </button>
+
+            <button class="btn-can" id="addCancelBtn">
+                취소
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const App = {
+
+    dbName:'ammoDB',
+    storeName:'documents',
+
+    db:null,
+
+    allData:[],
+
+    currentPage:1,
+
+    rowsPerPage:15,
+
+    currentCategory:'전체',
+
+    targetId:null,
+
+    tempFile:null,
+
+    addTargetId:null,
+
+    addTempFile:null,
+
+    async init(){
+
+        await this.initDB();
+
+        await this.loadData();
+
+        this.bindEvents();
+
+        this.renderTable(1);
+
+    },
+
+    bindEvents(){
+
+        document.getElementById('searchBtn')
+            .addEventListener('click', () => {
+
+                this.renderTable(1);
+
+            });
+
+        document.getElementById('searchInput')
+            .addEventListener('keyup', (e) => {
+
+                if(e.key === 'Enter'){
+
+                    this.renderTable(1);
+
+                }
+
+            });
+
+        document.querySelectorAll('.filter-btn')
+            .forEach(btn => {
+
+                btn.addEventListener('click', () => {
+
+                    document.querySelectorAll('.filter-btn')
+                        .forEach(b => b.classList.remove('active'));
+
+                    btn.classList.add('active');
+
+                    this.currentCategory = btn.dataset.cat;
+
+                    this.renderTable(1);
+
+                });
+
+            });
+
+        document.getElementById('newBtn')
+            .addEventListener('click', () => {
+
+                this.openModal();
+
+            });
+
+        document.getElementById('cancelBtn')
+            .addEventListener('click', () => {
+
+                this.closeModal();
+
+            });
+
+        document.getElementById('submitBtn')
+            .addEventListener('click', async () => {
+
+                await this.saveDoc();
+
+            });
+
+        document.getElementById('newFile')
+            .addEventListener('change', (e) => {
+
+                this.handleFile(e);
+
+            });
+
+        document.getElementById('addFile')
+            .addEventListener('change', (e) => {
+
+                this.handleAddFile(e);
+
+            });
+
+        document.getElementById('addCancelBtn')
+            .addEventListener('click', () => {
+
+                document.getElementById('addModalOverlay')
+                    .style.display = 'none';
+
+            });
+
+        document.getElementById('addSubmitBtn')
+            .addEventListener('click', async () => {
+
+                await this.saveAddition();
+
+            });
+
+    },
+
+    async initDB(){
+
+        return new Promise((resolve,reject)=>{
+
+            const request = indexedDB.open(this.dbName,1);
+
+            request.onupgradeneeded = (e)=>{
+
+                const db = e.target.result;
+
+                if(!db.objectStoreNames.contains(this.storeName)){
+
+                    db.createObjectStore(this.storeName,{
+                        keyPath:'id'
+                    });
+
+                }
+
+            };
+
+            request.onsuccess = (e)=>{
+
+                this.db = e.target.result;
+
+                resolve();
+
+            };
+
+            request.onerror = ()=>reject();
+
+        });
+
+    },
+
+    async loadData(){
+
+        return new Promise(resolve=>{
+
+            const tx = this.db.transaction(this.storeName,'readonly');
+
+            const store = tx.objectStore(this.storeName);
+
+            const request = store.getAll();
+
+            request.onsuccess = ()=>{
+
+                this.allData = request.result || [];
+
+                resolve();
+
+            };
+
+        });
+
+    },
+
+    async saveToDB(data){
+
+        return new Promise(resolve=>{
+
+            const tx = this.db.transaction(this.storeName,'readwrite');
+
+            tx.objectStore(this.storeName).put(data);
+
+            tx.oncomplete = ()=>resolve();
+
+        });
+
+    },
+
+    async deleteFromDB(id){
+
+        return new Promise(resolve=>{
+
+            const tx = this.db.transaction(this.storeName,'readwrite');
+
+            tx.objectStore(this.storeName).delete(id);
+
+            tx.oncomplete = ()=>resolve();
+
+        });
+
+    },
+
+    renderTable(page){
+
+        this.currentPage = page;
+
+        const tbody = document.getElementById('docTableBody');
+
+        tbody.innerHTML = '';
+
+        const keyword =
+            document.getElementById('searchInput')
+            .value
+            .toLowerCase();
+
+        const startDate =
+            document.getElementById('startDate').value;
+
+        const endDate =
+            document.getElementById('endDate').value;
+
+        const filtered = this.allData.filter(item=>{
+
+            const matchCategory =
+                this.currentCategory === '전체'
+                || item.category === this.currentCategory;
+
+            const matchSearch =
+                item.title.toLowerCase().includes(keyword)
+                || item.name.toLowerCase().includes(keyword);
+
+            let matchDate = true;
+
+            if(startDate){
+
+                matchDate =
+                    matchDate &&
+                    new Date(item.date) >= new Date(startDate);
+
+            }
+
+            if(endDate){
+
+                matchDate =
+                    matchDate &&
+                    new Date(item.date) <= new Date(endDate);
+
+            }
+
+            return matchCategory && matchSearch && matchDate;
+
+        });
+
+        if(filtered.length === 0){
+
+            const tr = document.createElement('tr');
+
+            const td = document.createElement('td');
+
+            td.colSpan = 7;
+
+            td.textContent = '조회 결과 없음';
+
+            td.style.padding = '30px';
+
+            tr.appendChild(td);
+
+            tbody.appendChild(tr);
+
+            return;
+
+        }
+
+        const start =
+            (page - 1) * this.rowsPerPage;
+
+        const pageData =
+            filtered.slice(start,start + this.rowsPerPage);
+
+        pageData.forEach((item,index)=>{
+
+            const tr = document.createElement('tr');
+
+            // 번호
+            const td1 = document.createElement('td');
+            td1.textContent = start + index + 1;
+
+            // 구분
+            const td2 = document.createElement('td');
+
+            const badge = document.createElement('span');
+
+            badge.className =
+                `badge bg-${item.category}`;
+
+            badge.textContent = item.category;
+
+            td2.appendChild(badge);
+
+            // 제목
+            const td3 = document.createElement('td');
+
+            td3.className = 'title-cell';
+
+            if(item.fileData){
+
+                const link = document.createElement('span');
+
+                link.className = 'pdf-link';
+
+                link.textContent = item.title + ' 📎';
+
+                link.addEventListener('click', ()=>{
+
+                    this.openPDF(item.fileData);
+
+                });
+
+                td3.appendChild(link);
+
+            }else{
+
+                td3.textContent = item.title;
+
+            }
+
+            // 추가문서
+            if(item.additions && item.additions.length > 0){
+
+                item.additions.forEach((add,idx)=>{
+
+                    const addLink =
+                        document.createElement('span');
+
+                    addLink.className = 'add-link';
+
+                    addLink.textContent =
+                        `└ 추가${idx+1}: ${add.title} 📎`;
+
+                    addLink.addEventListener('click',()=>{
+
+                        this.openPDF(add.fileData);
+
+                    });
+
+                    td3.appendChild(addLink);
+
+                });
+
+            }
+
+            // 날짜
+            const td4 = document.createElement('td');
+            td4.textContent = item.date;
+
+            // 이름
+            const td5 = document.createElement('td');
+            td5.textContent = item.name;
+
+            // 관할서
+            const td6 = document.createElement('td');
+            td6.textContent = item.office;
+
+            // 처리
+            const td7 = document.createElement('td');
+
+            const editBtn =
+                document.createElement('button');
+
+            editBtn.className = 'btn-edit';
+
+            editBtn.textContent = '수정';
+
+            editBtn.addEventListener('click',()=>{
+
+                this.editItem(item.id);
+
+            });
+
+            const addBtn =
+                document.createElement('button');
+
+            addBtn.className = 'btn-add';
+
+            addBtn.textContent = '추가';
+
+            addBtn.addEventListener('click',()=>{
+
+                this.openAddModal(item.id);
+
+            });
+
+            const delBtn =
+                document.createElement('button');
+
+            delBtn.className = 'btn-del';
+
+            delBtn.textContent = '삭제';
+
+            delBtn.addEventListener('click', async ()=>{
+
+                if(confirm('삭제하시겠습니까?')){
+
+                    await this.deleteItem(item.id);
+
+                }
+
+            });
+
+            td7.appendChild(editBtn);
+            td7.appendChild(delBtn);
+            td7.appendChild(addBtn);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+            tr.appendChild(td5);
+            tr.appendChild(td6);
+            tr.appendChild(td7);
+
+            tbody.appendChild(tr);
+
+        });
+
+        this.renderPagination(filtered.length);
+
+    },
+
+    renderPagination(totalRows){
+
+        const pagination =
+            document.getElementById('pagination');
+
+        pagination.innerHTML = '';
+
+        const totalPage =
+            Math.ceil(totalRows / this.rowsPerPage) || 1;
+
+        for(let i=1; i<=totalPage; i++){
+
+            const btn =
+                document.createElement('button');
+
+            btn.className =
+                `page-btn ${i===this.currentPage?'active':''}`;
+
+            btn.textContent = i;
+
+            btn.addEventListener('click',()=>{
+
+                this.renderTable(i);
+
+            });
+
+            pagination.appendChild(btn);
+
+        }
+
+    },
+
+    async saveDoc(){
+
+        const category =
+            document.getElementById('newCategory').value;
+
+        const title =
+            document.getElementById('newTitle').value.trim();
+
+        const name =
+            document.getElementById('newName').value.trim();
+
+        const office =
+            document.getElementById('newOffice').value.trim();
+
+        if(!category || !title || !name || !office){
+
+            alert('필수항목 입력');
+
+            return;
+
+        }
+
+        const today = new Date();
+
+        const date =
+            today.getFullYear() + '-' +
+            String(today.getMonth()+1).padStart(2,'0') + '-' +
+            String(today.getDate()).padStart(2,'0');
+
+        if(this.targetId){
+
+            const index =
+                this.allData.findIndex(x=>x.id===this.targetId);
+
+            this.allData[index].category = category;
+            this.allData[index].title = title;
+            this.allData[index].name = name;
+            this.allData[index].office = office;
+
+            if(this.tempFile){
+
+                this.allData[index].fileData =
+                    this.tempFile;
+
+            }
+
+            await this.saveToDB(this.allData[index]);
+
+            alert('수정 완료');
+
+        }else{
+
+            const newDoc = {
+
+                id:Date.now(),
+
+                category,
+
+                title,
+
+                name,
+
+                office,
+
+                date,
+
+                fileData:this.tempFile,
+
+                additions:[]
+
+            };
+
+            this.allData.unshift(newDoc);
+
+            await this.saveToDB(newDoc);
+
+            alert('등록 완료');
+
+        }
+
+        this.closeModal();
+
+        this.renderTable(1);
+
+    },
+
+    async saveAddition(){
+
+        const title =
+            document.getElementById('addTitle')
+            .value
+            .trim();
+
+        if(!title){
+
+            alert('추가제목 입력');
+
+            return;
+
+        }
+
+        if(!this.addTempFile){
+
+            alert('PDF 첨부 필요');
+
+            return;
+
+        }
+
+        const item =
+            this.allData.find(x=>x.id===this.addTargetId);
+
+        if(!item) return;
+
+        if(!item.additions){
+
+            item.additions = [];
+
+        }
+
+        item.additions.push({
+
+            title,
+
+            fileData:this.addTempFile,
+
+            createdAt:new Date().toISOString()
+
+        });
+
+        await this.saveToDB(item);
+
+        document.getElementById('addModalOverlay')
+            .style.display = 'none';
+
+        this.renderTable(this.currentPage);
+
+        alert('추가문서 등록 완료');
+
+    },
+
+    async deleteItem(id){
+
+        this.allData =
+            this.allData.filter(x=>x.id!==id);
+
+        await this.deleteFromDB(id);
+
+        this.renderTable(1);
+
+    },
+
+    handleFile(e){
+
+        const file = e.target.files[0];
+
+        if(!file) return;
+
+        const isPDF =
+            file.type === 'application/pdf'
+            || file.name.toLowerCase().endsWith('.pdf');
+
+        if(!isPDF){
+
+            alert('PDF만 가능합니다.');
+
+            return;
+
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (ev)=>{
+
+            this.tempFile = ev.target.result;
+
+            document.getElementById('fileName')
+                .textContent = file.name;
+
+        };
+
+        reader.readAsDataURL(file);
+
+    },
+
+    handleAddFile(e){
+
+        const file = e.target.files[0];
+
+        if(!file) return;
+
+        const isPDF =
+            file.type === 'application/pdf'
+            || file.name.toLowerCase().endsWith('.pdf');
+
+        if(!isPDF){
+
+            alert('PDF만 가능합니다.');
+
+            return;
+
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (ev)=>{
+
+            this.addTempFile = ev.target.result;
+
+            document.getElementById('addFileName')
+                .textContent = file.name;
+
+        };
+
+        reader.readAsDataURL(file);
+
+    },
+
+    openPDF(fileData){
+
+        const win = window.open();
+
+        win.document.write(`
+            <iframe
+                src="${fileData}"
+                style="width:100%;height:100%;border:none;"
+            ></iframe>
+        `);
+
+    },
+
+    openModal(){
+
+        this.targetId = null;
+
+        this.tempFile = null;
+
+        document.getElementById('modalTitle')
+            .textContent = '신규문서등록';
+
+        document.getElementById('submitBtn')
+            .textContent = '등록하기';
+
+        document.getElementById('newCategory').value = '';
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newName').value = '';
+        document.getElementById('newOffice').value = '';
+        document.getElementById('newFile').value = '';
+
+        document.getElementById('fileName')
+            .textContent = '선택된 파일 없음';
+
+        document.getElementById('modalOverlay')
+            .style.display = 'flex';
+
+    },
+
+    closeModal(){
+
+        document.getElementById('modalOverlay')
+            .style.display = 'none';
+
+    },
+
+    openAddModal(id){
+
+        this.addTargetId = id;
+
+        this.addTempFile = null;
+
+        document.getElementById('addTitle').value = '';
+
+        document.getElementById('addFile').value = '';
+
+        document.getElementById('addFileName')
+            .textContent = '선택된 파일 없음';
+
+        document.getElementById('addModalOverlay')
+            .style.display = 'flex';
+
+    },
+
+    editItem(id){
+
+        const item =
+            this.allData.find(x=>x.id===id);
+
+        if(!item) return;
+
+        this.targetId = id;
+
+        document.getElementById('newCategory').value =
+            item.category;
+
+        document.getElementById('newTitle').value =
+            item.title;
+
+        document.getElementById('newName').value =
+            item.name;
+
+        document.getElementById('newOffice').value =
+            item.office;
+
+        this.tempFile = item.fileData || null;
+
+        document.getElementById('fileName')
+            .textContent =
+            item.fileData
+            ? '기존 PDF 보존됨'
+            : '선택된 파일 없음';
+
+        document.getElementById('modalTitle')
+            .textContent = '문서 수정';
+
+        document.getElementById('submitBtn')
+            .textContent = '수정하기';
+
+        document.getElementById('modalOverlay')
+            .style.display = 'flex';
+
+    }
+
+};
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+
+    await App.init();
+
+});
+
+</script>
+
+</body>
+</html>

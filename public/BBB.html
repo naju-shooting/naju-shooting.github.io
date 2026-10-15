@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대회용메인 (BBB)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --table-border: #d1d8dd;
+            --usb-color: #27ae60;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-main-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-main-home:hover {
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.45);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-main-home h1 {
+            margin: 0;
+            font-size: 1.35em;
+            color: white;
+            font-weight: bold;
+        }
+
+        .home-icon {
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        .usb-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .data-info {
+            font-size: 12px;
+            color: #bdc3c7;
+            text-align: right;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-usb {
+            background: var(--usb-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-usb:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .btn-import {
+            background: #8e44ad;
+        }
+
+        .btn-sync {
+            background: #e67e22;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .menu-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-title::before {
+            content: '';
+            width: 6px;
+            height: 24px;
+            background: var(--accent-color);
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--table-border);
+            table-layout: fixed;
+        }
+
+        .main-table th {
+            background-color: #f8f9fa;
+            border: 1px solid var(--table-border);
+            height: 50px;
+        }
+
+        .main-table td {
+            padding: 10px;
+            border: 1px solid var(--table-border);
+            vertical-align: top;
+        }
+
+        .btn-link {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: none;
+            color: var(--primary-color);
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-link:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .status-table th {
+            background: #eee;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .status-table td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .auto-total {
+            font-weight: bold;
+            color: #2980b9;
+            background-color: #f8f9fa;
+            font-size: 1.1em;
+        }
+
+        .memo-input {
+            width: 100%;
+            height: 280px;
+            box-sizing: border-box;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            border: 1px solid transparent;
+        }
+
+        .memo-input:focus {
+            outline: none;
+            background-color: #fffdfd;
+            border-color: #eee;
+        }
+
+        .status-msg {
+            font-size: 11px;
+            color: #999;
+            text-align: right;
+            height: 15px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <a href="AAABBB.html" class="btn-main-home" title="메인 포털(index.html)로 이동">
+            <span class="home-icon">🏠</span>
+            <h1>대회사격장 통합 관리 (BBB)</h1>
+        </a>
+
+        <div class="usb-area">
+            <div class="data-info">
+                <span id="last_sync">전체 통합 모드</span><br>
+                <span id="liveClock"></span>
+            </div>
+            <div class="btn-group">
+                <button class="btn-usb" onclick="exportAllToUSB()">전체 데이터 USB 백업</button>
+                <button class="btn-usb btn-import" onclick="document.getElementById('fileInput').click()">USB 데이터 전체
+                    복원</button>
+                <input type="file" id="fileInput" style="display:none" accept=".json"
+                    onchange="importAllFromUSB(event)">
+                <button class="btn-usb btn-sync" onclick="document.getElementById('syncInput').click()">🔄
+                    최신동기화</button>
+                <input type="file" id="syncInput" style="display:none" accept=".json"
+                    onchange="importSyncFromUSB(event)">
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="menu-title">관리메뉴 </div>
+
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th><button class="btn-link" onclick="window.open('B01.html','_blank')">선수관리 (B01)</button></th>
+                    <th><button class="btn-link" onclick="window.open('B02.html','_blank')">총기관리 (B02)</button></th>
+                    <th><button class="btn-link" onclick="window.open('B03.html','_blank')">탄약관리 (B03)</button></th>
+                    <th><button class="btn-link" onclick="window.open('B04.html','_blank')">공문관리 (B04)</button></th>
+                    <th><button class="btn-link" onclick="window.open('B05.html','_blank')">출고확인서 (B05)</button></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <table class="status-table">
+                            <thead>
+                                <tr>
+                                    <th>총기종류</th>
+                                    <th>등록 인원</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statusBody">
+                                <tr>
+                                    <td>엽총</td>
+                                    <td id="t_1" class="auto-total">0</td>
+                                </tr>
+                                <tr>
+                                    <td>화약권총</td>
+                                    <td id="t_2" class="auto-total">0</td>
+                                </tr>
+                                <tr>
+                                    <td>화약권총(32)</td>
+                                    <td id="t_3" class="auto-total">0</td>
+                                </tr>
+                                <tr>
+                                    <td>화약소총</td>
+                                    <td id="t_4" class="auto-total">0</td>
+                                </tr>
+                                <tr>
+                                    <td>공기권총</td>
+                                    <td id="t_5" class="auto-total">0</td>
+                                </tr>
+                                <tr>
+                                    <td>공기소총</td>
+                                    <td id="t_6" class="auto-total">0</td>
+                                </tr>
+                                <tr style="background:#eee; font-weight:bold;">
+                                    <td>합계</td>
+                                    <td id="sum_t">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td><textarea id="memo_gun" class="memo-input" placeholder="총기 메모..."
+                            oninput="autoSave('gun', this.value)"></textarea>
+                        <div id="msg_gun" class="status-msg"></div>
+                    </td>
+                    <td><textarea id="memo_ammo" class="memo-input" placeholder="탄약 메모..."
+                            oninput="autoSave('ammo', this.value)"></textarea>
+                        <div id="msg_ammo" class="status-msg"></div>
+                    </td>
+                    <td><textarea id="memo_doc" class="memo-input" placeholder="공문 메모..."
+                            oninput="autoSave('doc', this.value)"></textarea>
+                        <div id="msg_doc" class="status-msg"></div>
+                    </td>
+                    <td><textarea id="memo_confirm" class="memo-input" placeholder="출고 메모..."
+                            oninput="autoSave('confirm', this.value)"></textarea>
+                        <div id="msg_confirm" class="status-msg"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function updateTime() { document.getElementById('liveClock').textContent = new Date().toLocaleString(); }
+        setInterval(updateTime, 1000);
+
+        function calculateFromB01() {
+            const players = JSON.parse(localStorage.getItem('PLAYER_MASTER')) || [];
+            const counts = { "엽총": 0, "화약권총": 0, "화약권총(32)": 0, "화약소총": 0, "공기권총": 0, "공기소총": 0 };
+            players.forEach(p => { if (counts.hasOwnProperty(p.gunType)) counts[p.gunType]++; });
+            Object.keys(counts).forEach((key, idx) => { document.getElementById('t_' + (idx + 1)).textContent = counts[key]; });
+            document.getElementById('sum_t').textContent = Object.values(counts).reduce((a, b) => a + b, 0);
+        }
+
+        const timers = {};
+        function autoSave(type, value) {
+            clearTimeout(timers[type]);
+            timers[type] = setTimeout(() => {
+                localStorage.setItem('bbb_memo_' + type, value);
+                document.getElementById('msg_' + type).textContent = "PC에 자동저장됨";
+                setTimeout(() => document.getElementById('msg_' + type).textContent = "", 1000);
+            }, 800);
+        }
+
+        // ==========================================
+        // B04 IndexedDB 헬퍼 함수
+        // ==========================================
+        function readB04IndexedDB() {
+            return new Promise(resolve => {
+                try {
+                    const req = indexedDB.open('b04DB', 1);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('documents')) {
+                            db.createObjectStore('documents', { keyPath: 'id' });
+                        }
+                    };
+                    req.onsuccess = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('documents')) {
+                            db.close();
+                            resolve([]);
+                            return;
+                        }
+                        const tx = db.transaction('documents', 'readonly');
+                        const store = tx.objectStore('documents');
+                        const getReq = store.getAll();
+                        getReq.onsuccess = (ev) => {
+                            db.close();
+                            resolve(ev.target.result || []);
+                        };
+                        getReq.onerror = () => {
+                            db.close();
+                            resolve([]);
+                        };
+                    };
+                    req.onerror = () => resolve([]);
+                } catch (err) {
+                    resolve([]);
+                }
+            });
+        }
+
+        function writeB04IndexedDB(docs) {
+            return new Promise(resolve => {
+                try {
+                    const req = indexedDB.open('b04DB', 1);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('documents')) {
+                            db.createObjectStore('documents', { keyPath: 'id' });
+                        }
+                    };
+                    req.onsuccess = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('documents')) {
+                            db.close();
+                            resolve();
+                            return;
+                        }
+                        const tx = db.transaction('documents', 'readwrite');
+                        const store = tx.objectStore('documents');
+                        store.clear();
+                        (docs || []).forEach(d => store.put(d));
+                        tx.oncomplete = () => {
+                            db.close();
+                            resolve();
+                        };
+                        tx.onerror = () => {
+                            db.close();
+                            resolve();
+                        };
+                    };
+                    req.onerror = () => resolve();
+                } catch (err) {
+                    resolve();
+                }
+            });
+        }
+
+        // ==========================================
+        // [핵심] 전체 데이터 USB 백업 (.json 파일 저장)
+        // ==========================================
+        async function exportAllToUSB() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const dateTag = `${yyyy}${mm}${dd}`;
+            const timeTag = now.toTimeString().substring(0, 8).replace(/:/g, '');
+            const fileName = `BBB_TOTAL_ARCHIVE_${dateTag}_${timeTag}.json`;
+
+            // 공문관리 IndexedDB 데이터 읽기
+            const b04Docs = await readB04IndexedDB();
+
+            const allData = {
+                // 1. 선수관리 (B01)
+                B01_PLAYER: JSON.parse(localStorage.getItem('PLAYER_MASTER')) || [],
+                // 2. 총기관리 (B02)
+                B02_GUN_HISTORY: JSON.parse(localStorage.getItem('smart_gun_history_v2')) || [],
+                // 3. 탄약관리 (B03)
+                B03_AMMO: JSON.parse(localStorage.getItem('AMMO_LOGS_B03')) || [],
+                B03_PREREG: JSON.parse(localStorage.getItem('PREREG_B03')) || [],
+                // 4. 공문관리 (B04)
+                B04_DOC: b04Docs,
+                // 5. 출고확인서 (B05)
+                B05_CONFIRM: JSON.parse(localStorage.getItem('CONFIRM_MASTER')) || [],
+                // 대회 타이틀 설정
+                TITLES: {
+                    player: localStorage.getItem('CONTEST_TITLE_PLAYER') || "",
+                    gun: localStorage.getItem('CONTEST_TITLE_GUN') || "",
+                    ammo: localStorage.getItem('CONTEST_TITLE_AMMO') || ""
+                },
+                // AI 환경설정
+                AI_CONFIG: {
+                    engine: localStorage.getItem('AI_ENGINE') || '',
+                    geminiKey: localStorage.getItem('GEMINI_API_KEY') || '',
+                    geminiModel: localStorage.getItem('GEMINI_MODEL') || '',
+                    ollamaUrl: localStorage.getItem('OLLAMA_URL') || '',
+                    ollamaTextModel: localStorage.getItem('OLLAMA_TEXT_MODEL') || '',
+                    ollamaVisionModel: localStorage.getItem('OLLAMA_VISION_MODEL') || ''
+                },
+                // 메모장 데이터
+                MEMOS: {
+                    gun: localStorage.getItem('bbb_memo_gun') || "",
+                    ammo: localStorage.getItem('bbb_memo_ammo') || "",
+                    doc: localStorage.getItem('bbb_memo_doc') || "",
+                    confirm: localStorage.getItem('bbb_memo_confirm') || ""
+                },
+                BACKUP_TIME: now.toLocaleString()
+            };
+
+            const jsonStr = JSON.stringify(allData, null, 2);
+            const summaryMsg = `[전체 데이터 백업 완료]\n\n` +
+                `- 선수관리: ${allData.B01_PLAYER.length}명\n` +
+                `- 총기관리(기록): ${allData.B02_GUN_HISTORY.length}건\n` +
+                `- 탄약관리(출고): ${allData.B03_AMMO.length}건\n` +
+                `- 탄약관리(사전신청): ${allData.B03_PREREG.length}건\n` +
+                `- 공문관리(문서): ${allData.B04_DOC.length}건\n` +
+                `- 출고확인서: ${allData.B05_CONFIRM.length}건\n\n` +
+                `파일명: ${fileName}`;
+
+            // 1) File System Access API 시도 (Chrome/Edge 파일 저장 대화상자)
+            let savedViaPicker = false;
+            if (window.showSaveFilePicker) {
+                try {
+                    const fileHandle = await window.showSaveFilePicker({
+                        suggestedName: fileName,
+                        types: [{
+                            description: 'JSON 백업 파일 (*.json)',
+                            accept: { 'application/json': ['.json'] }
+                        }]
+                    });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(jsonStr);
+                    await writable.close();
+                    savedViaPicker = true;
+                    alert(`${summaryMsg}\n\n※ 지정하신 위치에 정상적으로 저장되었습니다.`);
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        // 사용자가 파일 저장 취소를 누른 경우
+                        return;
+                    }
+                    // file:// 프로토콜 보안 에러 등 발생 시 아래 Blob 다운로드 방식으로 계속 진행
+                }
+            }
+
+            // 2) 표준 Blob 다운로드 (대용량 JSON 지원 및 모든 브라우저 호환)
+            if (!savedViaPicker) {
+                const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const dlAnchor = document.createElement('a');
+                dlAnchor.href = url;
+                dlAnchor.download = fileName;
+                document.body.appendChild(dlAnchor);
+                dlAnchor.click();
+                document.body.removeChild(dlAnchor);
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+                alert(`${summaryMsg}\n\n※ 백업 파일이 다운로드되었습니다.\n권장 위치: 바탕화면 > 공유폴더(사격장) > 대회용관리 > USB백업파일 또는 USB 드라이브`);
+            }
+        }
+
+        // ==========================================
+        // [핵심] USB에서 B01~B05 데이터 전체 복원 기능
+        // ==========================================
+        function importAllFromUSB(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm((data.BACKUP_TIME || '백업') + "에 저장된 전체 데이터를 복원하시겠습니까?\n(기존 데이터는 삭제되고 백업 데이터로 대체됩니다)")) {
+
+                        // 1. 선수관리 복구
+                        localStorage.setItem('PLAYER_MASTER', JSON.stringify(data.B01_PLAYER || []));
+                        if (data.TITLES && data.TITLES.player) localStorage.setItem('CONTEST_TITLE_PLAYER', data.TITLES.player);
+
+                        // 2. 총기관리 복구
+                        localStorage.setItem('smart_gun_history_v2', JSON.stringify(data.B02_GUN_HISTORY || data.B02_GUN || []));
+                        if (data.TITLES && data.TITLES.gun) localStorage.setItem('CONTEST_TITLE_GUN', data.TITLES.gun);
+
+                        // 3. 탄약관리 복구
+                        localStorage.setItem('AMMO_LOGS_B03', JSON.stringify(data.B03_AMMO || []));
+                        if (data.B03_PREREG) localStorage.setItem('PREREG_B03', JSON.stringify(data.B03_PREREG));
+                        if (data.TITLES && data.TITLES.ammo) localStorage.setItem('CONTEST_TITLE_AMMO', data.TITLES.ammo);
+
+                        // 4. 공문관리 IndexedDB 복구
+                        await writeB04IndexedDB(data.B04_DOC || []);
+
+                        // AI 환경설정 복구 (있는 경우)
+                        if (data.AI_CONFIG) {
+                            if (data.AI_CONFIG.engine) localStorage.setItem('AI_ENGINE', data.AI_CONFIG.engine);
+                            if (data.AI_CONFIG.geminiKey) localStorage.setItem('GEMINI_API_KEY', data.AI_CONFIG.geminiKey);
+                            if (data.AI_CONFIG.geminiModel) localStorage.setItem('GEMINI_MODEL', data.AI_CONFIG.geminiModel);
+                            if (data.AI_CONFIG.ollamaUrl) localStorage.setItem('OLLAMA_URL', data.AI_CONFIG.ollamaUrl);
+                            if (data.AI_CONFIG.ollamaTextModel) localStorage.setItem('OLLAMA_TEXT_MODEL', data.AI_CONFIG.ollamaTextModel);
+                            if (data.AI_CONFIG.ollamaVisionModel) localStorage.setItem('OLLAMA_VISION_MODEL', data.AI_CONFIG.ollamaVisionModel);
+                        }
+
+                        // 5. 출고확인서 복구
+                        localStorage.setItem('CONFIRM_MASTER', JSON.stringify(data.B05_CONFIRM || []));
+
+                        // 6. 메모 복구
+                        if (data.MEMOS) {
+                            localStorage.setItem('bbb_memo_gun', data.MEMOS.gun || "");
+                            localStorage.setItem('bbb_memo_ammo', data.MEMOS.ammo || "");
+                            localStorage.setItem('bbb_memo_doc', data.MEMOS.doc || "");
+                            localStorage.setItem('bbb_memo_confirm', data.MEMOS.confirm || "");
+                        }
+
+                        alert("전체 데이터(선수, 총기, 탄약, 공문, 출고확인서) 복원 완료!");
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert("올바른 백업 파일(.json)이 아닙니다.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==========================================
+        // [추가] 최신동기화 - 기존 데이터에 추가하는 방식 (중복 제외)
+        // ==========================================
+        function importSyncFromUSB(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            event.target.value = ''; // 같은 파일 재선택 허용
+
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const backupTime = data.BACKUP_TIME || '알 수 없음';
+                    if (!confirm(backupTime + "에 저장된 데이터를\n기존 데이터에 추가(병합)하시겠습니까?\n(기존 데이터는 유지됩니다)")) return;
+
+                    // 각 키별 병합 (id 또는 식별자 기반 중복 제거)
+                    function mergeArray(localKey, newArr) {
+                        const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+                        const existingIds = new Set(existing.map(x => String(x.id || x.barcode || JSON.stringify(x))));
+                        const toAdd = (newArr || []).filter(x => !existingIds.has(String(x.id || x.barcode || JSON.stringify(x))));
+                        localStorage.setItem(localKey, JSON.stringify([...existing, ...toAdd]));
+                        return toAdd.length;
+                    }
+
+                    const addedP = mergeArray('PLAYER_MASTER', data.B01_PLAYER);
+                    const addedG = mergeArray('smart_gun_history_v2', data.B02_GUN_HISTORY || data.B02_GUN);
+                    const addedA = mergeArray('AMMO_LOGS_B03', data.B03_AMMO);
+                    const addedPre = mergeArray('PREREG_B03', data.B03_PREREG);
+                    const addedC = mergeArray('CONFIRM_MASTER', data.B05_CONFIRM);
+
+                    // B04: IndexedDB 병합
+                    const existingDocs = await readB04IndexedDB();
+                    const existingIds = new Set(existingDocs.map(x => String(x.id)));
+                    const newDocs = (data.B04_DOC || []).filter(x => !existingIds.has(String(x.id)));
+                    await writeB04IndexedDB([...existingDocs, ...newDocs]);
+                    const addedD = newDocs.length;
+
+                    // 메모는 덮어쓰지 않고 내용이 있을 때만 추가
+                    if (data.MEMOS) {
+                        ['gun', 'ammo', 'doc', 'confirm'].forEach(type => {
+                            const existing = localStorage.getItem('bbb_memo_' + type) || '';
+                            const incoming = (data.MEMOS[type] || '').trim();
+                            if (incoming && !existing.includes(incoming)) {
+                                localStorage.setItem('bbb_memo_' + type, existing ? existing + '\n' + incoming : incoming);
+                            }
+                        });
+                    }
+
+                    alert(`최신동기화 완료!\n- 선수: +${addedP}명\n- 총기기록: +${addedG}건\n- 탄약기록: +${addedA}건\n- 탄약사전신청: +${addedPre}건\n- 공문: +${addedD}건\n- 출고확인: +${addedC}건`);
+                    calculateFromB01();
+                } catch (err) {
+                    alert("올바른 백업 파일(.json)이 아닙니다.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        window.onload = () => {
+            updateTime();
+            calculateFromB01();
+            ['gun', 'ammo', 'doc', 'confirm'].forEach(type => {
+                document.getElementById('memo_' + type).value = localStorage.getItem('bbb_memo_' + type) || "";
+            });
+        }
+    </script>
+</body>
+
+</html>

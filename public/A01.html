@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선수등록관리 (A01)</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            background-color: var(--bg);
+            padding: 20px;
+            margin: 0;
+            color: #334155;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .contest-title-input {
+            font-size: 1.8em;
+            font-weight: 800;
+            border: none;
+            border-bottom: 3px solid var(--accent);
+            text-align: center;
+            width: 60%;
+            padding: 10px;
+            outline: none;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+
+        /* 통계 보드 */
+        .status-board {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-bottom: 20px;
+            background: #334155;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        .status-card {
+            background: var(--primary);
+            padding: 12px;
+            border-radius: 0;
+            text-align: center;
+            border: none;
+            color: white;
+        }
+
+        .status-card .label {
+            font-size: 0.85em;
+            color: #cbd5e1;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .status-card .count {
+            font-size: 1.2em;
+            font-weight: 800;
+            color: #facc15;
+            /* 엽총~공기소총 수량: 노란색 */
+        }
+
+        .status-card.total {
+            background: var(--primary);
+        }
+
+        .status-card.total .label {
+            color: #e2e8f0;
+        }
+
+        .status-card.total .count {
+            color: #4ade80;
+            /* 전체합계 수량: 녹색 */
+        }
+
+        .barcode-focus-area {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #eff6ff;
+            border-radius: 12px;
+            border: 2px dashed var(--accent);
+        }
+
+        .barcode-input-large {
+            width: 350px;
+            padding: 12px;
+            font-size: 1.3em;
+            text-align: center;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .form-section input,
+        .form-section select {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .full-width {
+            grid-column: span 5;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            flex: 1;
+            font-size: 1em;
+            transition: 0.2s;
+        }
+
+        .btn-reg {
+            background: var(--accent);
+        }
+
+        .btn-update {
+            background: var(--warning);
+            display: none;
+        }
+
+        .btn-cancel {
+            background: #64748b;
+            display: none;
+        }
+
+        .filter-area {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .filter-select,
+        .search-input {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 550px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 1200px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border);
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tbody tr:hover {
+            background-color: #dcfce7 !important;
+        }
+
+        .action-btn {
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 1px;
+            white-space: nowrap;
+        }
+
+        .btn-notice {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-notice:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-notice.has-notice {
+            background: #f59e0b;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-notice.has-notice:hover {
+            background: #d97706;
+        }
+
+        .btn-edit {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #d97706;
+        }
+
+        .btn-del {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-del:hover {
+            background: #dc2626;
+        }
+
+        .bottom-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        /* 구경 클릭 버튼 스타일 */
+        .btn-cal {
+            flex: 1;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #334155;
+            transition: all 0.2s;
+            padding: 6px 0;
+        }
+
+        .btn-cal:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-cal.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* 총기명칭 토글 버튼 스타일 */
+        .btn-gun-name {
+            flex: 1;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #334155;
+            transition: all 0.2s;
+            padding: 5px 2px;
+            white-space: nowrap;
+        }
+
+        .btn-gun-name:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-gun-name.active {
+            background: #7c3aed;
+            color: white;
+            border-color: #7c3aed;
+        }
+
+        .gun-name-custom-input {
+            display: none;
+            margin-top: 4px;
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #7c3aed;
+            border-radius: 6px;
+            font-size: 12px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* 총종조회 선택 버튼 스타일 */
+        .btn-type-filter {
+            padding: 6px 12px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #334155;
+            transition: all 0.2s;
+        }
+
+        .btn-type-filter:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-type-filter.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-section">
+            <input type="text" id="contest-title" class="contest-title-input" placeholder="대회 명칭을 입력하세요">
+
+            <!-- 수정 1. 수량 합계 보드 -->
+            <div class="status-board">
+                <div class="status-card">
+                    <div class="label">엽총</div>
+                    <div class="count" id="count-엽총">0</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">화약권총</div>
+                    <div class="count" id="count-화약권총">0</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">화약권총(32)</div>
+                    <div class="count" id="count-화약권총(32)">0</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">화약소총</div>
+                    <div class="count" id="count-화약소총">0</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">공기권총</div>
+                    <div class="count" id="count-공기권총">0</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">공기소총</div>
+                    <div class="count" id="count-공기소총">0</div>
+                </div>
+                <div class="status-card total">
+                    <div class="label">전체합계</div>
+                    <div class="count" id="count-전체">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <input type="hidden" id="editId">
+            <input type="text" id="userName" placeholder="성명 (필수)" autofocus>
+            <input type="text" id="affiliation" placeholder="소속">
+            <input type="text" id="birthDate" placeholder="생년월일 (예: 26.01.01)" oninput="formatDateInput(this)">
+            <input type="text" id="contact" placeholder="연락처 (010-1234-5678)" oninput="formatPhoneInput(this)">
+            <select id="gunType">
+                <option value="">--총종 선택--</option>
+                <option value="엽총">엽총</option>
+                <option value="화약권총">화약권총</option>
+                <option value="화약권총(32)">화약권총(32)</option>
+                <option value="화약소총">화약소총</option>
+                <option value="공기권총">공기권총</option>
+                <option value="공기소총">공기소총</option>
+            </select>
+            <input type="text" id="gunName" placeholder="총기명칭"
+                oninput="this.value = this.value.replace(/[a-z]/g, c => c.toUpperCase())">
+            <input type="text" id="gunNumber" placeholder="총기번호" lang="en"
+                style="ime-mode:inactive; text-transform:uppercase;" oninput="this.value = this.value.toUpperCase()">
+
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <input type="hidden" id="gunCaliber" value="">
+                <div class="cal-btn-group" style="display: flex; gap: 3px; height: 100%;">
+                    <button type="button" class="btn-cal" data-val="2.2"
+                        onclick="selectCaliber('2.2', this)">2.2</button>
+                    <button type="button" class="btn-cal" data-val="3.2"
+                        onclick="selectCaliber('3.2', this)">3.2</button>
+                    <button type="button" class="btn-cal" data-val="4.5"
+                        onclick="selectCaliber('4.5', this)">4.5</button>
+                    <button type="button" class="btn-cal" data-val="12G"
+                        onclick="selectCaliber('12G', this)">12G</button>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <input type="hidden" id="manufacturer" value="">
+                <div class="mfr-btn-group" style="display: flex; gap: 3px; flex-wrap: wrap;">
+                    <button type="button" class="btn-gun-name" data-val="파르디니"
+                        onclick="selectManufacturer('파르디니', this)">파르디니</button>
+                    <button type="button" class="btn-gun-name" data-val="모리니"
+                        onclick="selectManufacturer('모리니', this)">모리니</button>
+                    <button type="button" class="btn-gun-name" data-val="앤슈츠"
+                        onclick="selectManufacturer('앤슈츠', this)">앤슈츠</button>
+                    <button type="button" class="btn-gun-name" data-val="햄머리"
+                        onclick="selectManufacturer('햄머리', this)">햄머리</button>
+                    <button type="button" class="btn-gun-name" data-val="월써"
+                        onclick="selectManufacturer('월써', this)">월써</button>
+                    <button type="button" class="btn-gun-name" data-val="토즈"
+                        onclick="selectManufacturer('토즈', this)">토즈</button>
+                    <button type="button" class="btn-gun-name" data-val="직접입력"
+                        onclick="selectManufacturer('직접입력', this)">직접입력</button>
+                </div>
+                <input type="text" id="manufacturerCustom" class="gun-name-custom-input" placeholder="제조사 직접 입력"
+                    oninput="document.getElementById('manufacturer').value = this.value">
+            </div>
+            <input type="text" id="permitAgency" placeholder="허가청" style="ime-mode:active;" lang="ko">
+            <input type="text" id="permitNumber" placeholder="허가번호 (예: 1 입력시 제1호)" oninput="formatPermitNumber(this)">
+            <input type="text" id="permitDate" placeholder="허가일자 (예: 26.01.01)" oninput="formatDateInput(this)">
+            <input type="text" id="barcode" placeholder="바코드 번호">
+            <input type="text" id="address" class="full-width" placeholder="주소">
+            <input type="text" id="remarks" class="full-width" placeholder="비고">
+        </div>
+
+        <div class="btn-group">
+            <button id="addBtn" class="btn btn-reg" onclick="savePlayer()">신규 선수 및 총기 등록</button>
+            <button id="updateBtn" class="btn btn-update" onclick="savePlayer()">수정 내용 저장</button>
+            <button id="cancelBtn" class="btn btn-cancel" onclick="resetForm()">취소</button>
+        </div>
+
+        <div class="filter-area"
+            style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:nowrap;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <b>총종조회:</b>
+                <input type="hidden" id="viewFilter" value="전체">
+                <div class="filter-btn-group" style="display:flex; gap:4px; flex-wrap:wrap;">
+                    <button type="button" class="btn-type-filter active" data-val="전체"
+                        onclick="selectTypeFilter('전체', this)">전체</button>
+                    <button type="button" class="btn-type-filter" data-val="엽총"
+                        onclick="selectTypeFilter('엽총', this)">엽총</button>
+                    <button type="button" class="btn-type-filter" data-val="화약권총"
+                        onclick="selectTypeFilter('화약권총', this)">화약권총</button>
+                    <button type="button" class="btn-type-filter" data-val="화약권총(32)"
+                        onclick="selectTypeFilter('화약권총(32)', this)">화약권총(32)</button>
+                    <button type="button" class="btn-type-filter" data-val="화약소총"
+                        onclick="selectTypeFilter('화약소총', this)">화약소총</button>
+                    <button type="button" class="btn-type-filter" data-val="공기권총"
+                        onclick="selectTypeFilter('공기권총', this)">공기권총</button>
+                    <button type="button" class="btn-type-filter" data-val="공기소총"
+                        onclick="selectTypeFilter('공기소총', this)">공기소총</button>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                <select id="searchTarget" class="filter-select">
+                    <option value="barcode">바코드</option>
+                    <option value="userName">성명</option>
+                    <option value="gunNumber">총기번호</option>
+                </select>
+                <input type="text" id="searchInput" class="search-input" placeholder="검색어 입력 후 엔터"
+                    onkeypress="if(event.key==='Enter') loadList()">
+                <button class="btn btn-reg" style="padding: 8px 15px; flex:none;" onclick="loadList()">검색</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:40px;"><input type="checkbox" id="checkAll" onclick="toggleAll(this)"></th>
+                        <th style="width:45px; cursor:pointer; user-select:none;" onclick="toggleSortOrder()" title="클릭하여 정렬 순서 변경">
+                            <span id="no-sort-label">No. ▼</span>
+                        </th>
+                        <th style="width:100px;">바코드</th>
+                        <th style="width:110px;">소속</th>
+                        <th style="width:140px;">성명(생년월일)</th>
+                        <th style="width:90px;">총종</th>
+                        <th style="width:110px;">총기번호</th>
+                        <th style="width:110px;">총기명칭</th>
+                        <th style="width:65px;">구경</th>
+                        <th style="width:110px;">연락처</th>
+                        <th style="width:165px; white-space:nowrap;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="playerTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="bottom-controls">
+            <button class="btn" style="background:var(--danger); flex:none; width:120px;" onclick="deleteChecked()">선택
+                삭제</button>
+            <button class="btn" style="background:var(--success); flex:none; width:120px;"
+                onclick="exportToExcel()">Excel 저장</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "PRO_PLAYER_MASTER_V2";
+        const TITLE_KEY = "PRO_CONTEST_TITLE_A01";
+        let sortOrderAsc = false; // false = 최신순(역순), true = 등록순
+
+        function toggleSortOrder() {
+            sortOrderAsc = !sortOrderAsc;
+            const label = document.getElementById('no-sort-label');
+            if (label) label.textContent = sortOrderAsc ? 'No. ▲' : 'No. ▼';
+            loadList();
+        }
+
+        window.onload = function () {
+            const savedTitle = localStorage.getItem(TITLE_KEY);
+            if (savedTitle) document.getElementById('contest-title').value = savedTitle;
+            document.getElementById('contest-title').oninput = (e) => localStorage.setItem(TITLE_KEY, e.target.value);
+            loadList();
+        };
+
+        function savePlayer() {
+            const id = document.getElementById('editId').value;
+            const player = {
+                id: id || Date.now(),
+                barcode: document.getElementById('barcode').value,
+                userName: document.getElementById('userName').value,
+                affiliation: document.getElementById('affiliation').value,
+                birthDate: document.getElementById('birthDate').value,
+                contact: document.getElementById('contact').value,
+                gunType: document.getElementById('gunType').value,
+                gunName: document.getElementById('gunName').value,
+                gunNumber: document.getElementById('gunNumber').value,
+                gunCaliber: document.getElementById('gunCaliber').value,
+                manufacturer: document.getElementById('manufacturer').value,
+                permitAgency: document.getElementById('permitAgency').value,
+                permitNumber: document.getElementById('permitNumber').value,
+                permitDate: document.getElementById('permitDate').value,
+                address: document.getElementById('address').value,
+                remarks: document.getElementById('remarks').value
+            };
+
+            if (!player.userName) { alert("성명은 필수 입력 항목입니다."); return; }
+
+            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            if (id) {
+                const index = players.findIndex(p => p.id == id);
+                if (index !== -1) {
+                    if (players[index].notices) player.notices = players[index].notices;
+                    players[index] = player;
+                } else {
+                    players.push(player);
+                }
+            } else {
+                players.push(player);
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+            resetForm();
+            loadList();
+        }
+
+        function selectTypeFilter(val, btnElement) {
+            document.getElementById('viewFilter').value = val;
+            document.querySelectorAll('.btn-type-filter').forEach(b => b.classList.remove('active'));
+            if (btnElement) {
+                btnElement.classList.add('active');
+            }
+            loadList();
+        }
+
+        function deleteSinglePlayer(id) {
+            if (!confirm("이 선수 및 총기 등록 데이터를 삭제하시겠습니까?")) return;
+            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            players = players.filter(p => p.id != id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+            loadList();
+        }
+
+        function loadList() {
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+            // 통계 업데이트
+            const types = ['엽총', '화약권총', '화약권총(32)', '화약소총', '공기권총', '공기소총'];
+            let total = 0;
+            types.forEach(t => {
+                let count = 0;
+                if (t === '화약권총(32)') {
+                    count = players.filter(p => {
+                        const is32 = (p.gunType === '화약권총(32)' || p.gunCaliber === '3.2' || (p.gunCaliber && String(p.gunCaliber).includes('3.2')));
+                        const hasGunInfo = String(p.gunType || '').trim() !== '' && String(p.gunNumber || '').trim() !== '';
+                        return is32 && hasGunInfo;
+                    }).length;
+                } else if (t === '화약권총') {
+                    count = players.filter(p => p.gunType === '화약권총' && p.gunCaliber !== '3.2' && (!p.gunCaliber || !String(p.gunCaliber).includes('3.2'))).length;
+                } else {
+                    count = players.filter(p => p.gunType === t).length;
+                }
+                document.getElementById(`count-${t}`).innerText = count;
+                total += count;
+            });
+            document.getElementById('count-전체').innerText = total;
+
+            // 필터 및 검색
+            const filterType = document.getElementById('viewFilter').value;
+            const searchTarget = document.getElementById('searchTarget').value;
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+
+            const tbody = document.getElementById('playerTableBody');
+            tbody.innerHTML = "";
+
+            const filtered = players.filter(p => {
+                let matchFilter = false;
+                if (filterType === "전체") {
+                    matchFilter = true;
+                } else if (filterType === "화약권총(32)") {
+                    const is32 = (p.gunType === "화약권총(32)" || p.gunCaliber === "3.2" || (p.gunCaliber && String(p.gunCaliber).includes("3.2")));
+                    const hasGunInfo = String(p.gunType || '').trim() !== '' && String(p.gunNumber || '').trim() !== '';
+                    matchFilter = is32 && hasGunInfo;
+                } else if (filterType === "화약권총") {
+                    matchFilter = (p.gunType === "화약권총" && p.gunCaliber !== "3.2" && (!p.gunCaliber || !String(p.gunCaliber).includes("3.2")));
+                } else {
+                    matchFilter = (p.gunType === filterType);
+                }
+
+                const matchSearch = (p[searchTarget] || "").toLowerCase().includes(searchQuery);
+                return matchFilter && matchSearch;
+            });
+
+            const displayList = sortOrderAsc ? filtered : [...filtered].reverse();
+
+            displayList.forEach((p, index) => {
+                const birthText = p.birthDate ? ` (${p.birthDate})` : '';
+                const nameWithBirth = `${p.userName || ''}${birthText}`;
+                const noNum = sortOrderAsc ? (index + 1) : (filtered.length - index);
+                const noticeCount = (p.notices && Array.isArray(p.notices)) ? p.notices.length : 0;
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                <td><input type="checkbox" class="row-check" value="${p.id}"></td>
+                <td>${noNum}</td>
+                <td style="font-weight:bold; color:var(--accent);">${p.barcode || '-'}</td>
+                <td>${p.affiliation || '-'}</td>
+                <td style="font-weight:bold;">${nameWithBirth}</td>
+                <td>${p.gunType || '-'}</td>
+                <td>${p.gunNumber || '-'}</td>
+                <td>${p.gunName || '-'}</td>
+                <td>${p.gunCaliber || '-'}</td>
+                <td>${p.contact || '-'}</td>
+                <td style="white-space:nowrap;">
+                    <button class="action-btn btn-notice ${noticeCount > 0 ? 'has-notice' : ''}" onclick="openNoticeModal(${p.id})">알림${noticeCount > 0 ? `(${noticeCount})` : ''}</button>
+                    <button class="action-btn btn-edit" onclick="editPlayer(${p.id})">수정</button>
+                    <button class="action-btn btn-del" onclick="deleteSinglePlayer(${p.id})">삭제</button>
+                </td>
+            `;
+            });
+        }
+
+        function selectCaliber(val, btnElement) {
+            document.getElementById('gunCaliber').value = val;
+            document.querySelectorAll('.btn-cal').forEach(b => b.classList.remove('active'));
+            if (btnElement) {
+                btnElement.classList.add('active');
+            }
+        }
+
+        function selectManufacturer(val, btnElement) {
+            document.querySelectorAll('.mfr-btn-group .btn-gun-name').forEach(b => b.classList.remove('active'));
+            const customInput = document.getElementById('manufacturerCustom');
+            if (val === '직접입력') {
+                btnElement.classList.add('active');
+                customInput.style.display = 'block';
+                customInput.focus();
+                document.getElementById('manufacturer').value = customInput.value;
+            } else {
+                btnElement.classList.add('active');
+                customInput.style.display = 'none';
+                customInput.value = '';
+                document.getElementById('manufacturer').value = val;
+            }
+        }
+
+        function formatPermitNumber(input) {
+            let raw = input.value;
+            // 숫자만 추출
+            let digits = raw.replace(/[^0-9]/g, '');
+            if (digits === '') {
+                input.value = '';
+            } else {
+                input.value = '\uc81c' + digits + '\ud638';
+                // 커서를 숫자 끝 위치로 이동 (제 다음, 호 앞)
+                const pos = 1 + digits.length;
+                input.setSelectionRange(pos, pos);
+            }
+        }
+
+        function formatDateInput(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            if (val.length > 6) val = val.substring(0, 6);
+            if (val.length >= 5) {
+                input.value = val.substring(0, 2) + '.' + val.substring(2, 4) + '.' + val.substring(4);
+            } else if (val.length >= 3) {
+                input.value = val.substring(0, 2) + '.' + val.substring(2);
+            } else {
+                input.value = val;
+            }
+        }
+
+        function formatPhoneInput(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            if (val.length > 11) val = val.substring(0, 11);
+            if (val.length > 7) {
+                input.value = val.substring(0, 3) + '-' + val.substring(3, 7) + '-' + val.substring(7);
+            } else if (val.length > 3) {
+                input.value = val.substring(0, 3) + '-' + val.substring(3);
+            } else {
+                input.value = val;
+            }
+        }
+
+        function editPlayer(id) {
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            const p = players.find(player => player.id == id);
+            if (!p) return;
+
+            Object.keys(p).forEach(key => {
+                const el = document.getElementById(key);
+                if (el) el.value = p[key];
+            });
+
+            const calVal = p.gunCaliber || "";
+            document.querySelectorAll('.btn-cal').forEach(b => {
+                if (b.getAttribute('data-val') === calVal) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+
+            // 제조사 토글 복원
+            const mfrVal = p.manufacturer || "";
+            const presetNames = ['파르디니', '모리니', '앤슈츠', '햄머리', '월써', '토즈'];
+            const mfrCustomInput = document.getElementById('manufacturerCustom');
+            document.querySelectorAll('.mfr-btn-group .btn-gun-name').forEach(b => b.classList.remove('active'));
+            if (presetNames.includes(mfrVal)) {
+                document.querySelectorAll('.mfr-btn-group .btn-gun-name').forEach(b => {
+                    if (b.getAttribute('data-val') === mfrVal) b.classList.add('active');
+                });
+                mfrCustomInput.style.display = 'none';
+                mfrCustomInput.value = '';
+            } else if (mfrVal) {
+                document.querySelectorAll('.mfr-btn-group .btn-gun-name').forEach(b => {
+                    if (b.getAttribute('data-val') === '직접입력') b.classList.add('active');
+                });
+                mfrCustomInput.style.display = 'block';
+                mfrCustomInput.value = mfrVal;
+            } else {
+                mfrCustomInput.style.display = 'none';
+                mfrCustomInput.value = '';
+            }
+
+            document.getElementById('editId').value = p.id;
+            document.getElementById('addBtn').style.display = 'none';
+            document.getElementById('updateBtn').style.display = 'inline-block';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+            window.scrollTo(0, 0);
+        }
+
+        function resetForm() {
+            document.getElementById('editId').value = "";
+            const inputs = document.querySelectorAll('.form-section input, .form-section select');
+            inputs.forEach(input => input.value = "");
+            document.querySelectorAll('.btn-cal').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mfr-btn-group .btn-gun-name').forEach(b => b.classList.remove('active'));
+            const mfrCustomInput = document.getElementById('manufacturerCustom');
+            mfrCustomInput.style.display = 'none';
+            mfrCustomInput.value = '';
+            document.getElementById('addBtn').style.display = 'inline-block';
+            document.getElementById('updateBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('userName').focus();
+        }
+
+        function deleteChecked() {
+            const checks = document.querySelectorAll('.row-check:checked');
+            if (checks.length === 0) return;
+            if (confirm("선택한 데이터를 삭제하시겠습니까?")) {
+                let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+                const idsToDelete = Array.from(checks).map(c => Number(c.value));
+                players = players.filter(p => !idsToDelete.includes(p.id));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+                loadList();
+            }
+        }
+
+        function toggleAll(master) {
+            document.querySelectorAll('.row-check').forEach(c => c.checked = master.checked);
+        }
+
+        function exportToExcel() {
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            if (players.length === 0) return;
+            let csv = "\ufeff바코드,성명,소속,생년월일,연락처,총종,총기명,총기번호,구경,제조사,허가청,허가번호,허가일자,주소,비고\n";
+            players.forEach(p => {
+                csv += `"${p.barcode}","${p.userName}","${p.affiliation}","${p.birthDate}","${p.contact}","${p.gunType}","${p.gunName}","${p.gunNumber}","${p.gunCaliber}","${p.manufacturer}","${p.permitAgency}","${p.permitNumber}","${p.permitDate}","${p.address}","${p.remarks}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = (document.getElementById('contest-title').value || "등록명부") + ".csv";
+            link.click();
+        }
+
+        /* ─── 알림 팝업 모달 관리를 위한 JS ─── */
+        let currentNoticePlayerId = null;
+
+        function openNoticeModal(playerId) {
+            currentNoticePlayerId = playerId;
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            const player = players.find(p => String(p.id) === String(playerId));
+            if (!player) return;
+
+            const birthText = player.birthDate ? ` (${player.birthDate})` : '';
+            document.getElementById('noticePlayerHeader').innerText = `${player.userName || ''}${birthText}`;
+            document.getElementById('noticeInputText').value = '';
+
+            renderNoticeList(player);
+            document.getElementById('noticeModal').style.display = 'flex';
+        }
+
+        function closeNoticeModal() {
+            document.getElementById('noticeModal').style.display = 'none';
+            currentNoticePlayerId = null;
+        }
+
+        function renderNoticeList(player) {
+            const container = document.getElementById('noticeList');
+            container.innerHTML = '';
+
+            const notices = player.notices || [];
+            if (notices.length === 0) {
+                container.innerHTML = `<div style="color:#94a3b8; text-align:center; padding:15px; font-size:0.9em;">등록된 알림이 없습니다.</div>`;
+                return;
+            }
+
+            notices.forEach(item => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:white; padding:8px 12px; border:1px solid #e2e8f0; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.03);';
+                row.innerHTML = `
+                    <span style="font-size:0.95em; color:#0f172a; word-break:break-all; font-weight:600;">📌 ${item.content}</span>
+                    <button onclick="deleteNoticeItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; font-size:0.82em; cursor:pointer; flex-shrink:0; margin-left:10px;">삭제</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function saveNewNotice() {
+            if (!currentNoticePlayerId) return;
+            const text = document.getElementById('noticeInputText').value.trim();
+            if (!text) {
+                alert('알림 내용을 입력해주세요.');
+                return;
+            }
+
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            const playerIndex = players.findIndex(p => String(p.id) === String(currentNoticePlayerId));
+            if (playerIndex === -1) return;
+
+            if (!players[playerIndex].notices) {
+                players[playerIndex].notices = [];
+            }
+
+            players[playerIndex].notices.push({
+                id: Date.now(),
+                content: text,
+                date: new Date().toISOString().split('T')[0]
+            });
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+            document.getElementById('noticeInputText').value = '';
+            renderNoticeList(players[playerIndex]);
+            loadList();
+        }
+
+        function deleteNoticeItem(noticeId) {
+            if (!currentNoticePlayerId) return;
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            const playerIndex = players.findIndex(p => String(p.id) === String(currentNoticePlayerId));
+            if (playerIndex === -1) return;
+
+            if (players[playerIndex].notices) {
+                players[playerIndex].notices = players[playerIndex].notices.filter(item => item.id !== noticeId);
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+            renderNoticeList(players[playerIndex]);
+            loadList();
+        }
+    </script>
+
+    <!-- 알림 팝업 모달 HTML -->
+    <div id="noticeModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+        <div
+            style="background:white; width:480px; max-width:90%; border-radius:12px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.25); box-sizing:border-box;">
+            <div
+                style="font-size:1.3em; font-weight:900; color:#0f172a; border-bottom:2px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+                <span>🔔 알림</span>
+                <button onclick="closeNoticeModal()"
+                    style="background:none; border:none; font-size:1.2em; cursor:pointer; color:#64748b; font-weight:bold;">✕</button>
+            </div>
+
+            <!-- 성명 (생년월일) -->
+            <div id="noticePlayerHeader"
+                style="font-size:1.05em; font-weight:800; color:#1e293b; background:#f1f5f9; padding:12px 14px; border-radius:8px; margin-bottom:16px; border-left:4px solid #2563eb;">
+            </div>
+
+            <!-- 등록된 알림 목록 -->
+            <div style="font-weight:700; font-size:0.9em; color:#475569; margin-bottom:6px;">○ 등록된 알림 목록</div>
+            <div id="noticeList"
+                style="max-height:180px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:16px; background:#f8fafc; display:flex; flex-direction:column; gap:8px;">
+            </div>
+
+            <!-- 알림 내용 입력 칸 -->
+            <div style="font-weight:700; font-size:0.9em; color:#475569; margin-bottom:6px;">○ 알림 내용 입력</div>
+            <textarea id="noticeInputText"
+                style="width:100%; height:75px; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box; resize:none; font-size:0.95em; font-family:inherit;"
+                placeholder="알림 내용을 입력하세요..."></textarea>
+
+            <!-- 하단 버튼: 등록, 닫기 (오른쪽 하단) -->
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
+                <button class="btn" onclick="saveNewNotice()"
+                    style="background:#2563eb; color:white; padding:8px 20px; border-radius:6px; font-weight:bold; border:none; cursor:pointer;">등록</button>
+                <button class="btn" onclick="closeNoticeModal()"
+                    style="background:#64748b; color:white; padding:8px 20px; border-radius:6px; font-weight:bold; border:none; cursor:pointer;">닫기</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

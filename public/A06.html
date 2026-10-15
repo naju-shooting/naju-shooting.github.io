@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>총기관리일지 (A06)</title>
+
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #cbd5e1;
+            --bg: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: var(--bg);
+            font-family: 'Pretendard', sans-serif;
+            color: #334155;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+        }
+
+        h1 {
+            margin: 0 0 25px;
+            text-align: center;
+            font-size: 28px;
+            color: var(--primary);
+        }
+
+        .section-title {
+            margin: 25px 0 10px;
+            padding-left: 10px;
+            border-left: 5px solid var(--accent);
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .input-blank {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .memo-area {
+            width: 100%;
+            min-height: 80px;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 13px;
+            overflow: hidden;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 6px;
+            padding: 9px 16px;
+            cursor: pointer;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .btn-reg {
+            background: var(--accent);
+        }
+
+        .btn-save {
+            background: var(--success);
+        }
+
+        .btn-del {
+            background: var(--danger);
+        }
+
+        .btn-search {
+            background: var(--primary);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .list-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 20px 0;
+        }
+
+        .page-btn {
+            border: 1px solid var(--border);
+            background: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .page-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .bottom-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .input-blank-select {
+            width: auto;
+            min-width: 140px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 10px;
+            outline: none;
+            font-size: 13px;
+            font-weight: 800;
+            background: #fff;
+            color: #1e293b;
+            cursor: pointer;
+            text-align: center;
+            text-align-last: center;
+            -webkit-text-align-last: center;
+        }
+
+        .vacation-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #ef4444;
+            cursor: pointer;
+            margin-left: 8px;
+            user-select: none;
+        }
+
+        .print-display {
+            display: none;
+        }
+
+        @media print {
+
+            .bottom-bar,
+            .pagination,
+            #list-page button,
+            .no-print,
+            .vacation-wrap,
+            .top-bar {
+                display: none !important;
+            }
+
+            .input-blank-select {
+                display: none !important;
+            }
+
+            .print-display {
+                display: inline !important;
+                font-weight: bold;
+                font-size: 13px;
+            }
+
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>총기관리일지</h1>
+
+        <!-- 목록 구역 -->
+        <div id="list-page">
+
+            <div class="top-bar">
+                <div>총 <span id="total-count">0</span> 건</div>
+
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <input type="date" id="start-date">
+                    ~
+                    <input type="date" id="end-date">
+
+                    <input type="text" id="search-keyword" placeholder="작성자 검색">
+
+                    <button class="btn btn-search" onclick="searchList()">검색</button>
+                </div>
+            </div>
+
+            <table class="list-table">
+                <thead>
+                    <tr>
+                        <th style="width:8%">번호</th>
+                        <th>제목</th>
+                        <th style="width:15%">등록일</th>
+                        <th style="width:15%">작성자</th>
+                        <th style="width:15%">관리</th>
+                    </tr>
+                </thead>
+
+                <tbody id="list-body"></tbody>
+            </table>
+
+            <div id="pagination-container" class="pagination"></div>
+
+            <div style="display:flex; justify-content:flex-end;">
+                <button class="btn btn-reg" onclick="openReport()">등록</button>
+            </div>
+
+        </div>
+
+        <!-- 작성 및 상세 구역 -->
+        <div id="report-page" class="hidden">
+
+            <div class="top-bar">
+                <div id="currentDate" style="font-size:24px; font-weight:800;"></div>
+                <button class="btn btn-search" onclick="closeReport()">목록</button>
+            </div>
+
+            <!-- 표1: 근무자 현황 -->
+            <div class="section-title">○ 근무자 현황</div>
+
+            <table>
+                <tr>
+                    <th rowspan="3" style="width:15%">근무자</th>
+                    <th style="width:35%">직</th>
+                    <th>성명</th>
+                </tr>
+
+                <tr>
+                    <td>청원경찰</td>
+                    <td style="padding:4px 12px; position:relative; text-align:center; height:38px;">
+                        <select id="worker1" class="input-blank-select"
+                            style="width:140px; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);"
+                            onchange="updatePrintDisplays()">
+                            <option value="">(선택)</option>
+                            <option value="(주)김문관">(주)김문관</option>
+                            <option value="(주)나상률">(주)나상률</option>
+                            <option value="(주)황인창">(주)황인창</option>
+                            <option value="(주)진동섭">(주)진동섭</option>
+                            <option value="(주)정다운">(주)정다운</option>
+                        </select>
+                        <span id="worker1_vac_badge" class="no-print"
+                            style="display:none; color:#dc2626; font-weight:800; font-size:13px; position:absolute; left:calc(50% + 78px); top:50%; transform:translateY(-50%); white-space:nowrap;">연가</span>
+                        <label class="vacation-wrap no-print"
+                            style="position:absolute; right:12px; top:50%; transform:translateY(-50%);">
+                            <input type="checkbox" id="worker1_vac" onchange="updatePrintDisplays()"> 연가
+                        </label>
+                        <span class="print-display" id="worker1_disp"></span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>청원경찰</td>
+                    <td style="padding:4px 12px; position:relative; text-align:center; height:38px;">
+                        <select id="worker2" class="input-blank-select"
+                            style="width:140px; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);"
+                            onchange="autoGiverBySelect()">
+                            <option value="">(선택)</option>
+                            <option value="(주/야)김문관">(주/야)김문관</option>
+                            <option value="(주/야)나상률">(주/야)나상률</option>
+                            <option value="(주/야)황인창">(주/야)황인창</option>
+                            <option value="(주/야)진동섭">(주/야)진동섭</option>
+                            <option value="(주/야)정다운">(주/야)정다운</option>
+                        </select>
+                        <span id="worker2_vac_badge" class="no-print"
+                            style="display:none; color:#dc2626; font-weight:800; font-size:13px; position:absolute; left:calc(50% + 78px); top:50%; transform:translateY(-50%); white-space:nowrap;">연가</span>
+                        <label class="vacation-wrap no-print"
+                            style="position:absolute; right:12px; top:50%; transform:translateY(-50%);">
+                            <input type="checkbox" id="worker2_vac" onchange="updatePrintDisplays()"> 연가
+                        </label>
+                        <span class="print-display" id="worker2_disp"></span>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- 표2: 총기 출납 현황 -->
+            <div class="section-title">○ 총기 출납 현황</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2">총종</th>
+                        <th rowspan="2">전체총계</th>
+                        <th rowspan="2">잔여총계</th>
+                        <th colspan="2">일일사용</th>
+                        <th colspan="2">일시전환</th>
+                        <th rowspan="2">일시전환<br>관리현황</th>
+                    </tr>
+
+                    <tr>
+                        <th>출고</th>
+                        <th>입고</th>
+                        <th>출고</th>
+                        <th>입고</th>
+                    </tr>
+                </thead>
+
+                <tbody id="gun-table-body"></tbody>
+            </table>
+
+            <!-- 표3: 탄약 수불 현황 -->
+            <div class="section-title">○ 탄약 수불 현황</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:20%">구분</th>
+                        <th>합계</th>
+                        <th>엽탄</th>
+                        <th>22탄</th>
+                        <th>32탄</th>
+                    </tr>
+                </thead>
+
+                <tbody id="ammo-table-body"></tbody>
+            </table>
+
+            <br>
+            <br>
+            <br>
+            <br>
+            <!-- 표4: 인수-인계 사항 -->
+
+            <div class="section-title">○ 인수-인계 사항</div>
+
+            <table>
+                <tr>
+                    <th rowspan="2" style="width:15%">인수-인계</th>
+
+                    <td style="width:40%; text-align:left; padding:10px;">
+                        ○ 가스총 : 5정<br>
+                        나상률04000797 진동섭04000798<br>
+                        황인창04000799 정다운04000800 김문관SYGS20000734
+                    </td>
+
+                    <td rowspan="2">
+                        <textarea id="memo" class="memo-area" placeholder="특이사항 입력"></textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="text-align:left; padding:10px; line-height:2.2;">
+
+                        <div style="display:flex; align-items:center;">
+                            <span style="width:60px;">인계자 :</span>
+                            <select id="giver" class="input-blank-select" style="min-width:120px;"
+                                onchange="updatePrintDisplays()">
+                                <option value="">(선택)</option>
+                                <option value="김문관">김문관</option>
+                                <option value="나상률">나상률</option>
+                                <option value="황인창">황인창</option>
+                                <option value="진동섭">진동섭</option>
+                                <option value="정다운">정다운</option>
+                            </select>
+                            <span class="print-display" id="giver_disp"></span>
+                        </div>
+
+                        <div style="display:flex; align-items:center; margin-top:4px;">
+                            <span style="width:60px;">인수자 :</span>
+                            <select id="taker" class="input-blank-select" style="min-width:120px;"
+                                onchange="updatePrintDisplays()">
+                                <option value="">(선택)</option>
+                                <option value="김문관">김문관</option>
+                                <option value="나상률">나상률</option>
+                                <option value="황인창">황인창</option>
+                                <option value="진동섭">진동섭</option>
+                                <option value="정다운">정다운</option>
+                            </select>
+                            <span class="print-display" id="taker_disp"></span>
+                        </div>
+
+                    </td>
+                </tr>
+            </table>
+
+            <!-- 표5: 총기 사용현황 -->
+            <div class="section-title">○ 총기 사용현황</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>총종</th>
+                        <th>성명</th>
+                        <th>출고시간</th>
+                        <th>입고시간</th>
+                        <th>출고</th>
+                        <th>입고</th>
+                    </tr>
+                </thead>
+
+                <tbody id="table5-body"></tbody>
+            </table>
+
+            <!-- 표6: 일시전환총기 사용현황 -->
+            <div class="section-title">○ 일시전환총기 사용현황</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>총종</th>
+                        <th>성명</th>
+                        <th>출고시간</th>
+                        <th>입고시간</th>
+                        <th>출고</th>
+                        <th>입고</th>
+                    </tr>
+                </thead>
+
+                <tbody id="table6-body"></tbody>
+            </table>
+
+            <div class="bottom-bar">
+                <button class="btn btn-save" onclick="saveData()">저장하기</button>
+                <button class="btn btn-search" onclick="printReport()">인쇄하기</button>
+                <button class="btn btn-del" onclick="closeReport()">닫기</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const KEYS = {
+            A01: 'PRO_PLAYER_MASTER_V2',
+            A02: 'DATA_A02_LOGS',
+            A03: 'PRO_TEMP_GUNS',
+            A04: 'DATA_A04_LOGS',
+            A06: 'DATA_A06_V1'
+        };
+
+        const GUN_TYPES = [
+            "엽총",
+            "화약권총",
+            "화약권총(32)",
+            "화약소총",
+            "공기권총",
+            "공기소총"
+        ];
+
+        // A01/A02/A03에 저장된 기존 총종명 → GUN_TYPES 표시명 변환 맵
+        const GUN_TYPE_MAP = {
+            "화약권총32": "화약권총(32)"
+        };
+        // 표시명 → 원본 저장명 (역방향)
+        const GUN_TYPE_RMAP = Object.fromEntries(Object.entries(GUN_TYPE_MAP).map(([k, v]) => [v, k]));
+
+        function normalizeGunType(t) {
+            return GUN_TYPE_MAP[t] || t;
+        }
+        // 표시명(화약권총(32))을 받아 저장된 원본키(화약권총32) 또는 자기 자신을 반환
+        function rawGunType(t) {
+            return GUN_TYPE_RMAP[t] || t;
+        }
+        // 총종 필터 함수: A01 등록 기준과 100% 동일하게 매칭 (화약권총(32) / 화약권총 / 엽총 / 기타)
+        function matchGunType(target, displayType) {
+            let typeStr = "";
+            let caliberStr = "";
+            let gunNumStr = "";
+
+            if (target && typeof target === 'object') {
+                typeStr = String(target.gunType || "").trim();
+                caliberStr = String(target.gunCaliber || "").trim();
+                gunNumStr = String(target.gunNumber || "").trim();
+            } else {
+                typeStr = String(target || "").trim();
+            }
+
+            const normDisplay = normalizeGunType(displayType);
+
+            // 1) 화약권총(32) 매칭 규칙 (A01과 동일: gunType이 화약권총(32)/화약권총32이거나 gunCaliber가 3.2인 경우)
+            if (normDisplay === "화약권총(32)") {
+                const is32 = (
+                    typeStr === "화약권총(32)" ||
+                    typeStr === "화약권총32" ||
+                    caliberStr === "3.2" ||
+                    caliberStr.includes("3.2")
+                );
+                if (target && typeof target === 'object' && target.barcode) {
+                    const hasGunInfo = typeStr !== '' && gunNumStr !== '';
+                    return is32 && hasGunInfo;
+                }
+                return is32;
+            }
+
+            // 2) 화약권총(22탄) 매칭 규칙 (A01과 동일: gunType이 화약권총이고 구경이 3.2가 아닌 경우)
+            if (normDisplay === "화약권총") {
+                const isPistol = (
+                    typeStr === "화약권총" ||
+                    typeStr === "화약권총(22)" ||
+                    typeStr === "화약권총22"
+                );
+                const isNot32 = caliberStr !== "3.2" && !caliberStr.includes("3.2");
+                return isPistol && isNot32;
+            }
+
+            // 3) 기타 총종 매칭 (엽총, 화약소총, 공기권총, 공기소총 등)
+            return normalizeGunType(typeStr) === normDisplay;
+        }
+
+        let CURRENT_DATE = "";
+
+        const ITEMS_PER_PAGE = 20;
+        let currentPage = 1;
+
+        window.onload = () => {
+            initDate();
+            buildTables();
+            renderList();
+            updatePrintDisplays();
+            initMemoResize();
+        };
+
+        function getTodayStr() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function initDate() {
+            const today = getTodayStr();
+            document.getElementById('start-date').value = today.substring(0, 4) + '-01-01';
+            document.getElementById('end-date').value = today;
+
+            if (!CURRENT_DATE) {
+                CURRENT_DATE = today;
+            }
+        }
+
+        function autoGiverBySelect() {
+            const val = document.getElementById('worker2').value;
+            const cleanName = val.replace(/\([^)]*\)/g, '').trim();
+            const giverEl = document.getElementById('giver');
+            if (giverEl && cleanName) {
+                giverEl.value = cleanName;
+            }
+            updatePrintDisplays();
+        }
+
+        function updatePrintDisplays() {
+            const w1 = document.getElementById('worker1')?.value || '';
+            const w1Vac = document.getElementById('worker1_vac')?.checked;
+            const w1Badge = document.getElementById('worker1_vac_badge');
+            const w1Disp = document.getElementById('worker1_disp');
+
+            if (w1Badge) {
+                w1Badge.style.display = w1Vac ? 'inline-block' : 'none';
+            }
+            if (w1Disp) {
+                w1Disp.innerText = w1Vac ? (w1 ? `${w1} 연가` : '연가') : w1;
+            }
+
+            const w2 = document.getElementById('worker2')?.value || '';
+            const w2Vac = document.getElementById('worker2_vac')?.checked;
+            const w2Badge = document.getElementById('worker2_vac_badge');
+            const w2Disp = document.getElementById('worker2_disp');
+
+            if (w2Badge) {
+                w2Badge.style.display = w2Vac ? 'inline-block' : 'none';
+            }
+            if (w2Disp) {
+                w2Disp.innerText = w2Vac ? (w2 ? `${w2} 연가` : '연가') : w2;
+            }
+
+            const g = document.getElementById('giver')?.value || '';
+            const gDisp = document.getElementById('giver_disp');
+            if (gDisp) gDisp.innerText = g;
+
+            const t = document.getElementById('taker')?.value || '';
+            const tDisp = document.getElementById('taker_disp');
+            if (tDisp) tDisp.innerText = t;
+        }
+
+        function initMemoResize() {
+            const memo = document.getElementById('memo');
+            if (memo) {
+                memo.addEventListener('input', function () {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+            }
+        }
+
+        function buildTables() {
+            const gunBody = document.getElementById('gun-table-body');
+            gunBody.innerHTML = '';
+
+            const a01Players = JSON.parse(localStorage.getItem(KEYS.A01) || "[]");
+            const a02Logs = JSON.parse(localStorage.getItem(KEYS.A02) || "[]");
+            const a03Logs = JSON.parse(localStorage.getItem(KEYS.A03) || "[]");
+
+            [...GUN_TYPES, '합계'].forEach(type => {
+                const isSum = type === '합계';
+                const tr = document.createElement('tr');
+
+                // ① 전체총계 : A01 마스터에 등록된 해당 총종 수 (저장명/표시명/구경3.2 완벽 매칭)
+                const masterCount = isSum ? 0 : a01Players.filter(p => matchGunType(p, type)).length;
+
+                // ② 일일사용 : A02에서 오늘 날짜 & 해당 총종
+                //    출고 = inTime 없음(출고중) / 입고 = inTime 있음(입고완료)
+                let dailyOutCount = 0;
+                let dailyInCount = 0;
+                if (!isSum && Array.isArray(a02Logs)) {
+                    const todayA02 = a02Logs.filter(l => l.date === CURRENT_DATE && matchGunType(l, type));
+                    dailyOutCount = todayA02.filter(l => !l.inTime || l.inTime.trim() === '' || l.inTime === '-').length;
+                    dailyInCount = todayA02.filter(l => l.inTime && l.inTime.trim() !== '' && l.inTime !== '-').length;
+                }
+
+                // ③ 일시전환 : A03에서 오늘 날짜 & 해당 총종
+                //    출고 = status === '출고' / 입고 = status === '입고'
+                let transOutCount = 0;
+                let transInCount = 0;
+                if (!isSum && Array.isArray(a03Logs)) {
+                    const todayA03 = a03Logs.filter(l => l.date === CURRENT_DATE && matchGunType(l, type));
+                    transOutCount = todayA03.filter(l => l.status === '출고').length;
+                    transInCount = todayA03.filter(l => l.status === '입고').length;
+                }
+
+                // ④ 일시전환관리현황 : A03에서 해당 총종의 현재 미반납(출고 상태) 총기 수
+                //    날짜 무관, 아직 입고되지 않은 전체 출고 기록
+                let a03StatusValue = '0';
+                if (isSum) {
+                    const totalActive = Array.isArray(a03Logs)
+                        ? a03Logs.filter(l => l.status === '출고').length : 0;
+                    a03StatusValue = totalActive.toLocaleString();
+                } else {
+                    const activeCount = Array.isArray(a03Logs)
+                        ? a03Logs.filter(l => matchGunType(l, type) && l.status === '출고').length : 0;
+                    a03StatusValue = activeCount.toLocaleString();
+                }
+
+                // ⑤ 잔여총계 = 전체총계 - 일시전환관리현황(미반납 일시전환 수)
+                const activeTransForType = Array.isArray(a03Logs)
+                    ? a03Logs.filter(l => matchGunType(l, type) && l.status === '출고').length : 0;
+                const remainCount = isSum ? 0 : (masterCount - activeTransForType);
+
+                tr.innerHTML = `
+        <th>${type}</th>
+        ${['total', 'remain', 'dout', 'din', 'tout', 'tin', 'status'].map(id => {
+                    let defaultVal = '0';
+                    if (id === 'status') defaultVal = a03StatusValue;
+                    else if (id === 'total' && !isSum) defaultVal = masterCount;
+                    else if (id === 'remain' && !isSum) defaultVal = remainCount;
+                    else if (id === 'dout' && !isSum) defaultVal = dailyOutCount;
+                    else if (id === 'din' && !isSum) defaultVal = dailyInCount;
+                    else if (id === 'tout' && !isSum) defaultVal = transOutCount;
+                    else if (id === 'tin' && !isSum) defaultVal = transInCount;
+
+                    // 자동 연산 컬럼 Readonly 처리
+                    const isReadonly = isSum || id === 'total' || id === 'remain'
+                        || id === 'dout' || id === 'din'
+                        || id === 'tout' || id === 'tin';
+
+                    return `
+            <td>
+                <input
+                    type="text"
+                    id="gun_${type}_${id}"
+                    class="input-blank"
+                    value="${defaultVal}"
+                    ${isReadonly ? 'readonly' : ''}
+                    oninput="calcGunSummary()"
+                >
+            </td>
+            `;
+                }).join('')}
+        `;
+                gunBody.appendChild(tr);
+            });
+
+            const ammoBody = document.getElementById('ammo-table-body');
+            ammoBody.innerHTML = '';
+            const AMMO_ROWS = [
+                { key: 'prev', label: '전날잔고' },
+                { key: 'in', label: '입고' },
+                { key: 'out', label: '출고' },
+                { key: 'balance', label: '잔고' }
+            ];
+            AMMO_ROWS.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+        <th>${row.label}</th>
+        ${[0, 1, 2, 3].map(i => `
+        <td>
+            <input
+                type="text"
+                id="ammo_${row.key}_${i}"
+                class="input-blank"
+                value="0"
+                ${i === 0 || row.key === 'balance' ? 'readonly' : ''}
+                oninput="calcAmmoSummary()"
+            >
+        </td>
+        `).join('')}
+        `;
+                ammoBody.appendChild(tr);
+            });
+
+            document.getElementById('table5-body').innerHTML = '';
+            document.getElementById('table6-body').innerHTML = '';
+
+            calcGunSummary();
+            loadAmmoFromA04();
+            populateTable5();
+            populateTable6();
+        }
+
+        function num(v) {
+            return Number(String(v).replace(/,/g, '')) || 0;
+        }
+
+        function calcGunSummary() {
+            const fields = ['total', 'remain', 'dout', 'din', 'tout', 'tin'];
+            fields.forEach(field => {
+                let sum = 0;
+                GUN_TYPES.forEach(type => {
+                    const el = document.getElementById(`gun_${type}_${field}`);
+                    if (el) {
+                        // 잔여총계 = 전체총계 - 일시전환관리현황(status 열)
+                        if (field === 'remain') {
+                            const tot = num(document.getElementById(`gun_${type}_total`).value);
+                            const status = num(document.getElementById(`gun_${type}_status`)?.value || '0');
+                            el.value = (tot - status).toLocaleString();
+                        }
+                        sum += num(el.value);
+                    }
+                });
+                const target = document.getElementById(`gun_합계_${field}`);
+                if (target) target.value = sum.toLocaleString();
+            });
+        }
+
+        function calcAmmoSummary() {
+            const rows = ['prev', 'in', 'out'];
+            rows.forEach(row => {
+                let sum = 0;
+                [1, 2, 3].forEach(i => {
+                    const el = document.getElementById(`ammo_${row}_${i}`);
+                    if (el) sum += num(el.value);
+                });
+                const target = document.getElementById(`ammo_${row}_0`);
+                if (target) target.value = sum.toLocaleString();
+            });
+
+            for (let i = 1; i <= 3; i++) {
+                const prevVal = num(document.getElementById(`ammo_prev_${i}`).value);
+                const inVal = num(document.getElementById(`ammo_in_${i}`).value);
+                const outVal = num(document.getElementById(`ammo_out_${i}`).value);
+                document.getElementById(`ammo_balance_${i}`).value = (prevVal + inVal - outVal).toLocaleString();
+            }
+
+            let total = 0;
+            [1, 2, 3].forEach(i => {
+                total += num(document.getElementById(`ammo_balance_${i}`).value);
+            });
+            document.getElementById(`ammo_balance_0`).value = total.toLocaleString();
+        }
+
+        function getA04ShelfTotals(shelfData) {
+            let totals = { "엽탄": 0, "22탄": 0, "32탄": 0 };
+            if (!shelfData || typeof shelfData !== 'object') return totals;
+
+            for (let s = 1; s <= 8; s++) {
+                const shelfObj = shelfData[`22탄_${s}`] || shelfData[`2.2탄_${s}`] || {};
+                const maxRows = (s === 8) ? 20 : 10;
+                for (let r = 1; r <= maxRows; r++) {
+                    const qtyL = parseInt(String(shelfObj[`r${r}_c3`] || '').replace(/,/g, ''), 10) || 0;
+                    if (qtyL > 0) {
+                        if (shelfObj[`r${r}_L_is32`] === '1' || shelfObj[`r${r}_L_is32`] === true) {
+                            totals["32탄"] += qtyL;
+                        } else {
+                            totals["22탄"] += qtyL;
+                        }
+                    }
+                    const qtyR = parseInt(String(shelfObj[`r${r}_c6`] || '').replace(/,/g, ''), 10) || 0;
+                    if (qtyR > 0) {
+                        if (shelfObj[`r${r}_R_is32`] === '1' || shelfObj[`r${r}_R_is32`] === true) {
+                            totals["32탄"] += qtyR;
+                        } else {
+                            totals["22탄"] += qtyR;
+                        }
+                    }
+                }
+            }
+
+            for (let s = 1; s <= 8; s++) {
+                const shelfObj = shelfData[`엽탄_${s}`] || {};
+                for (let r = 1; r <= 10; r++) {
+                    const qtyL = parseInt(String(shelfObj[`r${r}_c3`] || '').replace(/,/g, ''), 10) || 0;
+                    if (qtyL > 0) totals["엽탄"] += qtyL;
+                    const qtyR = parseInt(String(shelfObj[`r${r}_c6`] || '').replace(/,/g, ''), 10) || 0;
+                    if (qtyR > 0) totals["엽탄"] += qtyR;
+                }
+            }
+
+            return totals;
+        }
+
+        function loadAmmoFromA04() {
+            const FS_KEY_PREFIX = 'PRO_FULL_SHELF_DAILY_V2_';
+            let prevBalances = { "엽탄": 0, "22탄": 0, "32탄": 0 };
+            let hasShelfData = false;
+
+            // 1. A04 전체선반 데이터(PRO_FULL_SHELF_DAILY_V2_)에서 CURRENT_DATE 이전의 가장 최근 날짜 데이터 탐색
+            const priorDates = [];
+            const allDates = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(FS_KEY_PREFIX)) {
+                    const d = key.replace(FS_KEY_PREFIX, '');
+                    if (d) {
+                        allDates.push(d);
+                        if (d < CURRENT_DATE) priorDates.push(d);
+                    }
+                }
+            }
+
+            let targetDate = null;
+            if (priorDates.length > 0) {
+                priorDates.sort();
+                targetDate = priorDates[priorDates.length - 1]; // 전날 중 가장 최근 날짜
+            } else if (allDates.length > 0) {
+                allDates.sort();
+                targetDate = allDates[allDates.length - 1]; // 만약 전날 기록이 없으면 존재하는 가장 최근 날짜
+            }
+
+            if (targetDate) {
+                const raw = localStorage.getItem(FS_KEY_PREFIX + targetDate);
+                if (raw) {
+                    try {
+                        const shelfData = JSON.parse(raw);
+                        prevBalances = getA04ShelfTotals(shelfData);
+                        hasShelfData = true;
+                    } catch (e) {
+                        console.error('A04 shelf data parse error:', e);
+                    }
+                }
+            }
+
+            // 2. 만약 A04 전체선반 데이터가 없는 경우, DATA_A04_LOGS 누적 합산으로 차선책 처리
+            if (!hasShelfData) {
+                const a04Logs = JSON.parse(localStorage.getItem('DATA_A04_LOGS') || "[]");
+                const AMMO_KEY_MAP = { "2.2탄": "22탄", "3.2탄": "32탄" };
+                if (Array.isArray(a04Logs)) {
+                    a04Logs.forEach(log => {
+                        const type = AMMO_KEY_MAP[log.type] || log.type;
+                        if (prevBalances[type] === undefined) return;
+                        if (log.date < CURRENT_DATE) {
+                            prevBalances[type] += (Number(log.inQty) || 0) - (Number(log.outQty) || 0);
+                        }
+                    });
+                }
+            }
+
+            // 3. 당일(CURRENT_DATE) 입고 및 출고는 A04 로그에서 목적에 맞게 합산
+            let todayInputs = { "엽탄": 0, "22탄": 0, "32탄": 0 };
+            let todayOutputs = { "엽탄": 0, "22탄": 0, "32탄": 0 };
+            const a04Logs = JSON.parse(localStorage.getItem('DATA_A04_LOGS') || "[]");
+            const AMMO_KEY_MAP = { "2.2탄": "22탄", "3.2탄": "32탄" };
+            if (Array.isArray(a04Logs)) {
+                a04Logs.forEach(log => {
+                    const type = AMMO_KEY_MAP[log.type] || log.type;
+                    if (log.date === CURRENT_DATE) {
+                        todayInputs[type] += Number(log.inQty) || 0;
+                        todayOutputs[type] += Number(log.outQty) || 0;
+                    }
+                });
+            }
+
+            // 4. 표3(탄약 수불 현황) 전날잔고, 입고, 출고 대입 (엽탄=1, 22탄=2, 32탄=3)
+            const ammoTypes = {
+                "엽탄": 1,
+                "22탄": 2,
+                "32탄": 3
+            };
+
+            Object.keys(ammoTypes).forEach(type => {
+                const colIdx = ammoTypes[type];
+
+                const elPrev = document.getElementById(`ammo_prev_${colIdx}`);
+                if (elPrev) elPrev.value = (prevBalances[type] || 0).toLocaleString();
+
+                const elIn = document.getElementById(`ammo_in_${colIdx}`);
+                if (elIn) elIn.value = (todayInputs[type] || 0).toLocaleString();
+
+                const elOut = document.getElementById(`ammo_out_${colIdx}`);
+                if (elOut) elOut.value = (todayOutputs[type] || 0).toLocaleString();
+            });
+
+            // 5. 합계 열(Col 0) 및 잔고 행(balance) 자동 합산 업데이트
+            calcAmmoSummary();
+        }
+
+        function getExpectedAmmoType(gunType) {
+            const gt = String(gunType || "").trim();
+            if (gt.includes("엽총") || gt.includes("엽탄")) return "엽탄";
+            if (gt.includes("32") || gt.includes("3.2")) return "32탄";
+            return "22탄";
+        }
+
+        function isAmmoTypeMatch(a4Type, expectedType) {
+            if (expectedType === "엽탄") return a4Type === "엽탄";
+            if (expectedType === "32탄" || expectedType === "3.2탄") return a4Type === "32탄" || a4Type === "3.2탄";
+            if (expectedType === "22탄" || expectedType === "2.2탄") return a4Type === "22탄" || a4Type === "2.2탄";
+            return false;
+        }
+
+        function populateTable5() {
+            const a02Logs = JSON.parse(localStorage.getItem('DATA_A02_LOGS') || "[]");
+            const a04Logs = JSON.parse(localStorage.getItem('DATA_A04_LOGS') || "[]");
+            const a01Players = JSON.parse(localStorage.getItem(KEYS.A01) || "[]");
+
+            // 오늘 날짜 A02 기록을 id 오름차순 정렬 (등록 순서)
+            const todayA02 = a02Logs
+                .filter(log => log.date === CURRENT_DATE)
+                .sort((a, b) => (a.id || 0) - (b.id || 0));
+
+            const body = document.getElementById('table5-body');
+            body.innerHTML = '';
+
+            const processedKeys = new Set();
+
+            todayA02.forEach((log, idx) => {
+                const tr = document.createElement('tr');
+
+                const name = String(log.userName || log.name || '').trim();
+                const matchedPlayer = a01Players.find(p => String(p.userName || p.name || '').trim() === name);
+
+                const birth = String(log.birthDate || log.userBirth || log.birth || (matchedPlayer ? (matchedPlayer.birthDate || matchedPlayer.userBirth || matchedPlayer.birth || '') : '')).trim();
+                const team = String(log.affiliation || log.team || (matchedPlayer ? (matchedPlayer.affiliation || matchedPlayer.team || '') : '')).trim();
+                const gunTypeNorm = normalizeGunType(log.gunType || '');
+
+                const groupKey = `${name}|${birth}|${team}|${gunTypeNorm}`;
+
+                let outSum = 0, inSum = 0;
+
+                // 성명(생년월일), 소속, 총종이 같으면 최초 한 번만 출고/입고 입력값 세팅
+                if (!processedKeys.has(groupKey)) {
+                    processedKeys.add(groupKey);
+
+                    // 해당 총종에 대응하는 예상 탄종 (엽총->엽탄, 화약권총/소총->22탄, 화약권총(32)->32탄)
+                    const expectedAmmo = getExpectedAmmoType(log.gunType);
+
+                    // A04에서 해당 사용자의 오늘 탄약 수불 중 총종에 맞게 매칭되는 탄약 합산
+                    const userA04Logs = a04Logs.filter(a4 =>
+                        a4.date === CURRENT_DATE &&
+                        a4.name === name &&
+                        ["훈련", "대회"].includes(a4.purpose) &&
+                        isAmmoTypeMatch(a4.type, expectedAmmo)
+                    );
+                    userA04Logs.forEach(a4 => {
+                        outSum += Number(a4.outQty) || 0;
+                        inSum += Number(a4.inQty) || 0;
+                    });
+                }
+
+                // 출고시간·입고시간: A02 로그의 outTime / inTime 직접 매칭
+                const outTimeStr = (log.outTime && log.outTime !== '-') ? `${log.date} ${log.outTime}` : '-';
+                const inTimeStr = (log.inTime && log.inTime !== '-') ? `${log.date} ${log.inTime}` : '-';
+
+                tr.innerHTML = `
+        <td><input type="text" id="use_type_${idx}"    class="input-blank" value="${gunTypeNorm}"></td>
+        <td><input type="text" id="use_name_${idx}"    class="input-blank" value="${name}"></td>
+        <td><input type="text" id="use_outTime_${idx}" class="input-blank" value="${outTimeStr}"></td>
+        <td><input type="text" id="use_inTime_${idx}"  class="input-blank" value="${inTimeStr}"></td>
+        <td><input type="text" id="use_outQty_${idx}"  class="input-blank" value="${outSum}"></td>
+        <td><input type="text" id="use_inQty_${idx}"   class="input-blank" value="${inSum}"></td>
+        `;
+                body.appendChild(tr);
+            });
+        }
+
+        function populateTable6() {
+            const a03Logs = JSON.parse(localStorage.getItem('PRO_TEMP_GUNS') || "[]");
+            const a04Logs = JSON.parse(localStorage.getItem('DATA_A04_LOGS') || "[]");
+
+            // 오늘 날짜 기록 + 과거 미반납(status === '출고') 기록 포함, id 오름차순
+            const filteredA03 = a03Logs
+                .filter(log => {
+                    const isToday = log.date === CURRENT_DATE;
+                    const isUnreturnedPast = log.date < CURRENT_DATE && log.status === '출고';
+                    return isToday || isUnreturnedPast;
+                })
+                .sort((a, b) => (a.id || 0) - (b.id || 0));
+
+            const body = document.getElementById('table6-body');
+            body.innerHTML = '';
+
+            const processedKeys = new Set();
+
+            filteredA03.forEach((log, idx) => {
+                const tr = document.createElement('tr');
+
+                const name = String(log.userName || log.name || '').trim();
+                const gunTypeNorm = normalizeGunType(log.gunType || '');
+                const groupKey = `${name}|${gunTypeNorm}`;
+
+                let outQtyVal = 0;
+                let inQtyVal = 0;
+
+                // 총종, 성명이 같으면 최초 한 번만 실탄 표시, 나머지 같은 총종은 0으로 표시
+                if (!processedKeys.has(groupKey)) {
+                    processedKeys.add(groupKey);
+
+                    // 당일 출고된 총기에 대해 A04 관리전환 탄약 매칭
+                    if (log.date === CURRENT_DATE) {
+                        const expectedAmmo = getExpectedAmmoType(log.gunType);
+                        const userA04Logs = a04Logs.filter(a4 =>
+                            a4.date === CURRENT_DATE &&
+                            a4.name === name &&
+                            a4.purpose === "관리전환" &&
+                            isAmmoTypeMatch(a4.type, expectedAmmo)
+                        );
+                        let outSum = 0, inSum = 0;
+                        userA04Logs.forEach(a4 => {
+                            outSum += Number(a4.outQty) || 0;
+                            inSum += Number(a4.inQty) || 0;
+                        });
+                        outQtyVal = outSum;
+                        inQtyVal = inSum;
+                    }
+                }
+
+                // 출고시간·입고시간: A03 로그의 outTime / inTime 직접 매칭
+                const outTimeStr = (log.outTime && log.outTime !== '-') ? `${log.date} ${log.outTime}` : '-';
+                const inTimeStr = (log.inTime && log.inTime !== '-') ? `${log.date} ${log.inTime}` : '-';
+
+                tr.innerHTML = `
+        <td><input type="text" id="trans_type_${idx}"    class="input-blank" value="${gunTypeNorm}"></td>
+        <td><input type="text" id="trans_name_${idx}"    class="input-blank" value="${name}"></td>
+        <td><input type="text" id="trans_outTime_${idx}" class="input-blank" value="${outTimeStr}"></td>
+        <td><input type="text" id="trans_inTime_${idx}"  class="input-blank" value="${inTimeStr}"></td>
+        <td><input type="text" id="trans_outQty_${idx}"  class="input-blank" value="${outQtyVal}"></td>
+        <td><input type="text" id="trans_inQty_${idx}"   class="input-blank" value="${inQtyVal}"></td>
+        `;
+                body.appendChild(tr);
+            });
+        }
+
+
+        function searchList() {
+            currentPage = 1;
+            renderList();
+        }
+
+        function renderList() {
+            const raw = JSON.parse(localStorage.getItem(KEYS.A06) || "{}");
+            let list = Object.keys(raw)
+                .map(date => ({ date, ...raw[date] }))
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            if (startDate) {
+                list = list.filter(x => x.date >= startDate);
+            }
+            if (endDate) {
+                list = list.filter(x => x.date <= endDate);
+            }
+
+            const keyword = document.getElementById('search-keyword').value.trim();
+            if (keyword) {
+                list = list.filter(x =>
+                    (x.worker1 || '').includes(keyword) ||
+                    (x.worker2 || '').includes(keyword)
+                );
+            }
+
+            document.getElementById('total-count').innerText = list.length;
+            const totalPages = Math.ceil(list.length / ITEMS_PER_PAGE) || 1;
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const pageList = list.slice(start, start + ITEMS_PER_PAGE);
+
+            const body = document.getElementById('list-body');
+            body.innerHTML = '';
+
+            if (pageList.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" style="padding:30px;">등록된 일지가 없습니다.</td></tr>`;
+            } else {
+                pageList.forEach((item, idx) => {
+                    body.innerHTML += `
+            <tr>
+                <td>${list.length - start - idx}</td>
+                <td style="text-align:left; font-weight:700; cursor:pointer;" onclick="openReport('${item.date}')">
+                    ${item.date} 
+                </td>
+                <td>${item.date}</td>
+                <td>${item.worker2 || '-'}</td>
+                <td>
+                    <button class="btn btn-save" style="padding:4px 8px; font-size:12px;" onclick="openReport('${item.date}')">수정</button>
+                    <button class="btn btn-del" style="padding:4px 8px; font-size:12px;" onclick="deleteData('${item.date}')">삭제</button>
+                </td>
+            </tr>
+            `;
+                });
+            }
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination-container');
+            container.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn ' + (i === currentPage ? 'active' : '');
+                btn.innerText = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderList();
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function openReport(date = '') {
+            document.getElementById('list-page').classList.add('hidden');
+            document.getElementById('report-page').classList.remove('hidden');
+
+            if (date === '') {
+                CURRENT_DATE = getTodayStr();
+                const raw = JSON.parse(localStorage.getItem(KEYS.A06) || "{}");
+                if (raw[CURRENT_DATE]) {
+                    loadData();
+                } else {
+                    resetForm();
+                }
+            } else {
+                CURRENT_DATE = date;
+                loadData();
+            }
+            document.getElementById('currentDate').innerText = CURRENT_DATE + " ";
+        }
+
+        function closeReport() {
+            document.getElementById('report-page').classList.add('hidden');
+            document.getElementById('list-page').classList.remove('hidden');
+            renderList();
+        }
+
+        function resetForm() {
+            ['worker1', 'worker2', 'giver', 'taker'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            if (document.getElementById('worker1_vac')) document.getElementById('worker1_vac').checked = false;
+            if (document.getElementById('worker2_vac')) document.getElementById('worker2_vac').checked = false;
+            document.getElementById('memo').value = '';
+            updatePrintDisplays();
+            buildTables();
+        }
+
+        function saveData() {
+            const raw = JSON.parse(localStorage.getItem(KEYS.A06) || "{}");
+
+            const record = {
+                worker1: document.getElementById('worker1').value,
+                worker1_vac: !!document.getElementById('worker1_vac')?.checked,
+                worker2: document.getElementById('worker2').value,
+                worker2_vac: !!document.getElementById('worker2_vac')?.checked,
+                giver: document.getElementById('giver').value,
+                taker: document.getElementById('taker').value,
+                memo: document.getElementById('memo').value,
+                guns: {},
+                ammo: {},
+                usage: { use: [], trans: [] }
+            };
+
+            [...GUN_TYPES, '합계'].forEach(type => {
+                record.guns[type] = {};
+                ['total', 'remain', 'dout', 'din', 'tout', 'tin', 'status'].forEach(id => {
+                    const el = document.getElementById(`gun_${type}_${id}`);
+                    record.guns[type][id] = el ? el.value : '';
+                });
+            });
+
+            const AMMO_KEYS = ['prev', 'in', 'out', 'balance'];
+            AMMO_KEYS.forEach(row => {
+                record.ammo[row] = [];
+                [0, 1, 2, 3].forEach(i => {
+                    const el = document.getElementById(`ammo_${row}_${i}`);
+                    record.ammo[row].push(el ? el.value : '0');
+                });
+            });
+
+            // 3. 사용 내역 테이블 데이터 수집
+            ['use', 'trans'].forEach(prefix => {
+                const bodyId = prefix === 'use' ? 'table5-body' : 'table6-body';
+                const tbody = document.getElementById(bodyId);
+                const rows = tbody.querySelectorAll('tr');
+
+                rows.forEach((tr, i) => {
+                    const elType = document.getElementById(`${prefix}_type_${i}`);
+                    const elName = document.getElementById(`${prefix}_name_${i}`);
+                    const elOutTime = document.getElementById(`${prefix}_outTime_${i}`);
+                    const elInTime = document.getElementById(`${prefix}_inTime_${i}`);
+                    const elOutQty = document.getElementById(`${prefix}_outQty_${i}`);
+                    const elInQty = document.getElementById(`${prefix}_inQty_${i}`);
+
+                    record.usage[prefix].push({
+                        type: elType ? elType.value : '',
+                        name: elName ? elName.value : '',
+                        outTime: elOutTime ? elOutTime.value : '',
+                        inTime: elInTime ? elInTime.value : '',
+                        outQty: elOutQty ? elOutQty.value : '0',
+                        inQty: elInQty ? elInQty.value : '0'
+                    });
+                });
+            });
+
+            raw[CURRENT_DATE] = record;
+            localStorage.setItem(KEYS.A06, JSON.stringify(raw));
+            alert('저장되었습니다.');
+            closeReport();
+        }
+
+        function loadData() {
+            const raw = JSON.parse(localStorage.getItem(KEYS.A06) || "{}");
+            const data = raw[CURRENT_DATE];
+            if (!data) return;
+
+            buildTables();
+
+            document.getElementById('worker1').value = data.worker1 || '';
+            if (document.getElementById('worker1_vac')) {
+                document.getElementById('worker1_vac').checked = !!data.worker1_vac;
+            }
+            document.getElementById('worker2').value = data.worker2 || '';
+            if (document.getElementById('worker2_vac')) {
+                document.getElementById('worker2_vac').checked = !!data.worker2_vac;
+            }
+            document.getElementById('giver').value = data.giver || '';
+            document.getElementById('taker').value = data.taker || '';
+            document.getElementById('memo').value = data.memo || '';
+
+            updatePrintDisplays();
+
+            if (data.guns) {
+                const a01Players = JSON.parse(localStorage.getItem(KEYS.A01) || "[]");
+                const a02Logs = JSON.parse(localStorage.getItem(KEYS.A02) || "[]");
+                const a03Logs = JSON.parse(localStorage.getItem(KEYS.A03) || "[]");
+
+                [...GUN_TYPES, '합계'].forEach(type => {
+                    if (data.guns[type]) {
+                        ['total', 'remain', 'dout', 'din', 'tout', 'tin', 'status'].forEach(id => {
+                            const target = document.getElementById(`gun_${type}_${id}`);
+                            if (target) {
+                                if (id === 'total' && type !== '합계') {
+                                    // ① 전체총계: A01 마스터 등록 수
+                                    target.value = a01Players.filter(p => matchGunType(p, type)).length;
+
+                                } else if (id === 'dout' && type !== '합계' && Array.isArray(a02Logs)) {
+                                    // ② 일일사용 출고: inTime 없음(출고중)
+                                    const todayA02 = a02Logs.filter(l => l.date === CURRENT_DATE && matchGunType(l, type));
+                                    target.value = todayA02.filter(l => !l.inTime || l.inTime.trim() === '' || l.inTime === '-').length;
+
+                                } else if (id === 'din' && type !== '합계' && Array.isArray(a02Logs)) {
+                                    // ② 일일사용 입고: inTime 있음(입고완료)
+                                    const todayA02 = a02Logs.filter(l => l.date === CURRENT_DATE && matchGunType(l, type));
+                                    target.value = todayA02.filter(l => l.inTime && l.inTime.trim() !== '' && l.inTime !== '-').length;
+
+                                } else if (id === 'tout' && type !== '합계' && Array.isArray(a03Logs)) {
+                                    // ③ 일시전환 출고: status === '출고'
+                                    target.value = a03Logs.filter(l => l.date === CURRENT_DATE && matchGunType(l, type) && l.status === '출고').length;
+
+                                } else if (id === 'tin' && type !== '합계' && Array.isArray(a03Logs)) {
+                                    // ③ 일시전환 입고: status === '입고'
+                                    target.value = a03Logs.filter(l => l.date === CURRENT_DATE && matchGunType(l, type) && l.status === '입고').length;
+
+                                } else if (id === 'status') {
+                                    // ④ 일시전환관리현황: A03 미반납(출고 상태) 총기 수
+                                    if (type === '합계') {
+                                        const totalActive = Array.isArray(a03Logs)
+                                            ? a03Logs.filter(l => l.status === '출고').length : 0;
+                                        target.value = totalActive.toLocaleString();
+                                    } else {
+                                        const activeCount = Array.isArray(a03Logs)
+                                            ? a03Logs.filter(l => matchGunType(l, type) && l.status === '출고').length : 0;
+                                        target.value = activeCount.toLocaleString();
+                                    }
+                                } else {
+                                    target.value = data.guns[type][id] || '';
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            if (data.ammo) {
+                const AMMO_MAPPING = [
+                    { key: 'prev', legacy: '전날잔고' },
+                    { key: 'in', legacy: '입고' },
+                    { key: 'out', legacy: '출고' },
+                    { key: 'balance', legacy: '잔고' }
+                ];
+                AMMO_MAPPING.forEach(item => {
+                    const ammoData = data.ammo[item.key] || data.ammo[item.legacy];
+                    if (ammoData) {
+                        [0, 1, 2, 3].forEach(i => {
+                            const target = document.getElementById(`ammo_${item.key}_${i}`);
+                            if (target) target.value = ammoData[i] || '0';
+                        });
+                    }
+                });
+            }
+
+            if (data.usage) {
+                ['use', 'trans'].forEach(prefix => {
+                    const bodyId = prefix === 'use' ? 'table5-body' : 'table6-body';
+                    const body = document.getElementById(bodyId);
+                    body.innerHTML = ''; // Clear completely first
+
+                    const rowData = data.usage[prefix] || [];
+                    rowData.forEach((item, i) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                <td><input type="text" id="${prefix}_type_${i}" class="input-blank" value="${item.type || ''}"></td>
+                <td><input type="text" id="${prefix}_name_${i}" class="input-blank" value="${item.name || ''}"></td>
+                <td><input type="text" id="${prefix}_outTime_${i}" class="input-blank" value="${item.outTime || ''}"></td>
+                <td><input type="text" id="${prefix}_inTime_${i}" class="input-blank" value="${item.inTime || ''}"></td>
+                <td><input type="text" id="${prefix}_outQty_${i}" class="input-blank" value="${item.outQty || '0'}"></td>
+                <td><input type="text" id="${prefix}_inQty_${i}" class="input-blank" value="${item.inQty || '0'}"></td>
+                `;
+                        body.appendChild(tr);
+                    });
+                });
+            }
+
+            const memo = document.getElementById('memo');
+            if (memo) {
+                memo.style.height = 'auto';
+                memo.style.height = memo.scrollHeight + 'px';
+            }
+
+            calcGunSummary();
+            calcAmmoSummary();
+            populateTable5();
+            populateTable6();
+        }
+
+        function deleteData(date) {
+            if (!confirm(date + ' 일지를 삭제하시겠습니까?')) {
+                return;
+            }
+            const raw = JSON.parse(localStorage.getItem(KEYS.A06) || "{}");
+            delete raw[date];
+            localStorage.setItem(KEYS.A06, JSON.stringify(raw));
+            renderList();
+        }
+
+        function printReport() {
+            updatePrintDisplays();
+            window.print();
+        }
+    </script>
+</body>
+
+</html>

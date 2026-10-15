@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>선수관리 (B01)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f4f7f6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .contest-title-input {
+            font-size: 2.2em;
+            font-weight: bold;
+            border: none;
+            border-bottom: 2px solid var(--accent);
+            background: transparent;
+            text-align: center;
+            width: 80%;
+            padding: 10px;
+            outline: none;
+            color: var(--primary);
+        }
+
+        /* 상단 현황판 */
+        .summary-bar {
+            display: flex;
+            justify-content: space-around;
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        .summary-item span {
+            color: #f1c40f;
+            margin-left: 5px;
+            font-size: 1.1em;
+        }
+
+        .summary-item.total {
+            border-left: 2px solid #555;
+            padding-left: 20px;
+        }
+
+        .summary-item.total span {
+            color: #2ecc71;
+        }
+
+        /* 입고 현황판 (핑크색) */
+        .incoming-bar {
+            background: #fff0f5;
+            color: #c2185b;
+            border: 1px solid #f8bbd0;
+            margin-bottom: 25px;
+        }
+
+        .incoming-bar .summary-item span {
+            color: #d81b60;
+        }
+
+        .incoming-bar .summary-item.total {
+            border-left: 2px solid #f8bbd0;
+        }
+
+        .incoming-bar .summary-item.total span {
+            color: #e91e63;
+        }
+
+        /* 입고 행 초록색 바탕화면 */
+        tr.incoming-row {
+            background-color: #e8f5e9 !important;
+        }
+
+        tr.incoming-row td,
+        tr.incoming-row td small,
+        tr.incoming-row td .td-gun-detail {
+            color: #1b5e20 !important;
+        }
+
+        /* 출고 행 핑크색 바탕화면 */
+        tr.outgoing-row {
+            background-color: #fce4ec !important;
+        }
+
+        tr.outgoing-row td,
+        tr.outgoing-row td small,
+        tr.outgoing-row td .td-gun-detail {
+            color: #c2185b !important;
+        }
+
+        /* 목록(테이블) 행 마우스 올릴 때(Hover) 행 전체 파란색 바탕 표시 */
+        #playerTableBody tr:hover,
+        #playerTableBody tr.incoming-row:hover,
+        #playerTableBody tr.outgoing-row:hover {
+            background-color: #ff9560 !important;
+            transition: background-color 0.15s ease;
+        }
+
+        #playerTableBody tr:hover td,
+        #playerTableBody tr:hover td small,
+        #playerTableBody tr:hover td .td-gun-detail {
+            color: #0958d9 !important;
+        }
+
+        /* 입력 폼 섹션 */
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input,
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-sort-num {
+            background: #2c3e50;
+            color: white;
+            border: 1px solid #1a252f;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-sort-num:hover {
+            background: #34495e;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .btn-cal {
+            flex: 1;
+            padding: 8px 4px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #ccc;
+            background: #fff;
+            color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-cal:hover {
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+
+        .btn-cal.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+            box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-reg {
+            background: var(--accent);
+            flex: 1;
+        }
+
+        .btn-update {
+            background: #f39c12;
+            flex: 1;
+            display: none;
+        }
+
+        .bottom-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .btn-excel {
+            background: var(--success);
+        }
+
+        .btn-print {
+            background: #8e44ad;
+        }
+
+        .btn-del-selected {
+            background: var(--danger);
+        }
+
+        /* 필터링 섹션 */
+        .filter-section {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: #eee;
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .btn-filter {
+            padding: 6px 12px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: 0.2s;
+            color: #555;
+        }
+
+        .btn-filter.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .search-box {
+            margin-left: auto;
+        }
+
+        .search-input {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            width: 200px;
+        }
+
+        /* 테이블 스타일 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        th,
+        td {
+            border: 1px solid #eee;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+        }
+
+        .td-name {
+            line-height: 1.4;
+        }
+
+        .td-name small {
+            color: #666;
+            font-size: 0.85em;
+            display: block;
+        }
+
+        .td-gun-detail {
+            color: #555;
+        }
+
+        @media print {
+
+            .form-section,
+            .btn-group,
+            .bottom-controls,
+            .filter-section,
+            th:last-child,
+            td:last-child,
+            th:first-child,
+            td:first-child,
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* 단체등록 모달 스타일 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 1300px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: #fff;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fdfdfd;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 55vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .batch-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .batch-table th {
+            background: #f4f6f8;
+            color: #333;
+            font-weight: bold;
+            padding: 10px;
+            border: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .batch-table td {
+            padding: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .batch-table input,
+        .batch-table select {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .batch-table input:focus,
+        .batch-table select:focus {
+            border-color: var(--accent);
+        }
+
+        /* 실탄입고수량 숫자 입력 박스 상하 버튼 제거 */
+        .batch-ammoQty::-webkit-outer-spin-button,
+        .batch-ammoQty::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .batch-ammoQty {
+            -moz-appearance: textfield;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-section">
+            <input type="text" id="contest-title" class="contest-title-input" placeholder="대회 명칭 입력"
+                oninput="saveTitle(this.value)">
+        </div>
+
+        <!-- 상단 요약 바 -->
+        <div class="summary-bar">
+            <div class="summary-item"
+                style="color: #fff; font-weight: bold; padding-right: 10px; border-right: 2px solid #555; margin-right: 10px;">
+                등록총기 </div>
+            <div class="summary-item">엽총 <span id="cnt-엽총">0</span></div>
+            <div class="summary-item">화약권총 <span id="cnt-화약권총">0</span></div>
+            <div class="summary-item">화약권총(32) <span id="cnt-화약권총(32)">0</span></div>
+            <div class="summary-item">화약소총 <span id="cnt-화약소총">0</span></div>
+            <div class="summary-item">공기권총 <span id="cnt-공기권총">0</span></div>
+            <div class="summary-item">공기소총 <span id="cnt-공기소총">0</span></div>
+            <div class="summary-item total">전체 <span id="cnt-전체">0</span></div>
+        </div>
+
+        <!-- 입고 현황 바 (핑크색) -->
+        <div class="summary-bar incoming-bar no-print">
+            <div class="summary-item"
+                style="color: #c2185b; font-weight: bold; padding-right: 10px; border-right: 2px solid #f8bbd0; margin-right: 10px;">
+                입고총기 </div>
+            <div class="summary-item">엽총 <span id="in-cnt-엽총">0</span></div>
+            <div class="summary-item">화약권총 <span id="in-cnt-화약권총">0</span></div>
+            <div class="summary-item">화약권총(32) <span id="in-cnt-화약권총(32)">0</span></div>
+            <div class="summary-item">화약소총 <span id="in-cnt-화약소총">0</span></div>
+            <div class="summary-item">공기권총 <span id="in-cnt-공기권총">0</span></div>
+            <div class="summary-item">공기소총 <span id="in-cnt-공기소총">0</span></div>
+            <div class="summary-item total">전체 <span id="in-cnt-전체">0</span></div>
+        </div>
+
+        <!-- 입력 섹션 -->
+        <div class="form-section">
+            <input type="hidden" id="editId">
+            <div class="input-group"><label>선수명</label><input type="text" id="userName" placeholder="선수 성명 (필수)"></div>
+            <div class="input-group"><label>생년월일</label><input type="text" id="userBirth" placeholder="YYMMDD"></div>
+            <div class="input-group"><label>소속</label><input type="text" id="affiliation" placeholder="소속 팀/기관"></div>
+            <div class="input-group"><label>총기종류</label>
+                <select id="gunType">
+                    <option value="">-- 선택 --</option>
+                    <option value="엽총">엽총</option>
+                    <option value="화약권총">화약권총</option>
+                    <option value="화약권총(32)">화약권총(32)</option>
+                    <option value="화약소총">화약소총</option>
+                    <option value="공기권총">공기권총</option>
+                    <option value="공기소총">공기소총</option>
+                </select>
+            </div>
+            <div class="input-group"><label>총기명칭</label><input type="text" id="gunName" placeholder="예: 스태어 LP10"></div>
+            <div class="input-group"><label>총기번호</label><input type="text" id="gunNumber" placeholder="Serial No.">
+            </div>
+            <div class="input-group">
+                <label>구경</label>
+                <input type="hidden" id="gunCaliber" value="">
+                <div class="cal-toggle-group" style="display: flex; gap: 4px; width: 100%;">
+                    <button type="button" class="btn-cal" data-val="2.2"
+                        onclick="selectCaliber('2.2', this)">2.2</button>
+                    <button type="button" class="btn-cal" data-val="3.2"
+                        onclick="selectCaliber('3.2', this)">3.2</button>
+                    <button type="button" class="btn-cal" data-val="4.5"
+                        onclick="selectCaliber('4.5', this)">4.5</button>
+                    <button type="button" class="btn-cal" data-val="12G"
+                        onclick="selectCaliber('12G', this)">12G</button>
+                </div>
+            </div>
+            <div class="input-group"><label>바코드</label><input type="text" id="barcode" placeholder="바코드 정보 (선택)"></div>
+            <div class="input-group"><label>연락처</label><input type="text" id="contact" placeholder="010-0000-0000">
+            </div>
+            <div></div>
+            <div></div>
+            <div class="input-group" style="display: flex; align-items: flex-end;">
+                <button type="button" class="btn"
+                    style="background: #8e44ad; width: 100%; padding: 10px; font-size: 13px;"
+                    onclick="openBatchPopup()">👥 단체등록 (최대 20명)</button>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button id="addBtn" class="btn btn-reg" onclick="savePlayer()">선수 등록</button>
+            <button id="updateBtn" class="btn btn-update" onclick="savePlayer()">수정 완료</button>
+        </div>
+
+        <!-- 입고/출고 상태변경 -->
+        <div class="no-print"
+            style="background: #fdf2f4; border: 1px solid #f8bbd0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
+            <span
+                style="font-weight: bold; color: #c2185b; font-size: 1.05em; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                🔄 선수총기 입고/출고 등록(상태변경)
+            </span>
+            <input type="text" id="barcodeSearch" placeholder="바코드 스캔 또는 성명 입력 후 Enter"
+                onkeypress="if(event.keyCode==13) handleBarcodeSearch()"
+                style="max-width: 350px; padding: 10px 15px; border: 1px solid #f8bbd0; border-radius: 6px; font-size: 14px; outline: none; flex: 1;">
+            <span id="scanFeedback" style="font-weight: bold; color: #d81b60; font-size: 0.95em;"></span>
+        </div>
+
+        <!-- 필터링 및 검색 -->
+        <div class="filter-section">
+            <button class="btn-filter active" onclick="filterByGun('전체', this)">전체</button>
+            <button class="btn-filter" onclick="filterByGun('엽총', this)">엽총</button>
+            <button class="btn-filter" onclick="filterByGun('화약권총', this)">화약권총</button>
+            <button class="btn-filter" onclick="filterByGun('화약권총(32)', this)">화약권총(32)</button>
+            <button class="btn-filter" onclick="filterByGun('화약소총', this)">화약소총</button>
+            <button class="btn-filter" onclick="filterByGun('공기권총', this)">공기권총</button>
+            <button class="btn-filter" onclick="filterByGun('공기소총', this)">공기소총</button>
+            <div class="search-box"><input type="text" id="searchInput" class="search-input"
+                    placeholder="성명, 소속 또는 바코드 검색..." onkeyup="loadList()"></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="checkAll" onclick="toggleAll(this)"></th>
+                    <th>
+                        <button type="button" class="btn-sort-num" onclick="toggleSortOrder()"
+                            title="클릭 시 최신순 / 마지막순 정렬">
+                            번호 <span id="sortOrderIcon">▼</span>
+                        </button>
+                    </th>
+                    <th>바코드</th>
+                    <th>소속</th>
+                    <th>성명(생년월일)</th>
+                    <th>총기종류</th>
+                    <th>총기번호</th>
+                    <th>총기명칭</th>
+                    <th>구경</th>
+                    <th>연락처</th>
+                    <th class="no-print">상태</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody id="playerTableBody"></tbody>
+        </table>
+
+        <div class="bottom-controls">
+            <button class="btn btn-del-selected" onclick="deleteChecked()">선택삭제</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-excel" onclick="exportToExcel()">Excel 저장</button>
+                <button class="btn btn-print" onclick="window.print()">인쇄하기</button>
+            </div>
+        </div>
+
+        <!-- 단체등록 팝업 모달 -->
+        <div id="batchModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>👥 단체 등록 (최대 20명)</h3>
+                    <button class="close-btn" onclick="closeBatchPopup()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                        * 선수명과 총기종류는 필수 입력 항목입니다. 작성 중인 행만 등록됩니다.
+                    </p>
+                    <div class="table-container">
+                        <table class="batch-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;">번호</th>
+                                    <th>선수성명 *</th>
+                                    <th>생년월일</th>
+                                    <th>소속</th>
+                                    <th style="width: 140px;">총기종류 *</th>
+                                    <th>총기명칭</th>
+                                    <th>총기번호</th>
+                                    <th>구경</th>
+                                    <th>바코드</th>
+                                    <th>연락처</th>
+                                    <th style="width: 90px;">실탄입고수량</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchTableBody">
+                                <!-- JS가 20개의 행을 생성합니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-print" onclick="clearBatchForm()">초기화</button>
+                    <button class="btn" style="background:#27ae60; color:white;" onclick="addBatchRow()">추가</button>
+                    <button class="btn btn-reg" onclick="submitBatchRegistration('출고')">등록/출고상태</button>
+                    <button class="btn" style="background:#27ae60;"
+                        onclick="submitBatchRegistration('입고')">등록/입고상태</button>
+                    <button class="btn btn-del-selected" onclick="closeBatchPopup()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'PLAYER_MASTER';
+        const TITLE_KEY = 'CONTEST_TITLE_PLAYER';
+        let currentFilter = '전체';
+        let currentSortOrder = 'latest'; // 'latest': 최신순, 'oldest': 마지막순
+
+        function toggleSortOrder() {
+            currentSortOrder = (currentSortOrder === 'latest') ? 'oldest' : 'latest';
+            const icon = document.getElementById('sortOrderIcon');
+            if (icon) {
+                icon.innerText = (currentSortOrder === 'latest') ? '▼' : '▲';
+            }
+            loadList();
+        }
+
+        function selectCaliber(val, btn) {
+            document.getElementById('gunCaliber').value = val;
+            document.querySelectorAll('.btn-cal').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        function formatBirthdate(val) {
+            const digits = val.replace(/\D/g, '').substring(0, 6);
+            if (digits.length <= 2) return digits;
+            if (digits.length <= 4) return digits.substring(0, 2) + '.' + digits.substring(2);
+            return digits.substring(0, 2) + '.' + digits.substring(2, 4) + '.' + digits.substring(4);
+        }
+
+        function formatContact(val) {
+            const digits = val.replace(/\D/g, '').substring(0, 11);
+            if (digits.length <= 3) return digits;
+            if (digits.length <= 7) {
+                return digits.substring(0, 3) + '-' + digits.substring(3);
+            }
+            if (digits.length <= 10) {
+                return digits.substring(0, 3) + '-' + digits.substring(3, 6) + '-' + digits.substring(6);
+            }
+            return digits.substring(0, 3) + '-' + digits.substring(3, 7) + '-' + digits.substring(7);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('contest-title').value = localStorage.getItem(TITLE_KEY) || "";
+            loadList();
+            initBatchTable();
+
+            document.getElementById('userBirth').addEventListener('input', function () {
+                this.value = formatBirthdate(this.value);
+            });
+            document.getElementById('contact').addEventListener('input', function () {
+                this.value = formatContact(this.value);
+            });
+            document.getElementById('batchTableBody').addEventListener('input', (e) => {
+                if (e.target.classList.contains('batch-birth')) {
+                    e.target.value = formatBirthdate(e.target.value);
+                } else if (e.target.classList.contains('batch-contact')) {
+                    e.target.value = formatContact(e.target.value);
+                }
+            });
+            // 실탄입고수량 마우스 스크롤로 숫자 변경 방지
+            document.getElementById('batchTableBody').addEventListener('wheel', (e) => {
+                if (e.target.classList.contains('batch-ammoQty')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY) {
+                loadList();
+            }
+        });
+
+        function saveTitle(val) { localStorage.setItem(TITLE_KEY, val); }
+
+        function savePlayer() {
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('userName').value.trim();
+            const barcode = document.getElementById('barcode').value.trim();
+            const gunType = document.getElementById('gunType').value;
+
+            if (!name || !gunType) return alert("필수 항목을 입력하세요.");
+
+            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+            let existingStatus = '출고';
+            let existingInTimestamp = null;
+            let oldBarcode = '';
+            let oldName = '';
+            let oldAffil = '';
+            let oldBirth = '';
+
+            if (id) {
+                const existing = players.find(p => p.id === parseInt(id));
+                if (existing) {
+                    existingStatus = existing.status || '출고';
+                    existingInTimestamp = existing.inTimestamp || null;
+                    oldBarcode = existing.barcode || '';
+                    oldName = existing.userName || '';
+                    oldAffil = existing.affiliation || '';
+                    oldBirth = existing.userBirth || '';
+                }
+            }
+
+            const playerData = {
+                id: id ? parseInt(id) : Date.now(),
+                barcode, affiliation: document.getElementById('affiliation').value,
+                userName: name, userBirth: document.getElementById('userBirth').value,
+                gunType, gunName: document.getElementById('gunName').value,
+                gunNumber: document.getElementById('gunNumber').value,
+                gunCaliber: document.getElementById('gunCaliber').value,
+                contact: document.getElementById('contact').value,
+                status: existingStatus,
+                inTimestamp: existingInTimestamp
+            };
+
+            if (id) {
+                const idx = players.findIndex(p => p.id === parseInt(id));
+                players[idx] = playerData;
+            } else {
+                players.unshift(playerData);
+            }
+
+            // ── 바코드 수정 시 B03·B02 과거 기록 일괄 업데이트 ─────────────────
+            if (id && barcode !== oldBarcode) {
+                // B01 gunType을 B03 탄종으로 매핑하는 헬퍼
+                const getAmmoType = (gType) => {
+                    if (!gType) return "엽탄";
+                    if (gType.includes("엽총")) return "엽탄";
+                    if (gType.includes("화약권총(32)")) return "32탄";
+                    if (gType.includes("화약권총") || gType.includes("화약소총")) return "22탄";
+                    return "엽탄";
+                };
+                const expectedAmmoType = getAmmoType(gunType || playerData.gunType);
+
+                // B03 탄약 기록 매칭 (소속, 성명, 탄종이 같은 경우)
+                const isMatchAmmo = (l) => {
+                    if (oldBarcode && l.barcode === oldBarcode) return true;
+                    const isNameMatch = l.name === oldName || l.userName === oldName;
+                    const isAffilMatch = (l.affiliation || '') === (oldAffil || '');
+                    const isTypeMatch = l.type === expectedAmmoType;
+                    return isNameMatch && isAffilMatch && isTypeMatch;
+                };
+
+                // B02 총기 기록 매칭 (소속, 성명, 총종이 같은 경우)
+                const isMatchGun = (l) => {
+                    if (oldBarcode && l.barcode === oldBarcode) return true;
+                    const isNameMatch = l.userName === oldName || l.name === oldName;
+                    // B02의 l.info는 "소속 / 연락처" 형태이므로 앞부분 비교
+                    let isAffilMatch = false;
+                    if (l.info) {
+                        const parts = l.info.split(' / ');
+                        isAffilMatch = (parts[0] || '').trim() === (oldAffil || '').trim();
+                    } else {
+                        isAffilMatch = (oldAffil || '') === '';
+                    }
+                    const isGunTypeMatch = l.gunType === gunType;
+                    return isNameMatch && isAffilMatch && isGunTypeMatch;
+                };
+
+                // B03 탄약 기록 (AMMO_LOGS_B03)
+                const AMMO_KEY = 'AMMO_LOGS_B03';
+                let ammoLogs = JSON.parse(localStorage.getItem(AMMO_KEY) || '[]');
+                let ammoChanged = 0;
+                ammoLogs = ammoLogs.map(l => {
+                    if (isMatchAmmo(l)) { ammoChanged++; return { ...l, barcode }; }
+                    return l;
+                });
+                if (ammoChanged > 0) localStorage.setItem(AMMO_KEY, JSON.stringify(ammoLogs));
+
+                // B02 총기 출입고 기록 (smart_gun_history_v2)
+                const GUN_KEY = 'smart_gun_history_v2';
+                let gunLogs = JSON.parse(localStorage.getItem(GUN_KEY) || '[]');
+                let gunChanged = 0;
+                gunLogs = gunLogs.map(l => {
+                    if (isMatchGun(l)) { gunChanged++; return { ...l, barcode }; }
+                    return l;
+                });
+                if (gunChanged > 0) localStorage.setItem(GUN_KEY, JSON.stringify(gunLogs));
+
+                if (ammoChanged + gunChanged > 0) {
+                    console.log(`바코드 일괄 업데이트(${oldBarcode || '없음'} → ${barcode}): B03 ${ammoChanged}건, B02 ${gunChanged}건 수정 완료`);
+                }
+            }
+            // ────────────────────────────────────────────────────────────────
+
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+            resetForm();
+            loadList();
+        }
+
+
+        function loadList() {
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('playerTableBody');
+            tbody.innerHTML = '';
+
+            const counts = { '엽총': 0, '화약권총': 0, '화약권총(32)': 0, '화약소총': 0, '공기권총': 0, '공기소총': 0, '전체': 0 };
+            const inCounts = { '엽총': 0, '화약권총': 0, '화약권총(32)': 0, '화약소총': 0, '공기권총': 0, '공기소총': 0, '전체': 0 };
+
+            // 전체 마스터 데이터 순회하여 등록총기 및 입고총기 자동 계산
+            players.forEach(p => {
+                if (p.gunType in counts) {
+                    counts[p.gunType]++;
+                    counts['전체']++;
+                }
+                if (p.status === '입고') {
+                    if (p.gunType in inCounts) {
+                        inCounts[p.gunType]++;
+                        inCounts['전체']++;
+                    }
+                }
+            });
+
+            const filtered = players.filter(p => {
+                const matchesFilter = (currentFilter === '전체' || p.gunType === currentFilter);
+                const matchesSearch =
+                    (p.userName && p.userName.toLowerCase().includes(search)) ||
+                    (p.barcode && p.barcode.toLowerCase().includes(search)) ||
+                    (p.affiliation && p.affiliation.toLowerCase().includes(search));
+                return matchesFilter && matchesSearch;
+            });
+
+            // 정렬: 1순위 입고 상태 최상위, 2순위 입고시간순(최근 입고 상위), 3순위 번호 정렬 모드
+            filtered.sort((a, b) => {
+                const aIn = (a.status === '입고') ? 0 : 1;
+                const bIn = (b.status === '입고') ? 0 : 1;
+                if (aIn !== bIn) return aIn - bIn;
+
+                // 입고 상태인 경우: 최근 입고시간순 (내림차순)
+                if (a.status === '입고' && b.status === '입고') {
+                    const timeA = a.inTimestamp || a.id || 0;
+                    const timeB = b.inTimestamp || b.id || 0;
+                    if (timeA !== timeB) return timeB - timeA;
+                }
+
+                if (currentSortOrder === 'latest') {
+                    // 최신순 (최근 등록이 상위)
+                    return (b.id || 0) - (a.id || 0);
+                } else {
+                    // 마지막순 (과거 등록이 상위)
+                    return (a.id || 0) - (b.id || 0);
+                }
+            });
+
+            filtered.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                const statusText = p.status || '출고';
+                const isIncoming = statusText === '입고';
+
+                if (isIncoming) {
+                    tr.classList.add('incoming-row');
+                } else {
+                    tr.classList.add('outgoing-row');
+                }
+
+                const btnText = statusText;
+                const btnBg = isIncoming ? 'var(--success)' : '#e91e63';
+                const rowNum = currentSortOrder === 'latest' ? (filtered.length - idx) : (idx + 1);
+
+                tr.innerHTML = `
+                <td><input type="checkbox" class="chk" value="${p.id}"></td>
+                <td>${rowNum}</td>
+                <td>${p.barcode}</td>
+                <td>${p.affiliation}</td>
+                <td class="td-name">${p.userName}<br><small>(${p.userBirth || '미입력'})</small></td>
+                <td>${p.gunType}</td>
+                <td>${p.gunNumber || '-'}</td>
+                <td>${p.gunName || '-'}</td>
+                <td>${p.gunCaliber || '-'}</td>
+                <td>${p.contact}</td>
+                <td class="no-print"><button class="btn" style="background:${btnBg}; padding:5px 10px; font-size:12px;" onclick="toggleStatus(${p.id})">${btnText}</button></td>
+                <td><button class="btn" style="background:#f39c12; padding:5px 10px; font-size:12px;" onclick="editPlayer(${p.id})">수정</button></td>
+            `;
+                tbody.appendChild(tr);
+            });
+
+            Object.keys(counts).forEach(key => {
+                if (document.getElementById(`cnt-${key}`)) document.getElementById(`cnt-${key}`).innerText = counts[key];
+            });
+
+            Object.keys(inCounts).forEach(key => {
+                if (document.getElementById(`in-cnt-${key}`)) document.getElementById(`in-cnt-${key}`).innerText = inCounts[key];
+            });
+        }
+
+        function editPlayer(id) {
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const p = players.find(p => p.id === id);
+            if (!p) return;
+
+            document.getElementById('editId').value = p.id;
+            document.getElementById('barcode').value = p.barcode;
+            document.getElementById('affiliation').value = p.affiliation;
+            document.getElementById('userName').value = p.userName;
+            document.getElementById('userBirth').value = p.userBirth;
+            document.getElementById('gunType').value = p.gunType;
+            document.getElementById('gunName').value = p.gunName;
+            document.getElementById('gunNumber').value = p.gunNumber;
+            document.getElementById('gunCaliber').value = p.gunCaliber || '';
+            document.querySelectorAll('.btn-cal').forEach(b => {
+                b.classList.toggle('active', b.dataset.val === (p.gunCaliber || ''));
+            });
+            document.getElementById('contact').value = p.contact;
+
+            document.getElementById('addBtn').style.display = 'none';
+            document.getElementById('updateBtn').style.display = 'inline-block';
+            window.scrollTo(0, 0);
+        }
+
+        function resetForm() {
+            document.getElementById('editId').value = '';
+            document.querySelectorAll('.form-section input, .form-section select').forEach(el => el.value = '');
+            document.querySelectorAll('.btn-cal').forEach(b => b.classList.remove('active'));
+            document.getElementById('addBtn').style.display = 'inline-block';
+            document.getElementById('updateBtn').style.display = 'none';
+        }
+
+        function filterByGun(type, btn) {
+            currentFilter = type;
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadList();
+        }
+
+        function toggleAll(chk) { document.querySelectorAll('.chk').forEach(c => c.checked = chk.checked); }
+
+        function deleteChecked() {
+            if (!confirm("선택한 항목을 삭제하시겠습니까?")) return;
+            const checkedIds = Array.from(document.querySelectorAll('.chk:checked')).map(c => parseInt(c.value));
+            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            players = players.filter(p => !checkedIds.includes(p.id));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+            loadList();
+        }
+
+        function toggleStatus(id) {
+            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const idx = players.findIndex(p => p.id === id);
+            if (idx !== -1) {
+                const isNowIn = (players[idx].status !== '입고');
+                players[idx].status = isNowIn ? '입고' : '출고';
+                players[idx].inTimestamp = isNowIn ? Date.now() : null;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+                loadList();
+            }
+        }
+
+        function handleBarcodeSearch() {
+            const input = document.getElementById('barcodeSearch');
+            const query = input.value.trim().toLowerCase();
+            if (!query) return;
+
+            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const found = players.filter(p =>
+                p.barcode.toLowerCase() === query ||
+                (p.userName && p.userName.toLowerCase().includes(query))
+            );
+
+            if (found.length === 0) {
+                alert("일치하는 선수가 없습니다.");
+                input.value = '';
+                input.focus();
+                return;
+            }
+
+            let targetPlayer = null;
+            if (found.length > 1) {
+                const msg = found.map((p, idx) => {
+                    const birth = p.userBirth ? `(${p.userBirth})` : '';
+                    return `${idx + 1}. [소속: ${p.affiliation || '미지정'}] ${p.userName}${birth} / 총종: ${p.gunType || '미지정'} / 총기번호: ${p.gunNumber || '-'}`;
+                }).join('\n');
+                const choice = prompt(`여러 명의 선수가 검색되었습니다. 번호를 입력하세요:\n${msg}`);
+                if (choice) {
+                    const num = parseInt(choice);
+                    if (num > 0 && num <= found.length) {
+                        targetPlayer = found[num - 1];
+                    }
+                }
+            } else {
+                targetPlayer = found[0];
+            }
+
+            if (targetPlayer) {
+                // 입고 -> 출고, 출고 -> 입고로 토글 진행 (toggleStatus 내부에서 최상위 이동 처리)
+                toggleStatus(targetPlayer.id);
+
+                // 상태 변경 피드백 표시
+                const updatedPlayer = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').find(p => p.id === targetPlayer.id);
+                const feedback = document.getElementById('scanFeedback');
+                if (feedback && updatedPlayer) {
+                    feedback.innerText = `${updatedPlayer.userName}: ${updatedPlayer.status} 완료`;
+                    // 3초 후 페이드아웃 효과 또는 단순 초기화
+                    setTimeout(() => {
+                        if (feedback.innerText.startsWith(updatedPlayer.userName)) {
+                            feedback.innerText = '';
+                        }
+                    }, 3000);
+                }
+            }
+
+            input.value = '';
+            input.focus();
+        }
+
+        function createBatchRow(i) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="text-align: center; font-weight: bold;">${i}</td>
+                <td><input type="text" class="batch-name" placeholder="선수명"></td>
+                <td><input type="text" class="batch-birth" placeholder="YYMMDD"></td>
+                <td><input type="text" class="batch-affiliation" placeholder="소속"></td>
+                <td>
+                    <select class="batch-gunType">
+                        <option value="">-- 선택 --</option>
+                        <option value="엽총">엽총</option>
+                        <option value="화약권총">화약권총</option>
+                        <option value="화약권총(32)">화약권총(32)</option>
+                        <option value="화약소총">화약소총</option>
+                        <option value="공기권총">공기권총</option>
+                        <option value="공기소총">공기소총</option>
+                    </select>
+                </td>
+                <td><input type="text" class="batch-gunName" placeholder="예: LP10"></td>
+                <td><input type="text" class="batch-gunNumber" placeholder="총기번호"></td>
+                <td>
+                    <select class="batch-gunCaliber">
+                        <option value="">-- 선택 --</option>
+                        <option value="2.2">2.2</option>
+                        <option value="3.2">3.2</option>
+                        <option value="4.5">4.5</option>
+                        <option value="12Ga">12Ga</option>
+                    </select>
+                </td>
+                <td><input type="text" class="batch-barcode" placeholder="바코드"></td>
+                <td><input type="text" class="batch-contact" placeholder="연락처"></td>
+                <td><input type="number" class="batch-ammoQty" min="0" placeholder="수량"></td>
+            `;
+            return tr;
+        }
+
+        function initBatchTable(rowCount = 20) {
+            const tbody = document.getElementById('batchTableBody');
+            tbody.innerHTML = '';
+            for (let i = 1; i <= rowCount; i++) {
+                tbody.appendChild(createBatchRow(i));
+            }
+        }
+
+        // 단체등록 테이블에 번호 20(또는 마지막 번호) 밑으로 새 행 추가하기
+        function addBatchRow() {
+            const tbody = document.getElementById('batchTableBody');
+            const newIdx = tbody.querySelectorAll('tr').length + 1;
+            const tr = createBatchRow(newIdx);
+            tbody.appendChild(tr);
+            const nameInput = tr.querySelector('.batch-name');
+            if (nameInput) nameInput.focus();
+        }
+
+        function openBatchPopup() {
+            const modal = document.getElementById('batchModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                const firstInput = modal.querySelector('.batch-name');
+                if (firstInput) firstInput.focus();
+            }
+        }
+
+        function closeBatchPopup() {
+            const modal = document.getElementById('batchModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function clearBatchForm() {
+            if (!confirm("작성 중인 내용을 모두 초기화하시겠습니까?")) return;
+            const tbody = document.getElementById('batchTableBody');
+            tbody.querySelectorAll('input').forEach(input => input.value = '');
+            tbody.querySelectorAll('select').forEach(select => select.value = '');
+        }
+
+        function getLocalDateStr(d = new Date()) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function submitBatchRegistration(status) {
+            const initStatus = (status === '입고') ? '입고' : '출고';
+            const tbody = document.getElementById('batchTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            const newPlayers = [];
+            let isValid = true;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const name = row.querySelector('.batch-name').value.trim();
+                const birth = row.querySelector('.batch-birth').value.trim();
+                const affiliation = row.querySelector('.batch-affiliation').value.trim();
+                const gunType = row.querySelector('.batch-gunType').value;
+                const gunName = row.querySelector('.batch-gunName').value.trim();
+                const gunNumber = row.querySelector('.batch-gunNumber').value.trim();
+                const gunCaliber = row.querySelector('.batch-gunCaliber').value.trim();
+                const barcode = row.querySelector('.batch-barcode').value.trim();
+                const contact = row.querySelector('.batch-contact').value.trim();
+                const ammoQtyInput = row.querySelector('.batch-ammoQty');
+                const ammoQty = ammoQtyInput ? (parseInt(ammoQtyInput.value.trim()) || 0) : 0;
+
+                const rowNum = i + 1;
+
+                if (!name && !gunType && !birth && !affiliation && !gunName && !gunNumber && !gunCaliber && !barcode && !contact && ammoQty === 0) {
+                    continue;
+                }
+
+                if (!name || !gunType) {
+                    alert(`${rowNum}번째 줄: 선수명과 총기종류는 필수 항목입니다.`);
+                    isValid = false;
+                    break;
+                }
+
+                newPlayers.push({
+                    id: Date.now() + i,
+                    barcode,
+                    affiliation,
+                    userName: name,
+                    userBirth: birth,
+                    gunType,
+                    gunName,
+                    gunNumber,
+                    gunCaliber,
+                    contact,
+                    ammoQty,
+                    status: initStatus,
+                    inTimestamp: (initStatus === '입고') ? (Date.now() + i) : null
+                });
+            }
+
+            if (!isValid) return;
+
+            if (newPlayers.length === 0) {
+                alert("등록할 데이터가 없습니다.");
+                return;
+            }
+
+            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            players = [...newPlayers, ...players];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+
+            // B03 (AMMO_LOGS_B03) 탄약입고 기록 등록 (소속, 성명, 생년월일, 구경/탄종이 같으면 1명으로 자동합산)
+            const AMMO_KEY = 'AMMO_LOGS_B03';
+            let ammoLogs = JSON.parse(localStorage.getItem(AMMO_KEY) || '[]');
+            const now = new Date();
+            const dateStr = getLocalDateStr(now);
+            const timeStr = now.toLocaleString();
+
+            const getAmmoType = (gType, gCaliber) => {
+                if (gCaliber === "3.2" || (gType && gType.includes("32"))) return "32탄";
+                if (gCaliber === "2.2" || (gType && (gType.includes("화약권총") || gType.includes("화약소총")))) return "22탄";
+                if (gCaliber === "12Ga" || (gType && gType.includes("엽총"))) return "엽탄";
+                if (gType) {
+                    if (gType.includes("엽총")) return "엽탄";
+                    if (gType.includes("화약권총(32)")) return "32탄";
+                    if (gType.includes("화약권총") || gType.includes("화약소총")) return "22탄";
+                }
+                return "엽탄";
+            };
+
+            // 동일한 소속, 성명(생년월일), 구경(탄종) 단위로 실탄수량 합산
+            const ammoGroupMap = new Map();
+            newPlayers.forEach((p) => {
+                const ammoQty = p.ammoQty || 0;
+                if (ammoQty > 0) {
+                    const ammoType = getAmmoType(p.gunType, p.gunCaliber);
+                    const caliberKey = p.gunCaliber || ammoType;
+                    const key = `${(p.affiliation || '').trim()}_${(p.userName || '').trim()}_${(p.userBirth || '').trim()}_${caliberKey}`;
+
+                    if (!ammoGroupMap.has(key)) {
+                        ammoGroupMap.set(key, {
+                            barcode: p.barcode || '',
+                            affiliation: p.affiliation || '',
+                            userName: p.userName,
+                            userBirth: p.userBirth || '',
+                            ammoType: ammoType,
+                            totalAmmoQty: 0
+                        });
+                    }
+                    const item = ammoGroupMap.get(key);
+                    item.totalAmmoQty += ammoQty;
+                    if (!item.barcode && p.barcode) {
+                        item.barcode = p.barcode;
+                    }
+                }
+            });
+
+            let ammoAddedCount = 0;
+            let groupIdx = 0;
+            ammoGroupMap.forEach((item) => {
+                // 기존 기록에서 마지막 잔고(base) 조회
+                const pLogs = ammoLogs.filter(l => (item.barcode && l.barcode === item.barcode) || (l.name === item.userName && (!item.userBirth || l.userBirth === item.userBirth)));
+                const lastCurr = pLogs.length > 0 ? (pLogs[pLogs.length - 1].curr || 0) : 0;
+
+                ammoLogs.push({
+                    id: Date.now() + groupIdx + 500,
+                    date: dateStr,
+                    time: timeStr,
+                    usage: '대회',
+                    barcode: item.barcode || '',
+                    affiliation: item.affiliation || '',
+                    userBirth: item.userBirth || '',
+                    name: item.userName,
+                    type: item.ammoType,
+                    base: lastCurr,
+                    out: 0,
+                    in: item.totalAmmoQty,
+                    curr: lastCurr + item.totalAmmoQty
+                });
+                ammoAddedCount++;
+                groupIdx++;
+            });
+
+            if (ammoAddedCount > 0) {
+                localStorage.setItem(AMMO_KEY, JSON.stringify(ammoLogs));
+            }
+
+            const statusLabel = initStatus === '입고' ? '입고' : '출고';
+            let msg = `${newPlayers.length}명의 선수가 성공적으로 등록되었습니다. (상태: ${statusLabel})`;
+            if (ammoAddedCount > 0) {
+                msg += `\n🎯 실탄 입고 기록 ${ammoAddedCount}건이 B03(탄약관리)에 등록되었습니다.`;
+            }
+            alert(msg);
+            initBatchTable();   // 등록 완료 후 자동 초기화
+            closeBatchPopup();
+            loadList();
+        }
+
+        function exportToExcel() {
+            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            if (players.length === 0) return alert("데이터가 없습니다.");
+
+            let csv = "\uFEFF번호,바코드,소속,성명,생년월일,총기종류,총기명칭,총기번호,구경,연락처,상태(입/출고)\n";
+            players.forEach((p, idx) => {
+                csv += `"${players.length - idx}","${p.barcode}","${p.affiliation}","${p.userName}","${p.userBirth}","${p.gunType}","${p.gunName}","${p.gunNumber}","${p.gunCaliber}","${p.contact}","${p.status || '출고'}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${document.getElementById('contest-title').value || '선수명단'}.csv`;
+            link.click();
+        }
+    </script>
+
+</body>
+
+</html>
