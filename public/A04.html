@@ -1452,17 +1452,24 @@
                             style="color:#f43f5e; text-shadow:0 0 12px rgba(244,63,94,0.6);" value="0"
                             oninput="onDialInput('out', this)">
                     </div>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center; width:100%;">
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:5px; width:100%;">
                         <button type="button" class="btn-q" onclick="changeWheelQty('out', 50)">-50</button>
                         <button type="button" class="btn-q" onclick="changeWheelQty('out', 100)">-100</button>
                         <button type="button" class="btn-q" onclick="changeWheelQty('out', 150)">-150</button>
+                        <button type="button" class="btn-q" onclick="changeWheelQty('out', 200)">-200</button>
                         <button type="button" class="btn-q" onclick="changeWheelQty('out', 250)">-250</button>
-                        <button type="button" class="btn-q" style="border-color:#64748b; color:#64748b;"
+                        <button type="button" class="btn-q" onclick="changeWheelQty('out', 300)">-300</button>
+                        <button type="button" class="btn-q" onclick="changeWheelQty('out', 350)">-350</button>
+                        <button type="button" class="btn-q" onclick="changeWheelQty('out', 400)">-400</button>
+                    </div>
+                    <div style="display:flex; gap:6px; width:100%; margin-top:5px;">
+                        <button type="button" class="btn-util"
+                            style="background:#dc2626; flex:1; padding:12px; font-size:1.1em;"
+                            onclick="openGroupModal('출고')">📤 단체출고</button>
+                        <button type="button" class="btn-util"
+                            style="background:#64748b; flex:1; padding:12px; font-size:1.05em; border:none;"
                             onclick="setQty('out', 0)">초기화</button>
                     </div>
-                    <button type="button" class="btn-util"
-                        style="background:#dc2626; width:100%; margin-top:5px; padding:12px; font-size:1.1em;"
-                        onclick="openGroupModal('출고')">📤 단체출고</button>
                 </div>
 
                 <!-- 입고 카드 (오른쪽) -->
@@ -1473,21 +1480,42 @@
                             style="color:#38bdf8; text-shadow:0 0 12px rgba(56,189,248,0.6);" value="0"
                             oninput="onDialInput('in', this)">
                     </div>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center; width:100%;">
-                        <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
-                            onclick="changeWheelQty('in', 10)">+10</button>
-                        <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
-                            onclick="changeWheelQty('in', 20)">+20</button>
-                        <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
-                            onclick="changeWheelQty('in', 30)">+30</button>
-                        <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
-                            onclick="changeWheelQty('in', 40)">+40</button>
-                        <button type="button" class="btn-q" style="border-color:#64748b; color:#64748b;"
+                    <div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                        <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:5px; width:100%;">
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('1')">1</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('2')">2</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('3')">3</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('4')">4</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('5')">5</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:5px; width:100%;">
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('6')">6</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('7')">7</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('8')">8</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('9')">9</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
+                                onclick="pressInNum('0')">0</button>
+                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb; font-weight:900;"
+                                onclick="pressInNum('100')">100</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px; width:100%; margin-top:5px;">
+                        <button type="button" class="btn-util"
+                            style="background:#2563eb; flex:1; padding:12px; font-size:1.1em;"
+                            onclick="openGroupModal('입고')">📥 단체입고</button>
+                        <button type="button" class="btn-util"
+                            style="background:#64748b; flex:1; padding:12px; font-size:1.05em; border:none;"
                             onclick="setQty('in', 0)">초기화</button>
                     </div>
-                    <button type="button" class="btn-util"
-                        style="background:#2563eb; width:100%; margin-top:5px; padding:12px; font-size:1.1em;"
-                        onclick="openGroupModal('입고')">📥 단체입고</button>
                 </div>
             </div>
 
@@ -1744,6 +1772,8 @@
                         onclick="exportExcelFullShelf()">📊 엑셀저장</button>
                     <button type="button" class="btn-util btn-print" style="padding:6px 14px;"
                         onclick="printFullShelfModal()">🖨️ 인쇄하기</button>
+                    <button type="button" class="btn-util" style="background:#2563eb; padding:6px 14px;"
+                        onclick="saveFullShelfModal()">💾 저장하기</button>
                     <button type="button" class="btn-util btn-del" style="padding:6px 14px; background:#dc2626;"
                         onclick="closeFullShelfModal()">✕ 닫기</button>
                 </div>
@@ -1812,6 +1842,8 @@
                     onclick="exportExcelFullShelf()">📊 엑셀저장</button>
                 <button type="button" class="btn-util btn-print" style="padding:10px 20px;"
                     onclick="printFullShelfModal()">🖨️ 인쇄하기</button>
+                <button type="button" class="btn-util" style="background:#2563eb; padding:10px 20px;"
+                    onclick="saveFullShelfModal()">💾 저장하기</button>
                 <button type="button" class="btn-util btn-del" style="padding:10px 20px; background:#dc2626;"
                     onclick="closeFullShelfModal()">✕ 닫기</button>
             </div>
@@ -1840,6 +1872,7 @@
     </div>
 
     <script>
+        const API_BASE = '/api/a04';
         const KEYS = { MASTER: 'PRO_PLAYER_MASTER_V2', LOGS: 'DATA_A04_LOGS', TITLE: 'PRO_CONTEST_TITLE_A04' };
         let selectedPlayer = null;
         let _playerSelectCallback = null;
@@ -1848,6 +1881,70 @@
         function toggleSortOrderA04() {
             a04SortOrder = (a04SortOrder === 'desc') ? 'asc' : 'desc';
             renderTable();
+        }
+
+        // 서버(/api/a04)에서 수불 기록 불러오기 (GET)
+        async function loadLogsFromServer() {
+            try {
+                const res = await fetch(API_BASE);
+                const result = await res.json();
+                if (result.ok && Array.isArray(result.data)) {
+                    if (result.data.length === 0) {
+                        // 서버가 비어있고 브라우저 로컬에 기존 수불 기록이 있는 경우 초기 마이그레이션 전송
+                        const localLogs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]");
+                        if (localLogs.length > 0) {
+                            try {
+                                await fetch(API_BASE, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(localLogs)
+                                });
+                                const res2 = await fetch(API_BASE);
+                                const result2 = await res2.json();
+                                if (result2.ok && Array.isArray(result2.data) && result2.data.length > 0) {
+                                    result.data = result2.data;
+                                }
+                            } catch (mErr) {
+                                console.warn("A04 초기 데이터 마이그레이션 실패:", mErr);
+                            }
+                        }
+                    }
+
+                    if (result.data && result.data.length > 0) {
+                        const serverLogs = result.data.map(d => ({
+                            id: d._id || d.id,
+                            _id: d._id,
+                            date: d.date || '',
+                            time: d.time || '',
+                            name: d.name || d.userName || '',
+                            gunType: d.gunType || '',
+                            type: d.type || d.ammoType || '22탄',
+                            purpose: d.purpose || '훈련',
+                            outQty: Number(d.outQty || 0),
+                            inQty: Number(d.inQty || 0),
+                            currStock: Number(d.currStock || 0),
+                            barcode: d.barcode || ''
+                        }));
+                        localStorage.setItem(KEYS.LOGS, JSON.stringify(serverLogs));
+                    }
+                }
+            } catch (err) {
+                console.warn("A04 서버 연결 실패, 로컬 캐시를 사용합니다:", err);
+            }
+            renderTable();
+        }
+
+        async function saveLogsToServer(newLogsArray) {
+            if (!newLogsArray || newLogsArray.length === 0) return;
+            try {
+                await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newLogsArray)
+                });
+            } catch (err) {
+                console.warn("A04 서버 저장 동기화 실패:", err);
+            }
         }
 
         function formatNumber(val) {
@@ -1870,7 +1967,7 @@
             return new Date(now.getTime() + kstOffset).toISOString().split('T')[0];
         };
 
-        window.onload = () => {
+        window.onload = async () => {
             const today = getKSTDate();
             document.getElementById('start-date').value = today;
             document.getElementById('end-date').value = today;
@@ -1890,7 +1987,7 @@
             }, 60000);
 
             initDials();
-            renderTable();
+            await loadLogsFromServer();
         };
 
         const getYesterdayKSTDate = () => {
@@ -1912,6 +2009,24 @@
             document.getElementById('start-date').value = today;
             document.getElementById('end-date').value = today;
             renderTable();
+        }
+
+        // 입고수량(C) 키패드 숫자 입력 (0~9 자릿수 입력, 100은 +100 가산)
+        function pressInNum(val) {
+            const el = document.getElementById('in-qty');
+            let current = unformatNumber(el.value);
+
+            if (val === '100') {
+                setQty('in', current + 100, false);
+                return;
+            }
+
+            let currentStr = String(current);
+            let newStr = (currentStr === '0') ? String(val) : (currentStr + String(val));
+            let num = parseInt(newStr, 10);
+            if (isNaN(num)) num = 0;
+            if (num > 999999) num = 999999;
+            setQty('in', num, false);
         }
 
         // 휠/버튼 조절
@@ -2379,15 +2494,24 @@
             return `${ampm} ${hStr}:${mStr}`;
         }
 
-        function deleteSingleRecord(id) {
+        async function deleteSingleRecord(id) {
             if (!confirm("이 수불 기록을 삭제하시겠습니까?")) return;
-            let logs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]");
-            logs = logs.filter(l => l.id !== id);
-            localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
-            renderTable();
+            try {
+                const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (!res.ok || !result.ok) {
+                    throw new Error(result.error || '삭제 실패');
+                }
+            } catch (err) {
+                console.warn("서버 삭제 실패, 로컬 데이터에서 삭제합니다:", err);
+                let logs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]");
+                logs = logs.filter(l => l.id != id && l._id != id);
+                localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
+            }
+            await loadLogsFromServer();
         }
 
-        function saveRecord() {
+        async function saveRecord() {
             if (!selectedPlayer) return alert("선수를 먼저 조회해 주세요.");
 
             const logs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]");
@@ -2402,7 +2526,6 @@
             const timeFormatted = `${ampm} ${String(h12).padStart(2, '0')}:${minutes}`;
 
             const logData = {
-                id: editId ? Number(editId) : Date.now(),
                 date: getKSTDate(),
                 time: timeFormatted,
                 name: selectedPlayer.userName || selectedPlayer.name,
@@ -2411,23 +2534,50 @@
                 purpose: document.getElementById('p-purpose').value,
                 outQty: unformatNumber(document.getElementById('out-qty').value),
                 inQty: unformatNumber(document.getElementById('in-qty').value),
-                currStock: unformatNumber(document.getElementById('curr-stock').value)
+                currStock: unformatNumber(document.getElementById('curr-stock').value),
+                barcode: selectedPlayer.barcode || ''
             };
 
-            if (editId) {
-                const idx = logs.findIndex(l => l.id === Number(editId));
-                if (idx !== -1 && !logData.gunType) {
-                    logData.gunType = logs[idx].gunType || '';
+            try {
+                let res;
+                if (editId) {
+                    // 수정 (PUT /api/a04/:id)
+                    res = await fetch(`${API_BASE}/${editId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(logData)
+                    });
+                } else {
+                    // 신규 저장 (POST /api/a04)
+                    res = await fetch(API_BASE, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(logData)
+                    });
                 }
-                logs[idx] = logData;
+                const result = await res.json();
+                if (!res.ok || !result.ok) {
+                    throw new Error(result.error || '저장에 실패했습니다.');
+                }
+            } catch (err) {
+                console.warn("서버 저장 실패, 로컬에 저장합니다:", err);
+                if (editId) {
+                    const idx = logs.findIndex(l => l.id == editId || l._id == editId);
+                    if (idx !== -1) {
+                        logs[idx] = { ...logs[idx], ...logData };
+                    }
+                } else {
+                    logs.push({ ...logData, id: Date.now() });
+                }
+                localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
+            }
+
+            if (editId) {
                 document.getElementById('edit-id').value = '';
                 document.getElementById('save-btn').innerText = "수불 기록 저장";
                 document.getElementById('save-btn').classList.remove('btn-edit-mode');
-            } else {
-                logs.push(logData);
             }
 
-            localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
             // A04 저장 완료 후 전체선반 자동 동기화
             syncStockToShelf(
                 selectedPlayer.userName || selectedPlayer.name,
@@ -2436,17 +2586,17 @@
                 getKSTDate()
             );
             resetForm();
-            renderTable();
+            await loadLogsFromServer();
             alert("기록이 처리되었습니다.");
         }
 
         function editRecord(id) {
             const logs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]");
-            const item = logs.find(l => l.id === id);
+            const item = logs.find(l => l.id == id || l._id == id);
             if (!item) return;
 
-            selectedPlayer = { userName: item.name, gunType: item.gunType };
-            document.getElementById('edit-id').value = id;
+            selectedPlayer = { userName: item.name, gunType: item.gunType, barcode: item.barcode || '' };
+            document.getElementById('edit-id').value = item._id || item.id;
             document.getElementById('disp-name').innerText = "성명: " + item.name;
             document.getElementById('p-type').value = item.type;
             selectPurpose(item.purpose);
@@ -2548,8 +2698,8 @@
                 <td style="color:blue; font-weight:bold;">${formatNumber(l.inQty)}</td>
                 <td style="font-weight:bold;">${formatNumber(l.currStock)}</td>
                 <td>
-                    <button class="action-btn btn-edit" style="background:#f59e0b; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;" onclick="editRecord(${l.id})">수정</button>
-                    <button class="action-btn btn-del" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px; margin-left:2px;" onclick="deleteSingleRecord(${l.id})">삭제</button>
+                    <button class="action-btn btn-edit" style="background:#f59e0b; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;" onclick="editRecord('${l.id}')">수정</button>
+                    <button class="action-btn btn-del" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px; margin-left:2px;" onclick="deleteSingleRecord('${l.id}')">삭제</button>
                 </td>
             `;
                 tbody.appendChild(tr);
@@ -2570,47 +2720,114 @@
 
         function updateSummary() {
             const logs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]");
-            const start = document.getElementById('start-date') ? document.getElementById('start-date').value : getKSTDate();
-            const end = document.getElementById('end-date') ? document.getElementById('end-date').value : getKSTDate();
-            const nameFilter = document.getElementById('filter-name') ? document.getElementById('filter-name').value.trim() : "";
             const targetDate = fsCurrentDate || getKSTDateStr();
             const dateData = getSavedDataForDate(targetDate);
+            const todayStr = getKSTDate();
 
             let t = { "엽탄": 0, "22탄": 0, "32탄": 0 };
             let o = { "엽탄": 0, "22탄": 0, "32탄": 0 };
 
-            // 1. 현재 선택/조회된 날짜 범위의 수불 기록에서 당일 소비(출고) 합산 (출고 값 - 입고 값)
-            logs.filter(l => {
-                const isDateMatch = (!start || l.date >= start) && (!end || l.date <= end);
-                const isNameMatch = !nameFilter || (l.name || "").includes(nameFilter);
-                return isDateMatch && isNameMatch;
-            }).forEach(l => {
+            // 1. 당일 소비(출고)는 오늘 출고수량(outQty) 값만 표시 (입고 차감 X, 검색/기간필터 무관하게 오늘 순수 출고량 합산)
+            logs.filter(l => l.date === todayStr).forEach(l => {
                 const normType = normalizeAmmoType(l.type);
-                o[normType] += (Number(l.outQty || 0) - Number(l.inQty || 0));
+                o[normType] += Number(l.outQty || 0);
             });
 
-            // 2. 전체선반내역 팝업 데이터에서 탄종별 합계 계산 (A04 전체 수량 잔고 행과 100% 매칭)
+            // 2. 전체수량(잔고): 엽탄, 22탄, 32탄에 입고수량 입력값이 있으면 합산되고, 출고수량 입력값이 있으면 차감되도록 계산
+            //    - 수불 로그에 기록이 있는 선수는 최종 잔고(currStock, 이미 입고+ 출고- 반영됨)를 반영
+            //    - 선반에만 있고 아직 수불 기록이 없는 선수는 선반 기재 잔고를 반영
+            //    - 선반에 등록되지 않은 신규 선수라도 수불 기록(입고/출고)이 발생하면 전체 잔고에 정확히 합산/차감
+            const latestStockMap = {};
+            const loggedKeys = new Set();
+            logs.forEach(l => {
+                const nm = String(l.name || '').trim();
+                if (!nm) return;
+                const normType = normalizeAmmoType(l.type);
+                const key = `${normType}_${nm}`;
+                latestStockMap[key] = Number(l.currStock || 0);
+                loggedKeys.add(key);
+            });
+
+            const processedShelfKeys = new Set();
+
+            // 22탄 / 32탄 선반 (1~8선반)
             for (let s = 1; s <= 8; s++) {
                 const shelfKey22 = `22탄_${s}`;
                 const shelfObj22 = dateData[shelfKey22] || dateData[`2.2탄_${s}`] || {};
                 const maxRows22 = (s === 8) ? 20 : 10;
                 for (let r = 1; r <= maxRows22; r++) {
+                    // 왼쪽 L
                     const is32L = (shelfObj22[`r${r}_L_is32`] === '1' || shelfObj22[`r${r}_is32`] === '1');
+                    const typeL = is32L ? '32탄' : '22탄';
+                    const nameL = String(shelfObj22[`r${r}_c2`] || '').trim();
                     const stockL = unformatNumFs(shelfObj22[`r${r}_c3`]);
-                    if (is32L) t["32탄"] += stockL; else t["22탄"] += stockL;
 
+                    if (nameL) {
+                        const keyL = `${typeL}_${nameL}`;
+                        if (!processedShelfKeys.has(keyL)) {
+                            processedShelfKeys.add(keyL);
+                            t[typeL] += (latestStockMap[keyL] !== undefined) ? latestStockMap[keyL] : stockL;
+                        }
+                    } else if (stockL > 0) {
+                        t[typeL] += stockL;
+                    }
+
+                    // 오른쪽 R
                     const is32R = (shelfObj22[`r${r}_R_is32`] === '1' || shelfObj22[`r${r}_is32`] === '1');
+                    const typeR = is32R ? '32탄' : '22탄';
+                    const nameR = String(shelfObj22[`r${r}_c5`] || '').trim();
                     const stockR = unformatNumFs(shelfObj22[`r${r}_c6`]);
-                    if (is32R) t["32탄"] += stockR; else t["22탄"] += stockR;
+
+                    if (nameR) {
+                        const keyR = `${typeR}_${nameR}`;
+                        if (!processedShelfKeys.has(keyR)) {
+                            processedShelfKeys.add(keyR);
+                            t[typeR] += (latestStockMap[keyR] !== undefined) ? latestStockMap[keyR] : stockR;
+                        }
+                    } else if (stockR > 0) {
+                        t[typeR] += stockR;
+                    }
                 }
 
+                // 엽탄 선반 (1~8선반)
                 const shelfKeyShot = `엽탄_${s}`;
                 const shelfObjShot = dateData[shelfKeyShot] || {};
                 for (let r = 1; r <= 10; r++) {
-                    t["엽탄"] += unformatNumFs(shelfObjShot[`r${r}_c3`]);
-                    t["엽탄"] += unformatNumFs(shelfObjShot[`r${r}_c6`]);
+                    const nameL = String(shelfObjShot[`r${r}_c2`] || '').trim();
+                    const stockL = unformatNumFs(shelfObjShot[`r${r}_c3`]);
+                    if (nameL) {
+                        const keyL = `엽탄_${nameL}`;
+                        if (!processedShelfKeys.has(keyL)) {
+                            processedShelfKeys.add(keyL);
+                            t["엽탄"] += (latestStockMap[keyL] !== undefined) ? latestStockMap[keyL] : stockL;
+                        }
+                    } else if (stockL > 0) {
+                        t["엽탄"] += stockL;
+                    }
+
+                    const nameR = String(shelfObjShot[`r${r}_c5`] || '').trim();
+                    const stockR = unformatNumFs(shelfObjShot[`r${r}_c6`]);
+                    if (nameR) {
+                        const keyR = `엽탄_${nameR}`;
+                        if (!processedShelfKeys.has(keyR)) {
+                            processedShelfKeys.add(keyR);
+                            t["엽탄"] += (latestStockMap[keyR] !== undefined) ? latestStockMap[keyR] : stockR;
+                        }
+                    } else if (stockR > 0) {
+                        t["엽탄"] += stockR;
+                    }
                 }
             }
+
+            // 선반에 성명이 배정되지 않은 수불 기록 선수들의 잔고도 누락 없이 합산
+            loggedKeys.forEach(key => {
+                if (!processedShelfKeys.has(key)) {
+                    const [normType] = key.split('_');
+                    if (t[normType] !== undefined) {
+                        t[normType] += latestStockMap[key];
+                    }
+                }
+            });
 
             document.getElementById('sum-shot').innerText = formatNumber(t["엽탄"]);
             document.getElementById('sum-22').innerText = formatNumber(t["22탄"]);
@@ -2640,12 +2857,22 @@
         }
 
         function toggleAll(src) { document.querySelectorAll('.row-chk').forEach(c => c.checked = src.checked); }
-        function deleteSelected() {
-            if (!confirm("삭제하시겠습니까?")) return;
-            const ids = Array.from(document.querySelectorAll('.row-chk:checked')).map(c => Number(c.value));
-            const logs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]").filter(l => !ids.includes(l.id));
+
+        async function deleteSelected() {
+            const checked = document.querySelectorAll('.row-chk:checked');
+            if (checked.length === 0) return alert("삭제할 항목을 선택해주세요.");
+            if (!confirm(`선택한 ${checked.length}개의 수불 기록을 삭제하시겠습니까?`)) return;
+
+            const ids = Array.from(checked).map(c => c.value);
+            try {
+                await Promise.all(ids.map(id => fetch(`${API_BASE}/${id}`, { method: 'DELETE' })));
+            } catch (err) {
+                console.warn("서버 일괄 삭제 중 일부 실패:", err);
+            }
+            let logs = JSON.parse(localStorage.getItem(KEYS.LOGS) || "[]");
+            logs = logs.filter(l => !ids.includes(String(l.id)) && !ids.includes(String(l._id)));
             localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
-            renderTable();
+            await loadLogsFromServer();
         }
 
         function exportExcel() {
@@ -2795,7 +3022,7 @@
             renderGroupTable();
         }
 
-        function submitGroupRecord() {
+        async function submitGroupRecord() {
             if (groupPlayers.length === 0) return alert("등록할 선수가 없습니다.");
             if (!document.getElementById('group-confirm-chk').checked) return alert("동의 체크가 필요합니다.");
 
@@ -2806,6 +3033,7 @@
             const todayDate = getKSTDate();
             const timeOnly = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' });
 
+            const newLogs = [];
             for (let i = 0; i < groupPlayers.length; i++) {
                 const p = groupPlayers[i];
                 const name = p.userName || p.name || "-";
@@ -2823,7 +3051,6 @@
                 else if (gt.includes("권총") || gt.includes("소총") || gt.includes("2.2") || gt.includes("22")) type = "22탄";
 
                 const logData = {
-                    id: Date.now() + i,
                     date: todayDate,
                     time: timeOnly,
                     name: name,
@@ -2832,12 +3059,30 @@
                     purpose: selectedPurpose,
                     outQty: outQty,
                     inQty: inQty,
-                    currStock: newStock
+                    currStock: newStock,
+                    barcode: p.barcode || ''
                 };
-                logs.push(logData);
+                newLogs.push(logData);
             }
 
-            localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
+            try {
+                const res = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newLogs)
+                });
+                const result = await res.json();
+                if (!res.ok || !result.ok) {
+                    throw new Error(result.error || '단체 등록 실패');
+                }
+            } catch (err) {
+                console.warn("단체 등록 서버 전송 실패, 로컬에 저장합니다:", err);
+                logs.push(...newLogs.map((l, i) => ({ ...l, id: Date.now() + i })));
+                localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
+            }
+
+            await loadLogsFromServer();
+
             // 단체 저장 완료 후 전체선반 자동 동기화 (마지막 저장된 장부 기준)
             const freshLogs = JSON.parse(localStorage.getItem(KEYS.LOGS) || '[]');
             groupPlayers.forEach(p => {
@@ -2852,7 +3097,6 @@
             });
             alert("단체 입출고 기록이 성공적으로 등록되었습니다.");
             closeGroupModal();
-            renderTable();
         }
 
         // =========================================================
@@ -3165,6 +3409,73 @@
             syncShelfToA04BaseStock(fsCurrentDate, true);
             const modal = document.getElementById('fullShelfModal');
             if (modal) modal.style.display = 'none';
+        }
+
+        // 전체선반내역 저장하기: 선반 입력값을 영구 저장하고 A04 메인 화면(잔고, 당일소비, 목록)에 즉시 반영
+        function saveFullShelfModal() {
+            const targetDate = fsCurrentDate || getKSTDateStr();
+
+            // 1. 현재 화면의 모든 선반 입력값(성명, 잔고)을 완벽하게 파싱하여 저장
+            const allData = getSavedDataForDate(targetDate);
+            const inputs = document.querySelectorAll('#fullShelfModal input[type="text"]');
+            inputs.forEach(input => {
+                const id = input.id;
+                if (!id) return;
+                const val = input.value.trim();
+
+                const nameMatch = id.match(/^fs_name_(.+)_r(\d+)_(L|R)$/);
+                if (nameMatch) {
+                    const shelfKey = nameMatch[1];
+                    const r = nameMatch[2];
+                    const side = nameMatch[3];
+                    const cellKey = (side === 'L') ? `r${r}_c2` : `r${r}_c5`;
+                    if (!allData[shelfKey]) allData[shelfKey] = {};
+                    allData[shelfKey][cellKey] = val;
+                }
+
+                const qtyMatch = id.match(/^fs_shelf_(.+)_r(\d+)_(c3|c6)$/);
+                if (qtyMatch) {
+                    const shelfKey = qtyMatch[1];
+                    const r = qtyMatch[2];
+                    const c = qtyMatch[3];
+                    const cellKey = `r${r}_${c}`;
+                    const rawNum = val.replace(/,/g, '').replace(/[^0-9]/g, '');
+                    if (!allData[shelfKey]) allData[shelfKey] = {};
+                    allData[shelfKey][cellKey] = rawNum;
+                }
+            });
+
+            // 22탄 <-> 2.2탄 양방향 호환 동기화
+            for (let s = 1; s <= 8; s++) {
+                const k22 = `22탄_${s}`;
+                const k22dot = `2.2탄_${s}`;
+                if (allData[k22]) allData[k22dot] = allData[k22];
+                else if (allData[k22dot]) allData[k22] = allData[k22dot];
+            }
+            localStorage.setItem(FS_STORAGE_KEY_PREFIX + targetDate, JSON.stringify(allData));
+
+            // 2. 인쇄 전용 텍스트 및 선반 팝업 합계 갱신
+            syncAllFsPrintSpans();
+            recalcFsGrandTotals();
+
+            // 3. A04 기초재고 및 수불 기록 동기화
+            syncShelfToA04BaseStock(targetDate, true);
+
+            // 4. 하단 목록 날짜 검색 범위가 저장된 날짜를 포함하도록 보정
+            const sInput = document.getElementById('start-date');
+            const eInput = document.getElementById('end-date');
+            if (sInput && sInput.value > targetDate) sInput.value = targetDate;
+            if (eInput && eInput.value < targetDate) eInput.value = targetDate;
+
+            // 5. A04 메인 화면의 하단 목록 테이블 및 상단 요약 바(전체 수량 잔고, 당일 소비 출고) 갱신
+            renderTable();
+            updateSummary();
+
+            // 6. 팝업 닫고 A04 화면 표시 및 완료 알림
+            const modal = document.getElementById('fullShelfModal');
+            if (modal) modal.style.display = 'none';
+
+            alert(`전체선반내역(${targetDate})이 저장되었습니다.\nA04의 전체 수량(잔고), 당일 소비(출고), 하단 수불 목록에 반영되었습니다.`);
         }
 
         function syncAllFsPrintSpans() {
