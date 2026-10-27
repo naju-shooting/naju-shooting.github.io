@@ -470,7 +470,7 @@
         </div>
 
         <div class="btn-group">
-            <button id="addBtn" class="btn btn-reg" onclick="savePlayer()">신규 선수 및 총기 등록</button>
+            <button id="addBtn" class="btn btn-reg" onclick="savePlayer()">등록</button>
             <button id="updateBtn" class="btn btn-update" onclick="savePlayer()">수정 내용 저장</button>
             <button id="cancelBtn" class="btn btn-cancel" onclick="resetForm()">취소</button>
         </div>
@@ -541,15 +541,17 @@
     </div>
 
     <script>
+        const API_BASE = "/api/a01";
         const STORAGE_KEY = "PRO_PLAYER_MASTER_V2";
         const TITLE_KEY = "PRO_CONTEST_TITLE_A01";
         let sortOrderAsc = false; // false = 최신순(역순), true = 등록순
+        let allPlayers = []; // 서버에서 불러온 선수 데이터 캐시
 
         function toggleSortOrder() {
             sortOrderAsc = !sortOrderAsc;
             const label = document.getElementById('no-sort-label');
             if (label) label.textContent = sortOrderAsc ? 'No. ▲' : 'No. ▼';
-            loadList();
+            renderTable();
         }
 
         window.onload = function () {
@@ -559,12 +561,42 @@
             loadList();
         };
 
-        function savePlayer() {
+        // 서버에서 선수 목록 불러오기 (GET /api/a01)
+        async function loadList() {
+            try {
+                const res = await fetch(API_BASE);
+                const result = await res.json();
+                if (result.ok && Array.isArray(result.data)) {
+                    allPlayers = result.data.map(p => ({
+                        ...p,
+                        id: p._id || p.id // MongoDB _id를 id로 매핑
+                    }));
+                    // 오프라인 백업용으로 로컬 스토리지도 동기화
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(allPlayers));
+                } else {
+                    throw new Error(result.error || "데이터 불러오기 실패");
+                }
+            } catch (err) {
+                console.warn("서버 연결 실패, 로컬 캐시 데이터를 불러옵니다:", err);
+                allPlayers = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            }
+            renderTable();
+        }
+
+        // 서버로 선수 및 총기 데이터 등록/수정 (POST /api/a01 또는 PUT /api/a01/:id)
+        async function savePlayer() {
             const id = document.getElementById('editId').value;
-            const player = {
-                id: id || Date.now(),
+            const userName = document.getElementById('userName').value.trim();
+
+            if (!userName) {
+                alert("성명은 필수 입력 항목입니다.");
+                return;
+            }
+
+            const payload = {
+                contestTitle: document.getElementById('contest-title').value,
                 barcode: document.getElementById('barcode').value,
-                userName: document.getElementById('userName').value,
+                userName: userName,
                 affiliation: document.getElementById('affiliation').value,
                 birthDate: document.getElementById('birthDate').value,
                 contact: document.getElementById('contact').value,
@@ -580,24 +612,36 @@
                 remarks: document.getElementById('remarks').value
             };
 
-            if (!player.userName) { alert("성명은 필수 입력 항목입니다."); return; }
-
-            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            if (id) {
-                const index = players.findIndex(p => p.id == id);
-                if (index !== -1) {
-                    if (players[index].notices) player.notices = players[index].notices;
-                    players[index] = player;
+            try {
+                let res;
+                if (id) {
+                    // 수정 (PUT /api/a01/:id)
+                    res = await fetch(`${API_BASE}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
                 } else {
-                    players.push(player);
+                    // 신규 등록 (POST /api/a01)
+                    res = await fetch(API_BASE, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
                 }
-            } else {
-                players.push(player);
-            }
 
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-            resetForm();
-            loadList();
+                const result = await res.json();
+                if (!res.ok || !result.ok) {
+                    throw new Error(result.error || '저장에 실패했습니다.');
+                }
+
+                alert(id ? '수정 내용이 저장되었습니다.' : '선수 및 총기가 등록되었습니다.');
+                resetForm();
+                await loadList();
+            } catch (err) {
+                console.error("데이터 저장 오류:", err);
+                alert("저장 중 오류가 발생했습니다: " + err.message);
+            }
         }
 
         function selectTypeFilter(val, btnElement) {
@@ -606,19 +650,31 @@
             if (btnElement) {
                 btnElement.classList.add('active');
             }
-            loadList();
+            renderTable();
         }
 
-        function deleteSinglePlayer(id) {
+        // 단일 선수 삭제 (DELETE /api/a01/:id)
+        async function deleteSinglePlayer(id) {
             if (!confirm("이 선수 및 총기 등록 데이터를 삭제하시겠습니까?")) return;
-            let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            players = players.filter(p => p.id != id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-            loadList();
+            try {
+                const res = await fetch(`${API_BASE}/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await res.json();
+                if (!res.ok || !result.ok) {
+                    throw new Error(result.error || '삭제 실패');
+                }
+                alert('삭제되었습니다.');
+                await loadList();
+            } catch (err) {
+                console.error("삭제 오류:", err);
+                alert("삭제 중 오류가 발생했습니다: " + err.message);
+            }
         }
 
-        function loadList() {
-            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        // 화면 테이블 및 통계 보드 렌더링
+        function renderTable() {
+            const players = allPlayers;
 
             // 통계 업데이트
             const types = ['엽총', '화약권총', '화약권총(32)', '화약소총', '공기권총', '공기소총'];
@@ -688,9 +744,9 @@
                 <td>${p.gunCaliber || '-'}</td>
                 <td>${p.contact || '-'}</td>
                 <td style="white-space:nowrap;">
-                    <button class="action-btn btn-notice ${noticeCount > 0 ? 'has-notice' : ''}" onclick="openNoticeModal(${p.id})">알림${noticeCount > 0 ? `(${noticeCount})` : ''}</button>
-                    <button class="action-btn btn-edit" onclick="editPlayer(${p.id})">수정</button>
-                    <button class="action-btn btn-del" onclick="deleteSinglePlayer(${p.id})">삭제</button>
+                    <button class="action-btn btn-notice ${noticeCount > 0 ? 'has-notice' : ''}" onclick="openNoticeModal('${p.id}')">알림${noticeCount > 0 ? `(${noticeCount})` : ''}</button>
+                    <button class="action-btn btn-edit" onclick="editPlayer('${p.id}')">수정</button>
+                    <button class="action-btn btn-del" onclick="deleteSinglePlayer('${p.id}')">삭제</button>
                 </td>
             `;
             });
@@ -722,13 +778,11 @@
 
         function formatPermitNumber(input) {
             let raw = input.value;
-            // 숫자만 추출
             let digits = raw.replace(/[^0-9]/g, '');
             if (digits === '') {
                 input.value = '';
             } else {
                 input.value = '\uc81c' + digits + '\ud638';
-                // 커서를 숫자 끝 위치로 이동 (제 다음, 호 앞)
                 const pos = 1 + digits.length;
                 input.setSelectionRange(pos, pos);
             }
@@ -759,8 +813,7 @@
         }
 
         function editPlayer(id) {
-            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            const p = players.find(player => player.id == id);
+            const p = allPlayers.find(player => String(player.id) === String(id));
             if (!p) return;
 
             Object.keys(p).forEach(key => {
@@ -818,15 +871,22 @@
             document.getElementById('userName').focus();
         }
 
-        function deleteChecked() {
+        // 선택 삭제 (DELETE /api/a01/:id)
+        async function deleteChecked() {
             const checks = document.querySelectorAll('.row-check:checked');
             if (checks.length === 0) return;
-            if (confirm("선택한 데이터를 삭제하시겠습니까?")) {
-                let players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-                const idsToDelete = Array.from(checks).map(c => Number(c.value));
-                players = players.filter(p => !idsToDelete.includes(p.id));
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-                loadList();
+            if (!confirm(`선택한 ${checks.length}개의 데이터를 삭제하시겠습니까?`)) return;
+
+            const idsToDelete = Array.from(checks).map(c => c.value);
+            try {
+                await Promise.all(idsToDelete.map(id =>
+                    fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
+                ));
+                alert('선택한 데이터가 삭제되었습니다.');
+                await loadList();
+            } catch (err) {
+                console.error("일괄 삭제 오류:", err);
+                alert("일괄 삭제 중 오류가 발생했습니다: " + err.message);
             }
         }
 
@@ -835,11 +895,14 @@
         }
 
         function exportToExcel() {
-            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            if (players.length === 0) return;
+            const players = allPlayers;
+            if (players.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
+                return;
+            }
             let csv = "\ufeff바코드,성명,소속,생년월일,연락처,총종,총기명,총기번호,구경,제조사,허가청,허가번호,허가일자,주소,비고\n";
             players.forEach(p => {
-                csv += `"${p.barcode}","${p.userName}","${p.affiliation}","${p.birthDate}","${p.contact}","${p.gunType}","${p.gunName}","${p.gunNumber}","${p.gunCaliber}","${p.manufacturer}","${p.permitAgency}","${p.permitNumber}","${p.permitDate}","${p.address}","${p.remarks}"\n`;
+                csv += `"${p.barcode || ''}","${p.userName || ''}","${p.affiliation || ''}","${p.birthDate || ''}","${p.contact || ''}","${p.gunType || ''}","${p.gunName || ''}","${p.gunNumber || ''}","${p.gunCaliber || ''}","${p.manufacturer || ''}","${p.permitAgency || ''}","${p.permitNumber || ''}","${p.permitDate || ''}","${p.address || ''}","${p.remarks || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
@@ -853,8 +916,7 @@
 
         function openNoticeModal(playerId) {
             currentNoticePlayerId = playerId;
-            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            const player = players.find(p => String(p.id) === String(playerId));
+            const player = allPlayers.find(p => String(p.id) === String(playerId));
             if (!player) return;
 
             const birthText = player.birthDate ? ` (${player.birthDate})` : '';
@@ -891,7 +953,7 @@
             });
         }
 
-        function saveNewNotice() {
+        async function saveNewNotice() {
             if (!currentNoticePlayerId) return;
             const text = document.getElementById('noticeInputText').value.trim();
             if (!text) {
@@ -899,39 +961,61 @@
                 return;
             }
 
-            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            const playerIndex = players.findIndex(p => String(p.id) === String(currentNoticePlayerId));
-            if (playerIndex === -1) return;
+            const player = allPlayers.find(p => String(p.id) === String(currentNoticePlayerId));
+            if (!player) return;
 
-            if (!players[playerIndex].notices) {
-                players[playerIndex].notices = [];
+            const currentNotices = player.notices || [];
+            const updatedNotices = [
+                ...currentNotices,
+                {
+                    id: Date.now(),
+                    content: text,
+                    date: new Date().toISOString().split('T')[0]
+                }
+            ];
+
+            try {
+                const res = await fetch(`${API_BASE}/${currentNoticePlayerId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notices: updatedNotices })
+                });
+                const result = await res.json();
+                if (!res.ok || !result.ok) throw new Error(result.error || '알림 저장 실패');
+
+                player.notices = updatedNotices;
+                document.getElementById('noticeInputText').value = '';
+                renderNoticeList(player);
+                await loadList();
+            } catch (err) {
+                console.error("알림 저장 오류:", err);
+                alert("알림 저장 실패: " + err.message);
             }
-
-            players[playerIndex].notices.push({
-                id: Date.now(),
-                content: text,
-                date: new Date().toISOString().split('T')[0]
-            });
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-            document.getElementById('noticeInputText').value = '';
-            renderNoticeList(players[playerIndex]);
-            loadList();
         }
 
-        function deleteNoticeItem(noticeId) {
+        async function deleteNoticeItem(noticeId) {
             if (!currentNoticePlayerId) return;
-            const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            const playerIndex = players.findIndex(p => String(p.id) === String(currentNoticePlayerId));
-            if (playerIndex === -1) return;
+            const player = allPlayers.find(p => String(p.id) === String(currentNoticePlayerId));
+            if (!player || !player.notices) return;
 
-            if (players[playerIndex].notices) {
-                players[playerIndex].notices = players[playerIndex].notices.filter(item => item.id !== noticeId);
+            const updatedNotices = player.notices.filter(item => item.id !== noticeId);
+
+            try {
+                const res = await fetch(`${API_BASE}/${currentNoticePlayerId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notices: updatedNotices })
+                });
+                const result = await res.json();
+                if (!res.ok || !result.ok) throw new Error(result.error || '알림 삭제 실패');
+
+                player.notices = updatedNotices;
+                renderNoticeList(player);
+                await loadList();
+            } catch (err) {
+                console.error("알림 삭제 오류:", err);
+                alert("알림 삭제 실패: " + err.message);
             }
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-            renderNoticeList(players[playerIndex]);
-            loadList();
         }
     </script>
 
