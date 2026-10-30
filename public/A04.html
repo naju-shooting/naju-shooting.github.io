@@ -940,7 +940,7 @@
             }
 
             /* 메인 화면의 다른 모든 요소를 인쇄 플로우에서 완전히 제거 (10페이지 생성 방지) */
-            body.print-fullshelf-only > *:not(#fullShelfModal) {
+            body.print-fullshelf-only>*:not(#fullShelfModal) {
                 display: none !important;
             }
 
@@ -1227,7 +1227,7 @@
                 padding-bottom: 6px !important;
             }
 
-            .scan-area > div {
+            .scan-area>div {
                 gap: 6px !important;
             }
 
@@ -1367,7 +1367,7 @@
                 gap: 6px !important;
             }
 
-            .bottom-controls > div {
+            .bottom-controls>div {
                 display: flex !important;
                 flex-wrap: wrap !important;
                 gap: 4px !important;
@@ -1504,7 +1504,8 @@
                                 onclick="pressInNum('9')">9</button>
                             <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb;"
                                 onclick="pressInNum('0')">0</button>
-                            <button type="button" class="btn-q" style="border-color:#2563eb; color:#2563eb; font-weight:900;"
+                            <button type="button" class="btn-q"
+                                style="border-color:#2563eb; color:#2563eb; font-weight:900;"
                                 onclick="pressInNum('100')">100</button>
                         </div>
                     </div>
@@ -1521,7 +1522,8 @@
 
             <div style="width:100%;">
                 <div class="label-text" style="margin-bottom:4px;">현재잔고 (A-B+C)</div>
-                <input type="text" id="curr-stock" class="in-box" value="0" readonly style="background:#facc15 !important; color:#1e293b !important; border:2px solid #eab308 !important;">
+                <input type="text" id="curr-stock" class="in-box" value="0" readonly
+                    style="background:#facc15 !important; color:#1e293b !important; border:2px solid #eab308 !important;">
             </div>
 
             <!-- 현재잔고 밑: 수불 목적 선택 버튼 그룹 -->
@@ -1540,7 +1542,8 @@
                 </div>
             </div>
 
-            <button class="btn-add" id="save-btn" onclick="saveRecord()" style="background:#ff4d4f !important;">수불 기록 저장</button>
+            <button class="btn-add" id="save-btn" onclick="saveRecord()" style="background:#dc2626 !important;">수불 기록
+                저장</button>
         </div>
 
         <!-- 2. 하단 조회 기능 -->
@@ -1565,7 +1568,8 @@
         <thead>
             <tr>
                 <th style="width:40px;"><input type="checkbox" onclick="toggleAll(this)"></th>
-                <th style="width:55px; cursor:pointer; user-select:none;" onclick="toggleSortOrderA04()" title="클릭 시 정렬 변경 (최신순 / 마지막순)">No. <span id="no-sort-icon-a04">🔽</span></th>
+                <th style="width:55px; cursor:pointer; user-select:none;" onclick="toggleSortOrderA04()"
+                    title="클릭 시 정렬 변경 (최신순 / 마지막순)">No. <span id="no-sort-icon-a04">🔽</span></th>
                 <th>날짜/시간</th>
                 <th>목적</th>
                 <th>총종</th>
@@ -1780,11 +1784,15 @@
             </div>
 
             <!-- ══ 전체통합 실탄 총합계 바 (전체통합, 엽탄, 22탄, 32탄) ══ -->
-            <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 14px 20px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 12px;">
+            <div
+                style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 14px 20px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 12px;">
                 <div style="font-size: 1.15em; font-weight: 800; display:flex; align-items:center; gap:8px;">
-                    <span style="background:#dc2626; color:white; padding:4px 10px; border-radius:6px; font-size:0.85em; font-weight:900;">전체통합</span>
+                    <span
+                        style="background:#dc2626; color:white; padding:4px 10px; border-radius:6px; font-size:0.85em; font-weight:900;">전체통합</span>
                     <span>총합계:</span>
-                    <span id="fs-grand-total-all" style="color: #fbbf24; font-size: 1.35em; font-weight: 900;">0</span><span style="font-size:0.9em;">발</span>
+                    <span id="fs-grand-total-all"
+                        style="color: #fbbf24; font-size: 1.35em; font-weight: 900;">0</span><span
+                        style="font-size:0.9em;">발</span>
                 </div>
                 <div style="height:25px; width:1px; background:#475569;" class="no-print"></div>
                 <div style="font-size: 1.05em; font-weight: bold; display:flex; align-items:center; gap:6px;">
