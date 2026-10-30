@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -1406,14 +1406,14 @@
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;">
                 <span style="font-size: 1.3em; font-weight: bold; color: #333; white-space: nowrap;">선수검색 바코드:</span>
                 <input type="text" id="bc-input" class="bc-input" style="background-color: #f1f5f9;"
-                    placeholder="바코드 스캔 또는 성명 입력 후 ENTER" autofocus onkeypress="if(event.key==='Enter') handleSearch()">
+                    placeholder="바코드 스캔 또는 성명 입력 후 ENTER" autofocus onkeydown="if(event.key==='Enter'||event.keyCode===13) handleSearch()" oninput="bcDebounce('bc-input', handleSearch)">
             </div>
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;">
                 <span style="font-size: 1.3em; font-weight: bold; color: var(--red); white-space: nowrap;">출고수량
                     바코드:</span>
                 <input type="text" id="out-bc-input" class="bc-input"
                     style="border: 3px solid var(--red); color: var(--red); background-color: #fff1f0;"
-                    placeholder="출고수량 바코드 스캔 후 ENTER" onkeypress="if(event.key==='Enter') handleOutBarcodeSearch()">
+                    placeholder="출고수량 바코드 스캔 후 ENTER" onkeydown="if(event.key==='Enter'||event.keyCode===13) handleOutBarcodeSearch()" oninput="bcDebounce('out-bc-input', handleOutBarcodeSearch)">
             </div>
         </div>
 
@@ -1609,7 +1609,7 @@
             <div style="margin-bottom:15px; text-align:center;">
                 <input type="text" id="group-bc-input" class="bc-input"
                     style="width:100%; max-width:100%; border:2.5px solid var(--black); border-radius:8px; padding:10px; font-size:1.1em; outline:none;"
-                    placeholder="바코드 스캔 또는 성명 입력 후 ENTER" onkeypress="if(event.key==='Enter') handleGroupScan()">
+                    placeholder="바코드 스캔 또는 성명 입력 후 ENTER" onkeydown="if(event.key==='Enter'||event.keyCode===13) handleGroupScan()" oninput="bcDebounce('group-bc-input', handleGroupScan)">
             </div>
 
             <div class="group-table-wrapper">
@@ -1683,7 +1683,7 @@
             <div style="text-align:center; margin-bottom:20px;" class="no-print">
                 <input type="text" id="ledger-bc-input" class="bc-input"
                     style="width:100%; max-width:450px; border:2.5px solid var(--black); border-radius:8px; padding:10px; font-size:1.1em; outline:none;"
-                    placeholder="바코드 스캔 또는 성명 입력 후 ENTER" onkeypress="if(event.key==='Enter') handleLedgerSearch()">
+                    placeholder="바코드 스캔 또는 성명 입력 후 ENTER" onkeydown="if(event.key==='Enter'||event.keyCode===13) handleLedgerSearch()" oninput="bcDebounce('ledger-bc-input', handleLedgerSearch)">
             </div>
 
             <!-- 표 1행 (6개 열) -->
@@ -1880,6 +1880,25 @@
     </div>
 
     <script>
+                /* ── 모바일 바코드 스캐너 대응: debounce 기반 자동 검색 ──
+           스캐너는 짧은 시간에 여러 문자를 입력하므로
+           입력이 멈춘 뒤 300ms 후에 핸들러를 실행한다.
+           단, 마지막 입력 간격이 60ms 미만(스캐너 속도)일 때만 트리거한다. */
+        const _bcTimers = {};
+        const _bcLastKey = {};
+        function bcDebounce(inputId, handler) {
+            const now = Date.now();
+            const gap = now - (_bcLastKey[inputId] || 0);
+            _bcLastKey[inputId] = now;
+            clearTimeout(_bcTimers[inputId]);
+            const val = document.getElementById(inputId).value;
+            if (gap < 60 || val.length >= 4) {
+                _bcTimers[inputId] = setTimeout(() => {
+                    if (document.getElementById(inputId).value.trim().length > 0) handler();
+                }, 300);
+            }
+        }
+
         const API_BASE = '/api/a04';
         const KEYS = { MASTER: 'PRO_PLAYER_MASTER_V2', LOGS: 'DATA_A04_LOGS', TITLE: 'PRO_CONTEST_TITLE_A04' };
         let selectedPlayer = null;
