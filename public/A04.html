@@ -2700,11 +2700,16 @@
                 return isDateMatch && isNameMatch;
             });
 
-            // 입력순 정렬 (id 오름차순) - 입력된 순서대로 표시
+                        // 정렬 처리: a04SortOrder === 'desc' -> 최신 데이터가 최상위 (기본값)
+            // a04SortOrder === 'asc'  -> 최신 데이터가 최하위 (오래된 순)
             filtered.sort((a, b) => {
-                const idA = a.id || 0;
-                const idB = b.id || 0;
-                return idA - idB;
+                const timeA = `${a.date || ''} ${a.time || ''}`.trim();
+                const timeB = `${b.date || ''} ${b.time || ''}`.trim();
+                let comp = 0;
+                if (timeA && timeB) comp = timeA.localeCompare(timeB);
+                if (comp === 0) comp = (a.id || 0) - (b.id || 0);
+
+                return (a04SortOrder === 'desc') ? -comp : comp;
             });
 
             const iconEl = document.getElementById('no-sort-icon-a04');
@@ -2717,7 +2722,7 @@
                     const p = master.find(item => String(item.userName || item.name || "").trim() === String(l.name).trim());
                     gt = p ? (p.gunType || p.type || '-') : '-';
                 }
-                const rowNo = idx + 1;
+                const rowNo = (a04SortOrder === 'desc') ? (filtered.length - idx) : (idx + 1);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                 <td><input type="checkbox" class="row-chk" value="${l.id}"></td>
