@@ -2517,6 +2517,29 @@
             document.getElementById('curr-stock').value = formatNumber(curr);
         }
 
+                // 시간 문자열(오전/오후 HH:mm 또는 HH:mm)을 정렬 가능한 24시간 형식(HH:mm:ss)으로 변환
+        function parseTime24(timeStr) {
+            if (!timeStr) return '00:00:00';
+            let s = String(timeStr).trim();
+            let isPM = s.includes('오후') || s.toUpperCase().includes('PM');
+            let isAM = s.includes('오전') || s.toUpperCase().includes('AM');
+            let clean = s.replace(/[^0-9:]/g, '').trim();
+            let parts = clean.split(':').map(Number);
+            let h = parts[0] || 0;
+            let m = parts[1] || 0;
+            let sec = parts[2] || 0;
+            if (isPM && h < 12) h += 12;
+            if (isAM && h === 12) h = 0;
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+        }
+
+        // 날짜와 시간을 합쳐 정렬 비교용 키 생성
+        function getLogTimeKey(item) {
+            const d = item.date || '0000-00-00';
+            const t = parseTime24(item.time);
+            return d + ' ' + t;
+        }
+
         function format12HourTime(timeStr) {
             if (!timeStr) return '';
             if (timeStr.includes('오전') || timeStr.includes('오후')) return timeStr;
@@ -2700,15 +2723,15 @@
                 return isDateMatch && isNameMatch;
             });
 
-                        // 정렬 처리: a04SortOrder === 'desc' -> 최신 데이터가 최상위 (기본값)
-            // a04SortOrder === 'asc'  -> 최신 데이터가 최하위 (오래된 순)
+                        // 정렬 처리: a04SortOrder === 'desc' -> 시간순 기준 최신데이터가 최상위 (기본값)
+            // a04SortOrder === 'asc'  -> 시간순 기준 최신데이터가 최하위 (오래된 순)
             filtered.sort((a, b) => {
-                const timeA = `${a.date || ''} ${a.time || ''}`.trim();
-                const timeB = `${b.date || ''} ${b.time || ''}`.trim();
-                let comp = 0;
-                if (timeA && timeB) comp = timeA.localeCompare(timeB);
-                if (comp === 0) comp = (a.id || 0) - (b.id || 0);
-
+                const keyA = getLogTimeKey(a);
+                const keyB = getLogTimeKey(b);
+                let comp = keyA.localeCompare(keyB);
+                if (comp === 0) {
+                    comp = String(a.id || '').localeCompare(String(b.id || ''));
+                }
                 return (a04SortOrder === 'desc') ? -comp : comp;
             });
 
