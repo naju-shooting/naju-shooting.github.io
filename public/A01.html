@@ -514,7 +514,8 @@
                 <thead>
                     <tr>
                         <th style="width:40px;"><input type="checkbox" id="checkAll" onclick="toggleAll(this)"></th>
-                        <th style="width:45px; cursor:pointer; user-select:none;" onclick="toggleSortOrder()" title="클릭하여 정렬 순서 변경">
+                        <th style="width:45px; cursor:pointer; user-select:none;" onclick="toggleSortOrder()"
+                            title="클릭하여 정렬 순서 변경">
                             <span id="no-sort-label">No. ▼</span>
                         </th>
                         <th style="width:100px;">바코드</th>
@@ -533,10 +534,12 @@
         </div>
 
         <div class="bottom-controls">
-            <button class="btn" style="background:var(--danger); flex:none; width:120px;" onclick="deleteChecked()">선택
-                삭제</button>
-            <button class="btn" style="background:var(--success); flex:none; width:120px;"
-                onclick="exportToExcel()">Excel 저장</button>
+            <button class="btn" style="background:var(--danger); flex:none; width:120px;" onclick="deleteChecked()">선택 삭제</button>
+            <div style="display:flex; gap:10px;">
+                <input type="file" id="csvFileInput" accept=".csv, text/csv" style="display:none;" onchange="handleCSVImport(event)">
+                <button class="btn" style="background:#e67e22; padding:8px 15px; flex:none;" onclick="document.getElementById('csvFileInput').click()">CVS 불러오기</button>
+                <button class="btn" style="background:var(--success); flex:none; width:120px;" onclick="exportToExcel()">Excel 저장</button>
+            </div>
         </div>
     </div>
 
@@ -892,6 +895,159 @@
 
         function toggleAll(master) {
             document.querySelectorAll('.row-check').forEach(c => c.checked = master.checked);
+        }
+
+        
+        function handleCSVImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            event.target.value = '';
+
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                try {
+                    const text = e.target.result;
+                    await processCSVImportText(text);
+                } catch (err) {
+                    alert('CSV 파일을 처리하는 중 오류가 발생했습니다: ' + err.message);
+                }
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        function parseCSVLines(text) {
+            const lines = text.trim().split(/\r\n|\n|\r/);
+            const result = [];
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const row = [];
+                let inQuotes = false;
+                let cell = '';
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(cell.trim());
+                        cell = '';
+                    } else {
+                        cell += char;
+                    }
+                }
+                row.push(cell.trim());
+                result.push(row);
+            }
+            return result;
+        }
+
+        async function processCSVImportText(text) {
+            const rows = parseCSVLines(text);
+            if (rows.length < 2) {
+                return alert('불러올 수 있는 유효한 데이터 행이 없습니다.');
+            }
+
+            let startIdx = 0;
+            const headerStr = (rows[0] || []).join(' ');
+            if (headerStr.includes('성명') || headerStr.includes('바코드') || headerStr.includes('번호')) {
+                startIdx = 1;
+            }
+
+            let added = 0;
+            let updated = 0;
+            const contestTitle = document.getElementById('contest-title').value || '';
+
+            const isA01Format = headerStr.includes('제조사') || headerStr.includes('허가청') || (rows[0].length >= 14 && rows[0][1] === '성명');
+
+            for (let i = startIdx; i < rows.length; i++) {
+                const r = rows[i];
+                if (!r || r.length < 3) continue;
+
+                let barcode = '', userName = '', affiliation = '', birthDate = '', contact = '', gunType = '', gunName = '', gunNumber = '', gunCaliber = '', manufacturer = '', permitAgency = '', permitNumber = '', permitDate = '', address = '', remarks = '';
+
+                if (isA01Format) {
+                    barcode      = (r[0] || '').replace(/^"|"$/g, '').trim();
+                    userName     = (r[1] || '').replace(/^"|"$/g, '').trim();
+                    affiliation  = (r[2] || '').replace(/^"|"$/g, '').trim();
+                    birthDate    = (r[3] || '').replace(/^"|"$/g, '').trim();
+                    contact      = (r[4] || '').replace(/^"|"$/g, '').trim();
+                    gunType      = (r[5] || '').replace(/^"|"$/g, '').trim();
+                    gunName      = (r[6] || '').replace(/^"|"$/g, '').trim();
+                    gunNumber    = (r[7] || '').replace(/^"|"$/g, '').trim();
+                    gunCaliber   = (r[8] || '').replace(/^"|"$/g, '').trim();
+                    manufacturer = (r[9] || '').replace(/^"|"$/g, '').trim();
+                    permitAgency = (r[10] || '').replace(/^"|"$/g, '').trim();
+                    permitNumber = (r[11] || '').replace(/^"|"$/g, '').trim();
+                    permitDate   = (r[12] || '').replace(/^"|"$/g, '').trim();
+                    address      = (r[13] || '').replace(/^"|"$/g, '').trim();
+                    remarks      = (r[14] || '').replace(/^"|"$/g, '').trim();
+                } else {
+                    barcode      = (r[1] || '').replace(/^"|"$/g, '').trim();
+                    affiliation  = (r[2] || '').replace(/^"|"$/g, '').trim();
+                    userName     = (r[3] || '').replace(/^"|"$/g, '').trim();
+                    birthDate    = (r[4] || '').replace(/^"|"$/g, '').trim();
+                    gunType      = (r[5] || '').replace(/^"|"$/g, '').trim();
+                    gunName      = (r[6] || '').replace(/^"|"$/g, '').trim();
+                    gunNumber    = (r[7] || '').replace(/^"|"$/g, '').trim();
+                    gunCaliber   = (r[8] || '').replace(/^"|"$/g, '').trim();
+                    contact      = (r[9] || '').replace(/^"|"$/g, '').trim();
+                }
+
+                if (!userName) continue;
+
+                const match = allPlayers.find(p => {
+                    if (barcode && p.barcode && p.barcode.trim() !== '' && p.barcode.trim() === barcode) return true;
+                    if (p.userName === userName && p.gunType === gunType) {
+                        if (gunNumber && p.gunNumber && gunNumber !== '-' && p.gunNumber === gunNumber) return true;
+                        if (birthDate && p.birthDate && p.birthDate === birthDate) return true;
+                    }
+                    if (p.userName === userName && birthDate && p.birthDate && p.birthDate === birthDate) return true;
+                    return false;
+                });
+
+                const payload = {
+                    contestTitle: contestTitle || (match ? match.contestTitle : ''),
+                    barcode: barcode || (match ? match.barcode : ''),
+                    userName: userName,
+                    affiliation: affiliation || (match ? match.affiliation : ''),
+                    birthDate: birthDate || (match ? match.birthDate : ''),
+                    contact: contact || (match ? match.contact : ''),
+                    gunType: gunType || (match ? match.gunType : ''),
+                    gunName: gunName || (match ? match.gunName : ''),
+                    gunNumber: gunNumber || (match ? match.gunNumber : ''),
+                    gunCaliber: gunCaliber || (match ? match.gunCaliber : ''),
+                    manufacturer: manufacturer || (match ? match.manufacturer : ''),
+                    permitAgency: permitAgency || (match ? match.permitAgency : ''),
+                    permitNumber: permitNumber || (match ? match.permitNumber : ''),
+                    permitDate: permitDate || (match ? match.permitDate : ''),
+                    address: address || (match ? match.address : ''),
+                    remarks: remarks || (match ? match.remarks : '')
+                };
+
+                try {
+                    if (match && (match._id || match.id)) {
+                        const targetId = match._id || match.id;
+                        await fetch(`${API_BASE}/${targetId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        updated++;
+                    } else {
+                        await fetch(API_BASE, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        added++;
+                    }
+                } catch (saveErr) {
+                    console.warn('선수 동기화 실패 (' + userName + '):', saveErr);
+                }
+            }
+
+            await loadList();
+            alert(`[CVS 불러오기 및 매칭 완료]\n\n- 신규 등록: +${added}명\n- 기존 갱신: ${updated}명\n- 현재 총 등록 선수: ${allPlayers.length}명`);
         }
 
         function exportToExcel() {
