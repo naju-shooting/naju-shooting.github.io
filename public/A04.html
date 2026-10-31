@@ -2261,11 +2261,23 @@
             if (input === "0000000") {
                 if (!selectedPlayer) {
                     alert("선수를 먼저 검색/선택하세요.");
-                    if (el) el.value = '';
+                    if (el) { el.value = ''; el.focus(); }
                     return;
                 }
                 changeWheelQty('out', 50);
-                if (el) el.value = '';
+                if (el) { el.value = ''; el.focus(); }
+                return;
+            }
+
+            // 1-1. 바코드 번호가 1111111 이면 출고수량(B)에 100발 추가 (-100발 출고) 및 다음 입력 대기
+            if (input === "1111111") {
+                if (!selectedPlayer) {
+                    alert("선수를 먼저 검색/선택하세요.");
+                    if (el) { el.value = ''; el.focus(); }
+                    return;
+                }
+                changeWheelQty('out', 100);
+                if (el) { el.value = ''; el.focus(); }
                 return;
             }
 
@@ -2297,7 +2309,7 @@
                 });
             }
 
-            if (el) el.value = '';
+            if (el) { el.value = ''; el.focus(); }
         }
 
         function addOutOddQtyFromBaseStock() {
