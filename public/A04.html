@@ -1405,13 +1405,13 @@
             style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;">
                 <span style="font-size: 1.3em; font-weight: bold; color: #333; white-space: nowrap;">선수검색 바코드:</span>
-                <input type="text" id="bc-input" class="bc-input" style="background-color: #f1f5f9;"
+                <input type="text" id="bc-input" class="bc-input" inputmode="none" style="background-color: #f1f5f9;"
                     placeholder="바코드 스캔 또는 성명 입력 후 ENTER" autofocus onkeydown="if(event.key==='Enter'||event.keyCode===13) handleSearch()" oninput="bcDebounce('bc-input', handleSearch)">
             </div>
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;">
                 <span style="font-size: 1.3em; font-weight: bold; color: var(--red); white-space: nowrap;">출고수량
                     바코드:</span>
-                <input type="text" id="out-bc-input" class="bc-input"
+                <input type="text" id="out-bc-input" class="bc-input" inputmode="none"
                     style="border: 3px solid var(--red); color: var(--red); background-color: #fff1f0;"
                     placeholder="출고수량 바코드 스캔 후 ENTER" onkeydown="if(event.key==='Enter'||event.keyCode===13) handleOutBarcodeSearch()" oninput="bcDebounce('out-bc-input', handleOutBarcodeSearch)">
             </div>
