@@ -554,6 +554,8 @@
 
             if (entered === CORRECT_PASSWORD) {
                 // 인증 성공
+                sessionStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('isLoggedIn', 'true');
                 msgBox.className = 'msg-box success';
                 msgBox.innerHTML = '✓ 인증 성공! 시스템으로 이동합니다...';
                 input.disabled = true;
