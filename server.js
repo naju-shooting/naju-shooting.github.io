@@ -37,6 +37,7 @@ import routeB01 from './routes/B01Players.js';
 import routeB02 from './routes/B02GunLogs.js';
 import routeB03 from './routes/B03Ammo.js';
 import routeB04 from './routes/B04Documents.js';
+import routeB05 from './routes/B05Releases.js';
 
 // ── API 라우트 마운트 ─────────────────────────────────────────────────────────
 app.use('/api/a01', routeA01);
@@ -51,6 +52,26 @@ app.use('/api/b01', routeB01);
 app.use('/api/b02', routeB02);
 app.use('/api/b03', routeB03);
 app.use('/api/b04', routeB04);
+app.use('/api/b05', routeB05);
+
+
+// ── 페이지 로컬스토리지 백업 엔드포인트 (/api/savePage) ──────────────────────────
+const pageStorageMap = new Map();
+app.post('/api/savePage', (req, res) => {
+    try {
+        const { page, data } = req.body;
+        if (!page) return res.status(400).json({ ok: false, error: 'page 이름이 필요합니다.' });
+        pageStorageMap.set(page, { data, savedAt: new Date().toISOString() });
+        res.json({ ok: true, message: '페이지 데이터 임시 저장 완료', page });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+app.get('/api/savePage/:page', (req, res) => {
+    const item = pageStorageMap.get(req.params.page);
+    if (!item) return res.status(404).json({ ok: false, error: '저장된 페이지 데이터가 없습니다.' });
+    res.json({ ok: true, page: req.params.page, ...item });
+});
 
 // ── 헬스체크 ──────────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
