@@ -19,3 +19,4 @@
         window.location.replace('/');
     }
 })();
+
