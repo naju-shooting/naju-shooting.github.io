@@ -1012,62 +1012,7 @@
             win.document.write('</style></head><body>');
             win.document.write(printContent);
             win.document.write('
-    <!-- 📦 로컬스토리지 데이터를 브라우저에서 서버 엔드포인트로 전송 (Fetch API 동기화) -->
-    <script>
-        (function() {
-            const TARGET_ENDPOINT = '/api/b02';
-            const PAGE_NAME = 'B02.html';
-
-            function __syncLocalStorageToServer() {
-                try {
-                    const allStorage = {};
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const k = localStorage.key(i);
-                        const v = localStorage.getItem(k);
-                        try {
-                            allStorage[k] = JSON.parse(v);
-                        } catch (e) {
-                            allStorage[k] = v;
-                        }
-                    }
-
-                    // 1. 전체 로컬스토리지 백업 엔드포인트 (/api/savePage)로 전송
-                    fetch('/api/savePage', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ page: PAGE_NAME, data: allStorage })
-                    }).then(r => {
-                        if (r.ok) console.log('✅ [' + PAGE_NAME + '] 로컬스토리지 전체 데이터 서버 동기화 성공');
-                    }).catch(err => console.warn('⚠️ [' + PAGE_NAME + '] /api/savePage 전송 실패:', err));
-
-                    // 2. 해당 페이지 모듈 전용 엔드포인트 (/api/b02)로 전송
-                    if (TARGET_ENDPOINT) {
-                        fetch(TARGET_ENDPOINT, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(allStorage)
-                        }).catch(() => {});
-                    }
-                } catch (err) {
-                    console.error('🚨 [' + PAGE_NAME + '] 동기화 오류:', err);
-                }
-            }
-
-            // 페이지 로드 완료 시 전송
-            window.addEventListener('load', () => {
-                setTimeout(__syncLocalStorageToServer, 500);
-            });
-
-            // localStorage.setItem 호출 시 자동 감지하여 서버로 전송 (Debounce)
-            let __syncTimer = null;
-            const originalSetItem = localStorage.setItem;
-            localStorage.setItem = function(key, val) {
-                originalSetItem.apply(this, arguments);
-                clearTimeout(__syncTimer);
-                __syncTimer = setTimeout(__syncLocalStorageToServer, 600);
-            };
-        })();
-    </script>
+    
 
 </body></html>');
             win.document.close();
