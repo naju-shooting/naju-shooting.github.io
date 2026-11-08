@@ -19,8 +19,16 @@ router.get('/', async (req, res) => {
 // POST /
 router.post('/', async (req, res) => {
     try {
+        if (Array.isArray(req.body)) {
+            const docs = await B05Release.insertMany(req.body);
+            return res.status(201).json({ ok: true, message: '일괄 등록 완료', data: docs });
+        }
         const doc = await B05Release.create(req.body);
         res.status(201).json({ ok: true, message: '등록 완료', data: doc });
+    } catch (err) {
+        res.status(400).json({ ok: false, error: err.message });
+    }
+});
     } catch (err) {
         res.status(400).json({ ok: false, error: err.message });
     }
