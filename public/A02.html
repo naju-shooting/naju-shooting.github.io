@@ -2,6 +2,8 @@
 <html lang="ko">
 
 <head>
+    <!-- 비로그인 접근 차단 보안 인증 스크립트 (가장 먼저 실행) -->
+    <script src="auth-check.js"></script>
     <meta charset="UTF-8">
     <title>일일사용총기관리 (A02)</title>
     <style>
@@ -1579,7 +1581,24 @@
             localStorage.setItem(KEYS.MASTER, JSON.stringify(master));
             renderCheckoutNoticeList(master[playerIndex]);
         }
+                </script>
+    <script>
+        // 📦 Save page data from localStorage to server via fetch
+        window.addEventListener('load', () => {
+            const key = location.pathname.split('/').pop();
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                fetch('/api/savePage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ page: key, data: JSON.parse(stored) })
+                })
+                .then(r => r.ok ? console.log('✅ Sent', key) : console.warn('⚠️ Server reject', r.status))
+                .catch(err => console.error('🚨 fetch error', err));
+            }
+        });
     </script>
+</script>
 
     <!-- A02 총기 출고 시 알림 팝업 모달 HTML -->
     <div id="checkoutNoticeAlertModal"
