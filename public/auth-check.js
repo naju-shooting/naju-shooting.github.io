@@ -3,6 +3,17 @@
  * 비로그인 사용자의 하위 페이지 직접 접근(우회)을 차단하는 공통 보안 스크립트
  */
 (function() {
+    // List of paths to force redirect to main page if accessed directly without login
+    var redirectPaths = [
+        '/AAABBB.html', '/AAA', '/A01', '/A02', '/A03', '/A04', '/A05', '/A06',
+        '/BBB', '/B01', '/B02', '/B03', '/B04', '/B05'
+    ];
+    var currentPath = window.location.pathname;
+    if (redirectPaths.includes(currentPath)) {
+        window.location.replace('https://naju-shooting-github-io-6.onrender.com');
+        return;
+    }
+
     var authKey = 'isLoggedIn';
     var isAuth = false;
 
@@ -19,4 +30,3 @@
         window.location.replace('/');
     }
 })();
-
