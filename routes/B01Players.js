@@ -2,7 +2,7 @@ import express from 'express';
 import B01Player from '../models/B01Player.js';
 const router = express.Router();
 
-// GET / – 필터링된 선수 목록
+// GET / – list players with optional filters
 router.get('/', async (req, res) => {
   try {
     const filter = {};
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST / – 단일·다중 선수 등록
+// POST / – create one or many players
 router.post('/', async (req, res) => {
   try {
     if (Array.isArray(req.body)) {
@@ -30,7 +30,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /:id – 선수 정보 수정
+// PUT /:id – update a player
 router.put('/:id', async (req, res) => {
   try {
     const doc = await B01Player.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
@@ -41,7 +41,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /:id – 선수 삭제
+// DELETE /:id – delete a player
 router.delete('/:id', async (req, res) => {
   try {
     const doc = await B01Player.findByIdAndDelete(req.params.id);
