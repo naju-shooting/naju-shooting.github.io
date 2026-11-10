@@ -1,10 +1,3 @@
-/**
- * server.js - 사격장 통합관리 시스템 메인 서버
- *
- * 실행: node server.js
- * 환경: .env 파일에 MONGODB_URI, PORT 설정 (또는 process.env 직접 지정)
- */
-
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -22,10 +15,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ── Legacy path redirect middleware ──────────────────────────────────────────────
+const LEGACY_REDIRECT_TARGET = 'https://naju-shooting-github-io-6.onrender.com';
+const legacyPaths = [
+  '/AAABBB.html','/AAA','/A01','/A02','/A03','/A04','/A05','/A06',
+  '/BBB','/B01','/B02','/B03','/B04','/B05'
+];
+app.get(legacyPaths, (req, res) => {
+  res.redirect(LEGACY_REDIRECT_TARGET);
+});
 app.use(express.static(path.join(__dirname, 'public')));  // HTML 정적 파일 서빙
 
 // ── 라우터 임포트 (A01 ~ A06, B01 ~ B04) ────────────────────────────────────────
-// ※ 주의: 실제 routes 폴더 내 파일명과 확장자(.js)가 완전히 일치해야 합니다.
 import routeA01 from './routes/A01Players.js';
 import routeA02 from './routes/A02GunLogs.js';
 import routeA03 from './routes/A03Transfers.js';
@@ -53,7 +55,6 @@ app.use('/api/b02', routeB02);
 app.use('/api/b03', routeB03);
 app.use('/api/b04', routeB04);
 app.use('/api/b05', routeB05);
-
 
 // ── 페이지 로컬스토리지 백업 엔드포인트 (/api/savePage) ──────────────────────────
 const pageStorageMap = new Map();
@@ -89,7 +90,6 @@ app.use('/api', (req, res) => {
 });
 
 // ── 전역 에러 핸들러 ──────────────────────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
     console.error('[서버 오류]', err);
     res.status(500).json({ ok: false, error: '서버 내부 오류', detail: err.message });
